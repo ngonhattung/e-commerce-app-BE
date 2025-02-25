@@ -39,7 +39,7 @@ public class JwtUtils { //Tạo và kiểm tra token
                 .toList();
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getEmail()))
                 .claim("id", userPrincipal.getId())
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
@@ -53,7 +53,7 @@ public class JwtUtils { //Tạo và kiểm tra token
         ShopUserDetails userPrincipal = (ShopUserDetails) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpiration))
                 .setId(UUID.randomUUID().toString())

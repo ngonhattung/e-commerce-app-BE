@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class ShopUserDetails implements UserDetails { //Xác thực người dùng
 
     private Long id;
-    private String username;
     private String email;
     private String password;
 
@@ -33,7 +32,6 @@ public class ShopUserDetails implements UserDetails { //Xác thực người dù
 
         return ShopUserDetails.builder()
                 .id(user.getId())
-                .username(user.getUsername())
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)
@@ -52,7 +50,7 @@ public class ShopUserDetails implements UserDetails { //Xác thực người dù
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

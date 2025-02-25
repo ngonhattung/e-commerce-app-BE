@@ -19,17 +19,10 @@ public class ShopUserDetailsService implements UserDetailsService { //Lấy thô
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = Optional.ofNullable(userRepository.findByUsername(username))
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        User user = Optional.ofNullable(userRepository.findByUsernameOrEmailOrPhone(input, input,input))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return ShopUserDetails.buildUserDetail(user);
     }
 
-    @Transactional
-    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
-        User user = Optional.ofNullable(userRepository.findByEmail(email))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return ShopUserDetails.buildUserDetail(user);
-    }
 }
