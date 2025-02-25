@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ShopUserDetailsService implements UserDetailsService {
+public class ShopUserDetailsService implements UserDetailsService { //Lấy thông tin user từ database
 
     private final UserRepository userRepository;
 

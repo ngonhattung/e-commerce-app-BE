@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ShopUserDetails implements UserDetails {
+public class ShopUserDetails implements UserDetails { //Xác thực người dùng
 
     private Long id;
     private String username;
