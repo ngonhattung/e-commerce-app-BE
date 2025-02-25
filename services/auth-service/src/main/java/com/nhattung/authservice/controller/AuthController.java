@@ -32,7 +32,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("$/api/v1/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;

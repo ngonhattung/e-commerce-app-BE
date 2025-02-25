@@ -8,9 +8,9 @@ spring:
     name: auth-service
 
 
-  auth:
-    token:
-      expirationInMils: 600000
-      refreshExpirationInMils: 3600000
-      jwtSecret: 36763979244226452948404D635166546A576D5A7134743777217A25432A462D
+auth:
+  token:
+    expirationInMils: 600000
+    refreshExpirationInMils: 3600000
+    jwtSecret: 36763979244226452948404D635166546A576D5A7134743777217A25432A462D
 

@@ -28,7 +28,6 @@ public class SecurityConfig {
 
     private final ShopUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint authEntryPoint;
-    private final PasswordEncoder passwordEncoder;
     private static final List<String> SECURED_URLS =
             List.of("/api/v1/carts/**", "/api/v1/cartItems/**");
 
@@ -53,7 +52,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider daoAuthenticationProvider() { // cung cấp thông tin xác thực
         var authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder);
+        authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 

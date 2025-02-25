@@ -7,6 +7,7 @@ import com.nhattung.authservice.repository.UserRepository;
 import com.nhattung.authservice.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     @Override
     public User createUser(RegisterRequest request) {
@@ -24,7 +26,7 @@ public class UserService implements IUserService {
                 .map(req -> {
                     User user = User.builder()
                             .email(request.getEmail())
-                            .password(request.getPassword())
+                            .password(passwordEncoder.encode(request.getPassword()))
                             .build();
                     return userRepository.save(user);
                 }).orElseThrow(() -> new AlreadyExistsException("Oops!" +request.getEmail() +" already exists!"));
