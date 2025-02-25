@@ -17,11 +17,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
+
 public class AuthTokenFilter extends OncePerRequestFilter { // chặn request không có token
 
-    private final JwtUtils jwtUtils;
-    private final ShopUserDetailsService userDetailsService;
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private ShopUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
