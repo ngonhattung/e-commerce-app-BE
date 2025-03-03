@@ -1,14 +1,12 @@
-package com.nhattung.authservice.request;
+package com.nhattung.authservice.response;
 
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class RegisterRequest {
-
-    private String email;
-    private String password;
+public class UserProfileResponse {
+    private Long id;
     private String fullName;
     private String phone;
     private String avatar;

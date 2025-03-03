@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class CreateUserProfileRequest {
+    private Long userId;
     private String fullName;
     private String phone;
     private String avatar;

@@ -1,11 +1,8 @@
 package com.nhattung.userservice.service.userprofile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhattung.userservice.dto.UserProfileDto;
-import com.nhattung.userservice.entity.Address;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.UserNotFoundException;
-import com.nhattung.userservice.repository.AddressRepository;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
@@ -29,6 +26,7 @@ public class UserProfileService implements IUserProfileService {
                 .gender(request.isGender())
                 .avatar(request.getAvatar())
                 .dateOfBirth(request.getDateOfBirth())
+                .userId(request.getUserId())
                 .build();
         return userProfileRepository.save(userProfile);
 

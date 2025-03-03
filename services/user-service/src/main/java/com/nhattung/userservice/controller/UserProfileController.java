@@ -24,7 +24,8 @@ public class UserProfileController {
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> createUserProfile(@RequestBody CreateUserProfileRequest request){
         UserProfile userProfile = userProfileService.createUserProfile(request);
-        return ResponseEntity.ok(new ApiResponse("User profile created successfully", userProfile));
+        UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
+        return ResponseEntity.ok(new ApiResponse("User profile created successfully", userProfileDto));
     }
 
 
