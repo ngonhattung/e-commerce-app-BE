@@ -83,6 +83,9 @@ public class JwtUtils { //Tạo và kiểm tra token
                     .setSigningKey(key())
                     .build()
                     .parseClaimsJws(token);
+            if(invalidatedTokenRepository.existsById(verifyToken(token).getId())){
+                return false;
+            }
             return true;
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
                  IllegalArgumentException e) {
@@ -108,6 +111,7 @@ public class JwtUtils { //Tạo và kiểm tra token
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .id(jit)
                 .expiryDate(expriryDate)
+                .revoked(false)
                 .build();
         invalidatedTokenRepository.save(invalidatedToken);
     }
