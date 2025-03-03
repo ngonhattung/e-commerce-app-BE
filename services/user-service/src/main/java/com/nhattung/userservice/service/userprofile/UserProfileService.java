@@ -1,5 +1,7 @@
 package com.nhattung.userservice.service.userprofile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.Address;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.UserNotFoundException;
@@ -8,6 +10,7 @@ import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,6 +20,7 @@ import java.util.Optional;
 public class UserProfileService implements IUserProfileService {
 
     private final UserProfileRepository userProfileRepository;
+    private final ModelMapper modelMapper;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
         UserProfile userProfile = UserProfile.builder()
@@ -55,5 +59,10 @@ public class UserProfileService implements IUserProfileService {
                 .ifPresentOrElse(userProfileRepository::delete, () -> {
                     throw new UserNotFoundException("User not found");
                 });
+    }
+
+    @Override
+    public UserProfileDto convertToDto(UserProfile userProfile) {
+        return modelMapper.map(userProfile, UserProfileDto.class);
     }
 }
