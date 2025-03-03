@@ -5,6 +5,7 @@ import com.nhattung.authservice.dto.UserDto;
 import com.nhattung.authservice.entity.User;
 import com.nhattung.authservice.exception.AlreadyExistsException;
 import com.nhattung.authservice.request.LoginRequest;
+import com.nhattung.authservice.request.LogoutRequest;
 import com.nhattung.authservice.request.RefreshRequest;
 import com.nhattung.authservice.request.RegisterRequest;
 import com.nhattung.authservice.response.ApiResponse;
@@ -93,6 +94,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse(e.getMessage(), null));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse> logout(@RequestBody LogoutRequest request) {
+        jwtUtils.logout(request);
+        return ResponseEntity.ok(new ApiResponse("User logged out successfully", null));
     }
 
 }

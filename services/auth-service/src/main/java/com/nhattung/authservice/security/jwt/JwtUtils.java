@@ -1,6 +1,9 @@
 package com.nhattung.authservice.security.jwt;
 
 
+import com.nhattung.authservice.entity.InvalidatedToken;
+import com.nhattung.authservice.repository.InvalidatedTokenRepository;
+import com.nhattung.authservice.request.LogoutRequest;
 import com.nhattung.authservice.security.user.ShopUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -29,7 +32,7 @@ public class JwtUtils { //Tạo và kiểm tra token
     @Value("${auth.token.refreshExpirationInMils}")
     private int jwtRefreshExpiration;
 
-
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
     public String generateJwtToken(Authentication authentication){
         ShopUserDetails userPrincipal = (ShopUserDetails) authentication.getPrincipal();
 
@@ -85,5 +88,27 @@ public class JwtUtils { //Tạo và kiểm tra token
                  IllegalArgumentException e) {
             throw new JwtException(e.getMessage());
         }
+    }
+
+    private Claims verifyToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public void logout(LogoutRequest request) {
+        Claims claims = verifyToken(request.getToken());
+        String jit = claims.getId();
+        Date expriryDate = claims.getExpiration();
+
+        //save token to invalidated token repository
+        //vô hiệu hoá token
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryDate(expriryDate)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
     }
 }
