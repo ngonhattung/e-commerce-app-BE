@@ -9,6 +9,7 @@ import com.nhattung.authservice.request.CreateUserProfileRequest;
 import com.nhattung.authservice.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

@@ -23,6 +23,11 @@ public class UserProfileController {
 
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> createUserProfile(@RequestBody CreateUserProfileRequest request){
+//        try {
+//            Thread.sleep(10000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         UserProfile userProfile = userProfileService.createUserProfile(request);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
         return ResponseEntity.ok(new ApiResponse("User profile created successfully", userProfileDto));
