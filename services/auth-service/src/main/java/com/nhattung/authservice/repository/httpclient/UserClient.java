@@ -7,7 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "user-service", url = "http://localhost:8091/api/v1/user-profile")
+@FeignClient(name = "user-service",
+        url = "http://localhost:8091/api/v1/user-profile",
+        fallback = UserClientImpl.class)
 public interface UserClient {
 
     @PostMapping(value = "/add",produces = MediaType.APPLICATION_JSON_VALUE)
