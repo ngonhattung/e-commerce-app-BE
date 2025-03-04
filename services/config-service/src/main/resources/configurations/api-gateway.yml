@@ -1,3 +1,7 @@
+
+app:
+  apiPrefix: /api/v1
+
 spring:
   cloud:
     gateway:
@@ -5,11 +9,15 @@ spring:
         - id: auth-service
           uri: lb://auth-service
           predicates:
-            - Path=/auth/**
+            - Path=${app.apiPrefix}/auth/**
+          filters:
+            - StripPrefix=2
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/user-profile/**
+            - Path=${app.apiPrefix}/user-profile/**
+          filters:
+            - StripPrefix=2
 server:
   port: 8080
 
