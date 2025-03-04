@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
         fallback = UserClientImpl.class)
 public interface UserClient {
 
-    @PostMapping(value = "/api/v1/user-profile/add",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/user-profile/add",produces = MediaType.APPLICATION_JSON_VALUE)
     UserProfileResponse createUserProfile(@RequestBody CreateUserProfileRequest request);
 
 }

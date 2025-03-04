@@ -15,7 +15,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user-profile")
+@RequestMapping("/user-profile")
 public class UserProfileController {
 
     private final IUserProfileService userProfileService;
