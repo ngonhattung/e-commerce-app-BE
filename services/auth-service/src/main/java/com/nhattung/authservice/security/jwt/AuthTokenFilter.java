@@ -40,11 +40,13 @@ public class AuthTokenFilter extends OncePerRequestFilter { // chặn request kh
                 var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
-        } catch (JwtException e) {
+        }
+        catch (JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); //401
             response.getWriter().write(e.getMessage() + " : Invalid or expired token, you may login and try again!");
             return;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); //500
             response.getWriter().write(e.getMessage() + " : Unauthorized access, you may login and try again!");
             return;

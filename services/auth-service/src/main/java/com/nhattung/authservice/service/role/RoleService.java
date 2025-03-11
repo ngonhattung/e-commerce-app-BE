@@ -39,6 +39,14 @@ public class RoleService implements IRoleService{
     }
 
     @Override
+    public List<RoleDto> convertRolesToDtos(List<Role> roles) {
+        return roles
+                .stream()
+                .map(this::convertRoleToDto).toList();
+    }
+
+
+    @Override
     public void deleteRole(Long roleId) {
         roleRepository.deleteById(roleId);
     }

@@ -8,19 +8,26 @@ import com.nhattung.authservice.response.ApiResponse;
 import com.nhattung.authservice.service.role.IRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/auth/roles")
 public class RoleController {
     private final IRoleService roleService;
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> getAllRoles() {
-        return ResponseEntity.ok(new ApiResponse("Success", roleService.getAllRoles()));
+        List<Role> roles = roleService.getAllRoles();
+        List<RoleDto> roleDtos = roleService.convertRolesToDtos(roles);
+        return ResponseEntity.ok(new ApiResponse("Success", roleDtos));
     }
 
     @PostMapping("/add")

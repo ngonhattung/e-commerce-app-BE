@@ -12,5 +12,6 @@ public interface IRoleService {
     Role createRole(CreateRoleRequest request);
     List<Role> getAllRoles();
     RoleDto convertRoleToDto(Role role);
+    List<RoleDto> convertRolesToDtos(List<Role> roles);
     void deleteRole(Long roleId);
 }
