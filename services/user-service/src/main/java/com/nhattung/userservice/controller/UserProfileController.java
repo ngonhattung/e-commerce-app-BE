@@ -9,6 +9,7 @@ import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -19,6 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class UserProfileController {
 
     private final IUserProfileService userProfileService;
+
 
 
     @PostMapping("/add")
@@ -34,6 +36,7 @@ public class UserProfileController {
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/user/{userId}/profile")
     public ResponseEntity<ApiResponse> getUserProfile(@PathVariable Long userId){
         UserProfile userProfile = userProfileService.getUserProfile(userId);
@@ -42,6 +45,7 @@ public class UserProfileController {
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/user/{userId}/update")
     public ResponseEntity<ApiResponse> updateUserProfile(@PathVariable Long userId,
                                                          @RequestBody UpdateUserProfileRequest request){
@@ -50,6 +54,7 @@ public class UserProfileController {
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/user/{userId}/delete")
     public ResponseEntity<ApiResponse> deleteUserProfile(@PathVariable Long userId){
         try {

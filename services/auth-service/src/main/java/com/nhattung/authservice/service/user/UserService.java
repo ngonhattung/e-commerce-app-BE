@@ -33,7 +33,7 @@ public class UserService implements IUserService {
         return Optional.of(request)
                 .filter(user -> !userRepository.existsByEmail(user.getEmail()))
                 .map(req -> {
-                    Role role =  roleRepository.findByName(PredefinedRole.ADMIN_ROLE);
+                    Role role =  roleRepository.findByName(PredefinedRole.USER_ROLE);
                     User user = User.builder()
                             .email(request.getEmail())
                             .password(passwordEncoder.encode(request.getPassword()))
