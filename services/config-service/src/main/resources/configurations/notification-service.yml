@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://ngonhattung08062003:AL0UgVRKigrGxrR0@cluster0.zin3j.mongodb.net/ms_notify_db?retryWrites=true&w=majority&appName=Cluster0
+
+
+server:
+  port: 8092
