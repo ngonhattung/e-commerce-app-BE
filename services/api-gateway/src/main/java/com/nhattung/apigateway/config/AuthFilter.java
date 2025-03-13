@@ -39,14 +39,16 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private String[] whiteList = new String[]{
             "/auth/login",
             "/auth/register",
+            "/notification/send-email"
     };
 
     @Value("${app.apiPrefix}")
     private String apiPrefix;
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
+        log.info("Received request path: {}", exchange.getRequest().getURI().getPath());
         if(isWhiteList(exchange.getRequest())){
+            log.info("Request path {} is whitelisted.", exchange.getRequest().getURI().getPath());
             return chain.filter(exchange);
         }
 
