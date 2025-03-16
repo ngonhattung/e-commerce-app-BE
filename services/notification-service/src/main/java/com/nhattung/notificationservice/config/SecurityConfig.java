@@ -22,7 +22,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final List<String> PUBLIC_URLS =
-            List.of("/send-email");
+            List.of("/notification/send-email");
 
     @Bean
     public AuthTokenFilter authTokenFilter() {
