@@ -12,6 +12,27 @@ services:
     networks:
         - e-commerce-network
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-ms
+#    restart: always
+    depends_on:
+      - mysql
+    command: start-dev
+    environment:
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://mysql-e-commerce:3306/keycloak?useSSL=false&allowPublicKeyRetrieval=true
+      KC_DB_USERNAME: root
+      KC_DB_PASSWORD: root
+      KC_HOSTNAME: localhost
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    networks:
+      - e-commerce-network
+
+
   redis:
     image: redis:latest
     container_name: redis
