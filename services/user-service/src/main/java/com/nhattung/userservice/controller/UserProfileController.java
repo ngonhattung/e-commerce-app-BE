@@ -8,6 +8,7 @@ import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,46 +23,56 @@ public class UserProfileController {
     private final IUserProfileService userProfileService;
 
 
-
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> createUserProfile(@RequestBody CreateUserProfileRequest request){
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+    public ApiResponse<UserProfileDto> createUserProfile(@RequestBody CreateUserProfileRequest request) {
         UserProfile userProfile = userProfileService.createUserProfile(request);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
-        return ResponseEntity.ok(new ApiResponse("User profile created successfully", userProfileDto));
+        return ApiResponse.<UserProfileDto>builder()
+                .message("User profile created successfully")
+                .result(userProfileDto)
+                .build();
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/user/{userId}/profile")
-    public ResponseEntity<ApiResponse> getUserProfile(@PathVariable Long userId){
+    public ApiResponse<UserProfileDto> getUserProfile(@PathVariable Long userId) {
         UserProfile userProfile = userProfileService.getUserProfile(userId);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
-        return ResponseEntity.ok(new ApiResponse("User profile fetched successfully", userProfileDto));
+        return ApiResponse.<UserProfileDto>builder()
+                .message("User profile fetched successfully")
+                .result(userProfileDto)
+                .build();
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/user/{userId}/update")
-    public ResponseEntity<ApiResponse> updateUserProfile(@PathVariable Long userId,
-                                                         @RequestBody UpdateUserProfileRequest request){
+    public ApiResponse<UserProfileDto> updateUserProfile(@PathVariable Long userId,
+                                                         @RequestBody UpdateUserProfileRequest request) {
         UserProfile userProfile = userProfileService.updateUserProfile(userId, request);
-        return ResponseEntity.ok(new ApiResponse("User profile updated successfully", userProfile));
+        UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
+        return ApiResponse.<UserProfileDto>builder()
+                .message("User profile updated successfully")
+                .result(userProfileDto)
+                .build();
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/user/{userId}/delete")
-    public ResponseEntity<ApiResponse> deleteUserProfile(@PathVariable Long userId){
+    public ResponseEntity<ApiResponse<Void>> deleteUserProfile(@PathVariable Long userId) {
         try {
             userProfileService.deleteUserProfile(userId);
-            return ResponseEntity.ok(new ApiResponse("User profile deleted successfully", null));
-        } catch (ResourceNotFoundException e){
-            return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(e.getMessage(), null));
+            return ResponseEntity.ok(
+                    ApiResponse.<Void>builder()
+                            .message("User profile deleted successfully")
+                            .result(null)
+                            .build()
+            );
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.<Void>builder()
+                            .message(e.getMessage())
+                            .result(null)
+                            .build());
         }
     }
 }

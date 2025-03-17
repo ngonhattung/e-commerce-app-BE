@@ -24,6 +24,23 @@ spring:
             - Path=${app.apiPrefix}/notification/**
           filters:
             - StripPrefix=2
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/springboot-ms-realm
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8081/realms/springboot-ms-realm
+        registration:
+          keycloak-client:
+            client-id: ecommerce_ms_app
+            client-secret: B9HnviniWRfOQEKzEhLROtl3USI13Irl
+            authorization-grant-type: client_credentials
+            scope: openid
+
+
 server:
   port: 8080
 

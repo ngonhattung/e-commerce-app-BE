@@ -9,3 +9,10 @@ spring:
 
 
 
+idp:
+  url: http://localhost:8081/realms/springboot-ms-realm/protocol/openid-connect
+  client-id: ecommerce_ms_app
+  client-secret: B9HnviniWRfOQEKzEhLROtl3USI13Irl
+
+app:
+  apiPrefix: /api/v1
