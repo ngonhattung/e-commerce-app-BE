@@ -38,7 +38,7 @@ public class UserProfileService implements IUserProfileService {
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
 
         UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setUsername(randomUtil.generateRandomString());
+        userRepresentation.setUsername(request.getEmail());
         userRepresentation.setEmail(request.getEmail());
         userRepresentation.setFirstName(request.getFullName().split(" ")[0]);
         userRepresentation.setLastName(request.getFullName());

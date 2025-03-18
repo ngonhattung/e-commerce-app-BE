@@ -18,18 +18,17 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         String[] PUBLIC_ENDPOINTS = {
-                apiPrefix + "/registration",
-                apiPrefix + "/user-profile/**"
+                apiPrefix + "/user-profile/registration",
         };
 
         http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(PUBLIC_ENDPOINTS).permitAll()  // Không cần xác thực
                         .anyExchange()
                         .authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())); // Xác thực bằng JWT
-
         return http.build();
     }
 }

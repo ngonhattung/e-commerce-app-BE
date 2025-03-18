@@ -21,3 +21,15 @@ spring:
           issuer-uri: http://localhost:8081/realms/springboot-ms-realm
 server:
   port: 8091
+
+idp:
+  url: http://localhost:8081
+  client:
+    id: ecommerce_ms_app
+    realm: springboot-ms-realm
+    secret: B9HnviniWRfOQEKzEhLROtl3USI13Irl
+    grant-type: client_credentials
+    scope: openid
+  admin:
+    username: admin
+    password: admin
