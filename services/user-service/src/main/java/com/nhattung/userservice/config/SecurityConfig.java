@@ -1,6 +1,7 @@
 package com.nhattung.userservice.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -18,12 +19,14 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@Slf4j
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {"/user"};
+    private final String[] PUBLIC_ENDPOINTS = {"/user-profile/registration"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        log.info("Public endpoints: {}", List.of(PUBLIC_ENDPOINTS));
         httpSecurity.
                 authorizeHttpRequests(request -> request.
                         requestMatchers(PUBLIC_ENDPOINTS).permitAll()

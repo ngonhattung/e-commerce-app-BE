@@ -19,12 +19,12 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String fullName;
+    private String email;
     private String phone;
     private String avatar;
     private LocalDate dateOfBirth;
     private boolean gender;
-
-    private Long userId;
+    private String userId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();

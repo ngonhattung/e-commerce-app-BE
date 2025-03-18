@@ -23,7 +23,7 @@ public class UserProfileController {
     private final IUserProfileService userProfileService;
 
 
-    @PostMapping("/add")
+    @PostMapping("/registration")
     public ApiResponse<UserProfileDto> createUserProfile(@RequestBody CreateUserProfileRequest request) {
         UserProfile userProfile = userProfileService.createUserProfile(request);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
@@ -58,9 +58,9 @@ public class UserProfileController {
 
 
     @DeleteMapping("/user/{userId}/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteUserProfile(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteUserProfile(@PathVariable String userId) {
         try {
-            userProfileService.deleteUserProfile(userId);
+            userProfileService.deleteUser(userId);
             return ResponseEntity.ok(
                     ApiResponse.<Void>builder()
                             .message("User profile deleted successfully")

@@ -9,7 +9,8 @@ public interface IUserProfileService {
     UserProfile createUserProfile(CreateUserProfileRequest request);
     UserProfile getUserProfile(Long userId);
     UserProfile updateUserProfile(Long userId, UpdateUserProfileRequest request);
-    void deleteUserProfile(Long userId);
+    void deleteUser(String userId);
     UserProfileDto convertToDto(UserProfile userProfile);
-
+    void sendVerificationEmail(String userId);
+    void forgotPassword(String email);
 }
