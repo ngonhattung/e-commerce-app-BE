@@ -2,6 +2,7 @@ package com.nhattung.userservice.service.userprofile;
 
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
+import com.nhattung.userservice.exception.ErrorNomalizer;
 import com.nhattung.userservice.exception.UserNotFoundException;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
@@ -34,51 +35,51 @@ public class UserProfileService implements IUserProfileService {
     private String REALM;
     private final Keycloak keycloak;
     private final RandomUtil randomUtil;
+    private final ErrorNomalizer errorNomalizer;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
 
-        UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setUsername(request.getEmail());
-        userRepresentation.setEmail(request.getEmail());
-        userRepresentation.setFirstName(request.getFullName().split(" ")[0]);
-        userRepresentation.setLastName(request.getFullName());
-        userRepresentation.setEnabled(true);
-        userRepresentation.setEmailVerified(false);
+            UserRepresentation userRepresentation = new UserRepresentation();
+            userRepresentation.setUsername(request.getEmail());
+            userRepresentation.setEmail(request.getEmail());
+            userRepresentation.setFirstName(request.getFullName().split(" ")[0]);
+            userRepresentation.setLastName(request.getFullName());
+            userRepresentation.setEnabled(true);
+            userRepresentation.setEmailVerified(false);
 
-        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-        credentialRepresentation.setValue(request.getPassword());
-        credentialRepresentation.setTemporary(false);
-        userRepresentation.setCredentials(List.of(credentialRepresentation));
+            CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+            credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+            credentialRepresentation.setValue(request.getPassword());
+            credentialRepresentation.setTemporary(false);
+            userRepresentation.setCredentials(List.of(credentialRepresentation));
 
-        log.info("User Representation: {}", userRepresentation);
+            log.info("User Representation: {}", userRepresentation);
 
-        UsersResource usersResource = getUsersResource();
-        Response response = usersResource.create(userRepresentation);
-        log.info("Status Code "+response.getStatus());
+            UsersResource usersResource = getUsersResource();
+            Response response = usersResource.create(userRepresentation);
+            log.info("Status Code "+response.getStatus());
 
-        if(!Objects.equals(201,response.getStatus())){
-            String errorMessage = response.readEntity(String.class);
-            log.error("Lỗi khi tạo user: " + errorMessage);
-            throw new RuntimeException("Status code "+response.getStatus());
-        }
+            if(!Objects.equals(201,response.getStatus())){
+                String errorMessage = response.readEntity(String.class);
+                throw errorNomalizer.handelKeyCloakException(new RuntimeException(errorMessage));
+            }
 
 
-        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
-        UserRepresentation user = userRepresentations.get(0);
+            List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
+            UserRepresentation user = userRepresentations.get(0);
 
-        //sendVerificationEmail(user.getId());
+            //sendVerificationEmail(user.getId());
 
-        UserProfile userProfile = UserProfile.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .gender(request.isGender())
-                .avatar(request.getAvatar())
-                .dateOfBirth(request.getDateOfBirth())
-                .userId(user.getId())
-                .build();
-        return userProfileRepository.save(userProfile);
+            UserProfile userProfile = UserProfile.builder()
+                    .fullName(request.getFullName())
+                    .email(request.getEmail())
+                    .phone(request.getPhone())
+                    .gender(request.isGender())
+                    .avatar(request.getAvatar())
+                    .dateOfBirth(request.getDateOfBirth())
+                    .userId(user.getId())
+                    .build();
+            return userProfileRepository.save(userProfile);
 
     }
 
