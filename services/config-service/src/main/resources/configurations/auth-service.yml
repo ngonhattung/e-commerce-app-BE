@@ -1,33 +1,17 @@
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3307/ms_auth_db
-    username: root
-    password: root
-    hikari:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-        format_sql: true
-    show-sql: true
-    hibernate:
-      ddl-auto: update
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/springboot-ms-realm
 server:
   port: 8090
 
-#openfeign
-feign:
+idp:
+  url: http://localhost:8081/realms/springboot-ms-realm/protocol/openid-connect
   client:
-    config:
-      default:
-        connectTimeout: 5000 # thời gian bắt đầu gọi đến khi kết nối
-        readTimeout: 5000   # thời gian đọc dữ liệu từ server
-  circuitbreaker: # cho phép fallback
-    enabled: true
-
-resilience4j:
-  timelimiter:
-    configs:
-      default:
-        timeoutDuration: 5s # thời gian timeout
+    id: ecommerce_ms_app
+    realm: springboot-ms-realm
+    secret: B9HnviniWRfOQEKzEhLROtl3USI13Irl
+    grant-type: password
+    scope: openid

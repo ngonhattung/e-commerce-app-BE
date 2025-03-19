@@ -33,3 +33,19 @@ idp:
   admin:
     username: admin
     password: admin
+
+##openfeign
+#feign:
+#  client:
+#    config:
+#      default:
+#        connectTimeout: 5000 # thời gian bắt đầu gọi đến khi kết nối
+#        readTimeout: 5000   # thời gian đọc dữ liệu từ server
+#  circuitbreaker: # cho phép fallback
+#    enabled: true
+#
+#resilience4j:
+#  timelimiter:
+#    configs:
+#      default:
+#        timeoutDuration: 5s # thời gian timeout
