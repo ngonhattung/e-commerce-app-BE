@@ -17,7 +17,8 @@ public enum ErrorCode {
     USER_EXISTED(1009, "Username existed, please choose another one", HttpStatus.BAD_REQUEST),
     USERNAME_IS_MISSING(1010, "Please enter username", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1011, "User not existed", HttpStatus.BAD_REQUEST),
-
+    INVALID_CREDENTIALS(1012, "Username or password not correct", HttpStatus.UNAUTHORIZED),
+    FEIGN_ERROR(1013, "Feign error", HttpStatus.INTERNAL_SERVER_ERROR),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

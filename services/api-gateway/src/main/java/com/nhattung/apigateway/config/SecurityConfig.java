@@ -19,6 +19,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         String[] PUBLIC_ENDPOINTS = {
                 apiPrefix + "/user-profile/registration",
+                apiPrefix + "/auth/**",
         };
 
         http

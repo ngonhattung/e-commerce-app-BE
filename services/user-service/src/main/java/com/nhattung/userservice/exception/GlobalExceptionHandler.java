@@ -37,4 +37,5 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
+
 }

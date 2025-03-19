@@ -36,6 +36,7 @@ public class AuthController {
                 .result(authService.logout(RefreshRequest.builder()
                         .refreshToken(request.getRefreshToken())
                         .build()))
+                .message("Logout success")
                 .build();
     }
 
