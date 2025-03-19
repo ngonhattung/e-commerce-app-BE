@@ -38,12 +38,13 @@ public class UserProfileService implements IUserProfileService {
     private final ErrorNomalizer errorNomalizer;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
-
+            String fullName = request.getFullName().trim();
+            String[] nameParts = fullName.split(" ");
             UserRepresentation userRepresentation = new UserRepresentation();
             userRepresentation.setUsername(request.getEmail());
             userRepresentation.setEmail(request.getEmail());
-            userRepresentation.setFirstName(request.getFullName().split(" ")[0]);
-            userRepresentation.setLastName(request.getFullName());
+            userRepresentation.setFirstName(nameParts[0]);
+            userRepresentation.setLastName(nameParts.length > 1 ? fullName.substring(fullName.indexOf(" ") + 1) : "");
             userRepresentation.setEnabled(true);
             userRepresentation.setEmailVerified(false);
 
@@ -90,6 +91,11 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
+    public List<UserProfile> getAllUserProfiles() {
+        return userProfileRepository.findAll();
+    }
+
+    @Override
     public UserProfile updateUserProfile(Long profileId, UpdateUserProfileRequest request) {
         return Optional.ofNullable(getUserProfile(profileId))
                 .map(userProfile -> {
@@ -115,6 +121,13 @@ public class UserProfileService implements IUserProfileService {
     @Override
     public UserProfileDto convertToDto(UserProfile userProfile) {
         return modelMapper.map(userProfile, UserProfileDto.class);
+    }
+
+    @Override
+    public List<UserProfileDto> convertToDto(List<UserProfile> userProfiles) {
+        return userProfiles.stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override

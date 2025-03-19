@@ -11,7 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -44,6 +48,18 @@ public class UserProfileController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/profiles")
+    public ApiResponse<List<UserProfileDto>> getAllUserProfiles() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        List<UserProfile> userProfiles = userProfileService.getAllUserProfiles();
+        List<UserProfileDto> userProfileDtos = userProfileService.convertToDto(userProfiles);
+
+        return ApiResponse.<List<UserProfileDto>>builder()
+                .message("User profiles fetched successfully")
+                .result(userProfileDtos)
+                .build();
+    }
 
     @PutMapping("/user/{userId}/update")
     public ApiResponse<UserProfileDto> updateUserProfile(@PathVariable Long userId,
