@@ -20,6 +20,7 @@ public class SecurityConfig {
         String[] PUBLIC_ENDPOINTS = {
                 apiPrefix + "/user-profile/registration",
                 apiPrefix + "/auth/**",
+                apiPrefix + "/notification/**"
         };
 
         http

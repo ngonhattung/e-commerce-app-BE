@@ -2,7 +2,16 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://ngonhattung08062003:AL0UgVRKigrGxrR0@cluster0.zin3j.mongodb.net/ms_notify_db?retryWrites=true&w=majority&appName=Cluster0
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/springboot-ms-realm
 
 server:
   port: 8092
+
+email:
+  api-key: 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
+  root-email: ngonhattung08062003@gmail.com
+  name: Nhat Tung
