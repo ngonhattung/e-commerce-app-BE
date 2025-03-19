@@ -13,7 +13,6 @@ public class RefreshTokenExchangeParam {
     private String grant_type;
     private String client_id;
     private String client_secret;
-    private String username;
-    private String password;
     private String scope;
+    private String refresh_token;
 }

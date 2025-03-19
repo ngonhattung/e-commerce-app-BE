@@ -55,19 +55,42 @@ public class AuthService implements IAuthService{
 
     @Override
     public LogoutResponse logout(RefreshRequest request) {
-        return keyCloakClient.logout(LogoutParam.builder()
-                .client_id(CLIENT_ID)
-                .client_secret(CLIENT_SECRET)
-                .refresh_token(request.getRefreshToken())
-                .build());
+        try {
+            return keyCloakClient.logout(LogoutParam.builder()
+                    .client_id(CLIENT_ID)
+                    .client_secret(CLIENT_SECRET)
+                    .refresh_token(request.getRefreshToken())
+                    .build());
+        } catch (FeignException.BadRequest e) {
+            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
+        } catch (FeignException e) {
+            throw new AppException(ErrorCode.FEIGN_ERROR);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+
+
     }
 
     @Override
     public RefreshTokenResponse refreshToken(RefreshRequest request) {
-        return keyCloakClient.refreshToken(RefreshTokenParam.builder()
-                .client_id(CLIENT_ID)
-                .client_secret(CLIENT_SECRET)
-                .refresh_token(request.getRefreshToken())
-                .build());
+
+        try {
+            return keyCloakClient.refreshToken(RefreshTokenExchangeParam.builder()
+                    .client_id(CLIENT_ID)
+                    .client_secret(CLIENT_SECRET)
+                    .scope(SCOPE)
+                    .grant_type("refresh_token")
+                    .refresh_token(request.getRefreshToken())
+                    .build());
+        } catch (FeignException.BadRequest e) {
+            throw new AppException(ErrorCode.ERROR_REFRESH_TOKEN);
+        } catch (FeignException e) {
+            throw new AppException(ErrorCode.FEIGN_ERROR);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+
+
     }
 }
