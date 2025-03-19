@@ -12,13 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     private final EmailClient emailClient;
 
-    @Value("${email.api-key}")
+    @Value("${email.brevo-key}")
     private String apiKey;
 
     @Value("${email.name}")
@@ -33,7 +35,7 @@ public class EmailService {
                         .name(emailName)
                         .email(rootEmail)
                         .build())
-                .to(request.getTo())
+                .to(List.of(request.getTo()))
                 .subject(request.getSubject())
                 .htmlContent(request.getHtmlContent())
                 .build();

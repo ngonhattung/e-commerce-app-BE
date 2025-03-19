@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         String[] PUBLIC_ENDPOINTS = {
-                apiPrefix + "/user-profile/registration",
+                apiPrefix + "/registration",
                 apiPrefix + "/auth/**",
                 apiPrefix + "/notification/**"
         };

@@ -26,18 +26,6 @@ public class UserProfileController {
 
     private final IUserProfileService userProfileService;
 
-
-    @PostMapping("/registration")
-    public ApiResponse<UserProfileDto> createUserProfile(@RequestBody CreateUserProfileRequest request) {
-        UserProfile userProfile = userProfileService.createUserProfile(request);
-        UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
-        return ApiResponse.<UserProfileDto>builder()
-                .message("User profile created successfully")
-                .result(userProfileDto)
-                .build();
-    }
-
-
     @GetMapping("/user/{userId}/profile")
     public ApiResponse<UserProfileDto> getUserProfile(@PathVariable Long userId) {
         UserProfile userProfile = userProfileService.getUserProfile(userId);

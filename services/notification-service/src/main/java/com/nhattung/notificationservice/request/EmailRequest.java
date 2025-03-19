@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EmailRequest {
     private Sender sender;
-    private List<Recipient> to;
+    List<Recipient> to;
     private String subject;
     private String htmlContent;
 }

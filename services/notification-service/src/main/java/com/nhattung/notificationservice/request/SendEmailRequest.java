@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendEmailRequest {
-    private List<Recipient> to;
+    private Recipient to;
     private String subject;
     private String htmlContent;
 }

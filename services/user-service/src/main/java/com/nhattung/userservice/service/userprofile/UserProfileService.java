@@ -1,5 +1,6 @@
 package com.nhattung.userservice.service.userprofile;
 
+import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.ErrorNomalizer;
@@ -17,6 +18,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +36,7 @@ public class UserProfileService implements IUserProfileService {
     @Value("${idp.client.realm}")
     private String REALM;
     private final Keycloak keycloak;
-    private final RandomUtil randomUtil;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ErrorNomalizer errorNomalizer;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
@@ -80,6 +82,19 @@ public class UserProfileService implements IUserProfileService {
                     .dateOfBirth(request.getDateOfBirth())
                     .userId(user.getId())
                     .build();
+
+
+        NotificationEvent notificationEvent = NotificationEvent.builder()
+                .channel("email")
+                .receiver(userProfile.getEmail())
+                .subject("Welcome to Dream Shop")
+                .content("Your account has been created successfully")
+                .build();
+
+
+            //Publish message to Kafka
+            kafkaTemplate.send("notification-delivery",notificationEvent);
+
             return userProfileRepository.save(userProfile);
 
     }

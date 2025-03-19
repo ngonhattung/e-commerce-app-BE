@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {"/user-profile/registration"};
+    private final String[] PUBLIC_ENDPOINTS = {"/registration"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

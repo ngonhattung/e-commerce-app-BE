@@ -15,7 +15,7 @@ spring:
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=${app.apiPrefix}/user-profile/**
+            - Path=${app.apiPrefix}/user-profile/**, ${app.apiPrefix}/user-address/**, ${app.apiPrefix}/registration/**
           filters:
             - StripPrefix=2
         - id: notification-service
