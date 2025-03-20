@@ -25,6 +25,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/registration",
             "/otp/**",
+            "/user-address/**"
     };
 
     @Bean

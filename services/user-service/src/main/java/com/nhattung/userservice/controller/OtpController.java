@@ -5,6 +5,7 @@ import com.nhattung.userservice.request.ValidateOtpRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.response.OtpResponse;
 import com.nhattung.userservice.response.ValidateOtpResponse;
+import com.nhattung.userservice.service.otp.IOtpService;
 import com.nhattung.userservice.service.otp.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.shaded.com.google.protobuf.Api;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/otp")
 public class OtpController {
 
-    private final OtpService otpService;
+    private final IOtpService otpService;
 
     @PostMapping("/generate")
     public ApiResponse<OtpResponse> generateOtp(@RequestBody GenerateOtpRequest request) {

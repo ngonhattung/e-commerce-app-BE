@@ -21,7 +21,8 @@ public class SecurityConfig {
                 apiPrefix + "/registration",
                 apiPrefix + "/auth/**",
                 apiPrefix + "/notification/**",
-                apiPrefix + "/otp/**"
+                apiPrefix + "/otp/**",
+                apiPrefix + "/user-address/**",
         };
 
         http
