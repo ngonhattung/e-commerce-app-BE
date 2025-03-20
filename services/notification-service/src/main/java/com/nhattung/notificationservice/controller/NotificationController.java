@@ -1,6 +1,6 @@
 package com.nhattung.notificationservice.controller;
 
-import com.nhattung.event.dto.NotificationEvent;
+import com.nhattung.commondto.event.dto.NotificationEvent;
 import com.nhattung.notificationservice.request.Recipient;
 import com.nhattung.notificationservice.request.SendEmailRequest;
 import com.nhattung.notificationservice.service.EmailService;

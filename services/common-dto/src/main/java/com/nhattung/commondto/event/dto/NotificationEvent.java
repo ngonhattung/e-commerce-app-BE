@@ -1,4 +1,4 @@
-package com.nhattung.event.dto;
+package com.nhattung.commondto.event.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,6 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class NotificationEvent {
-
     private String channel;
     private String receiver;
     private String templateCode;
