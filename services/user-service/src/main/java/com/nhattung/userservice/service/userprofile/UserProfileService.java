@@ -1,6 +1,7 @@
 package com.nhattung.userservice.service.userprofile;
 
-import com.nhattung.commondto.event.dto.NotificationEvent;
+
+import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.ErrorNomalizer;

@@ -1,4 +1,4 @@
-package com.nhattung.commondto.event.dto;
+package com.nhattung.event.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +18,4 @@ public class NotificationEvent {
     private Map<String, Object> params;
     private String subject;
     private String content;
-
 }
