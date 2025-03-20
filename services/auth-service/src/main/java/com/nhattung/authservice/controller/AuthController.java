@@ -7,6 +7,7 @@ import com.nhattung.authservice.response.AuthResponse;
 import com.nhattung.authservice.response.LogoutResponse;
 import com.nhattung.authservice.response.RefreshTokenResponse;
 import com.nhattung.authservice.service.IAuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class AuthController {
     private final IAuthService authService;
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ApiResponse<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         return ApiResponse.<AuthResponse>builder()
                 .result(authService.exchangeToken(LoginRequest.builder()
                         .username(request.getUsername())

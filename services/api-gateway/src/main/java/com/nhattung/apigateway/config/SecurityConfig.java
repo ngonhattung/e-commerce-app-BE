@@ -32,7 +32,12 @@ public class SecurityConfig {
                         .anyExchange()
                         .authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())); // Xác thực bằng JWT
+                .exceptionHandling(exceptionHandlingSpec -> exceptionHandlingSpec
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .jwt(Customizer.withDefaults())); // Xác thực bằng JWT
         return http.build();
     }
 }
