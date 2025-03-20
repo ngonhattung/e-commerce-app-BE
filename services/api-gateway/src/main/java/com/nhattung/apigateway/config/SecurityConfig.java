@@ -20,7 +20,8 @@ public class SecurityConfig {
         String[] PUBLIC_ENDPOINTS = {
                 apiPrefix + "/registration",
                 apiPrefix + "/auth/**",
-                apiPrefix + "/notification/**"
+                apiPrefix + "/notification/**",
+                apiPrefix + "/otp/**"
         };
 
         http

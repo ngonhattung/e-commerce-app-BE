@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class UserProfileService implements IUserProfileService {
             userRepresentation.setFirstName(nameParts[0]);
             userRepresentation.setLastName(nameParts.length > 1 ? fullName.substring(fullName.indexOf(" ") + 1) : "");
             userRepresentation.setEnabled(true);
-            userRepresentation.setEmailVerified(false);
+            userRepresentation.setEmailVerified(true);
 
             CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
             credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
@@ -88,8 +89,11 @@ public class UserProfileService implements IUserProfileService {
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("email")
                 .receiver(userProfile.getEmail())
-                .subject("Welcome to Dream Shop")
-                .content("Your account has been created successfully")
+                .templateCode("WELCOME_EMAIL")
+                .params(Map.of(
+                        "subject","Welcome to Dream Shop",
+                        "content",formWelcomeEmailContent()
+                ))
                 .build();
 
 
@@ -165,4 +169,72 @@ public class UserProfileService implements IUserProfileService {
         return keycloak.realm(REALM).users();
     }
 
+    public String formWelcomeEmailContent(){
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Welcome to Our E-Commerce Store</title>\n" +
+                "    <style>\n" +
+                "        body {\n" +
+                "            font-family: Arial, sans-serif;\n" +
+                "            background-color: #f4f4f4;\n" +
+                "            margin: 0;\n" +
+                "            padding: 0;\n" +
+                "        }\n" +
+                "        .container {\n" +
+                "            max-width: 600px;\n" +
+                "            margin: 20px auto;\n" +
+                "            background: #ffffff;\n" +
+                "            padding: 20px;\n" +
+                "            border-radius: 10px;\n" +
+                "            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n" +
+                "        }\n" +
+                "        .header {\n" +
+                "            text-align: center;\n" +
+                "            padding: 10px 0;\n" +
+                "        }\n" +
+                "        .header img {\n" +
+                "            max-width: 150px;\n" +
+                "        }\n" +
+                "        .content {\n" +
+                "            text-align: center;\n" +
+                "            color: #333;\n" +
+                "        }\n" +
+                "        .button {\n" +
+                "            display: inline-block;\n" +
+                "            background: #ff6600;\n" +
+                "            color: #ffffff;\n" +
+                "            padding: 10px 20px;\n" +
+                "            text-decoration: none;\n" +
+                "            border-radius: 5px;\n" +
+                "            margin-top: 20px;\n" +
+                "        }\n" +
+                "        .footer {\n" +
+                "            text-align: center;\n" +
+                "            font-size: 12px;\n" +
+                "            color: #777;\n" +
+                "            margin-top: 20px;\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div class=\"container\">\n" +
+                "        <div class=\"header\">\n" +
+                "            <img src=\"https://your-logo-url.com/logo.png\" alt=\"Logo\">\n" +
+                "        </div>\n" +
+                "        <div class=\"content\">\n" +
+                "            <h2>Welcome to Our E-Commerce Store!</h2>\n" +
+                "            <p>Thank you for registering with us. We are excited to have you on board.</p>\n" +
+                "            <p>Start exploring our wide range of products and enjoy exclusive discounts.</p>\n" +
+                "            <a href=\"https://your-ecommerce-website.com\" class=\"button\">Shop Now</a>\n" +
+                "        </div>\n" +
+                "        <div class=\"footer\">\n" +
+                "            <p>&copy; 2025 Your E-Commerce Store. All rights reserved.</p>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</body>\n" +
+                "</html>";
+    }
 }

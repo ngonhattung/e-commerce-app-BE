@@ -16,6 +16,4 @@ public class NotificationEvent {
     private String receiver;
     private String templateCode;
     private Map<String, Object> params;
-    private String subject;
-    private String content;
 }

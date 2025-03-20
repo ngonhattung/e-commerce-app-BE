@@ -22,12 +22,32 @@ public class NotificationController {
     @KafkaListener(topics = "notification-delivery")
     public void listenNotificationDelivery(NotificationEvent message) {
         log.info("Received message: {}", message);
+
+        if(message.getChannel().equals("email"))
+        {
+            switch (message.getTemplateCode()) {
+                case "SEND_OTP", "WELCOME_EMAIL":
+                    emailService.sendEmail(SendEmailRequest
+                            .builder()
+                            .to(Recipient.builder()
+                                    .email(message.getReceiver())
+                                    .build())
+                            .subject(message.getParams().get("subject").toString())
+                            .htmlContent(message.getParams().get("content").toString())
+                            .build());
+                    break;
+                default:
+                    log.info("Unknown template: " + message.getTemplateCode());
+
+            }
+        }
+
         emailService.sendEmail(SendEmailRequest.builder()
                         .to(Recipient.builder()
                                 .email(message.getReceiver())
                                 .build())
-                        .subject(message.getSubject())
-                        .htmlContent(message.getContent())
+                        .subject(message.getParams().get("subject").toString())
+                        .htmlContent(message.getParams().get("content").toString())
                 .build());
 
     }
