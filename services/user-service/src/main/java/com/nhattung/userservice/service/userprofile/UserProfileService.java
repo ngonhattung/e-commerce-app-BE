@@ -4,8 +4,9 @@ package com.nhattung.userservice.service.userprofile;
 import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
+import com.nhattung.userservice.exception.AppException;
+import com.nhattung.userservice.exception.ErrorCode;
 import com.nhattung.userservice.exception.ErrorNomalizer;
-import com.nhattung.userservice.exception.UserNotFoundException;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
@@ -107,7 +108,7 @@ public class UserProfileService implements IUserProfileService {
     @Override
     public UserProfile getUserProfile(Long profileId) {
         return userProfileRepository.findById(profileId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
@@ -125,7 +126,7 @@ public class UserProfileService implements IUserProfileService {
                     userProfile.setAvatar(request.getAvatar());
                     userProfile.setDateOfBirth(request.getDateOfBirth());
                     return userProfileRepository.save(userProfile);
-                }).orElseThrow(() -> new UserNotFoundException("User not found"));
+                }).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
@@ -134,7 +135,7 @@ public class UserProfileService implements IUserProfileService {
         usersResource.delete(userId);
         userProfileRepository.findByUserId(userId)
                 .ifPresentOrElse(userProfileRepository::delete, () -> {
-                    throw new UserNotFoundException("User not found");
+                    throw new AppException(ErrorCode.USER_NOT_EXISTED);
                 });
     }
 

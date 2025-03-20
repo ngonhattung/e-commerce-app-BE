@@ -6,6 +6,7 @@ import com.nhattung.userservice.request.CreateAddressRequest;
 import com.nhattung.userservice.request.UpdateAddressRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.service.address.IAddressService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,7 @@ public class AddressController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<AddressDto> addAddress(@RequestBody CreateAddressRequest request) {
+    public ApiResponse<AddressDto> addAddress(@RequestBody @Valid CreateAddressRequest request) {
         Address address = addressService.saveAddress(request);
         AddressDto addressDto = addressService.convertToDto(address);
         return ApiResponse.<AddressDto>builder()

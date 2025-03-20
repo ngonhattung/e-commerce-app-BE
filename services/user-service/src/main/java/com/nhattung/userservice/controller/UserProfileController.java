@@ -2,8 +2,7 @@ package com.nhattung.userservice.controller;
 
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
-import com.nhattung.userservice.exception.ResourceNotFoundException;
-import com.nhattung.userservice.request.CreateUserProfileRequest;
+import com.nhattung.userservice.exception.AppException;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
@@ -71,7 +70,7 @@ public class UserProfileController {
                             .result(null)
                             .build()
             );
-        } catch (ResourceNotFoundException e) {
+        } catch (AppException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.<Void>builder()
                             .message(e.getMessage())
