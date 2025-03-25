@@ -31,6 +31,14 @@ public enum ErrorCode {
     EMPTY_AVATAR(1021, "Avatar cannot be empty", HttpStatus.BAD_REQUEST),
     INVALID_AVATAR(1022, "Avatar must be a valid URL", HttpStatus.BAD_REQUEST),
     INVALID_BIRTHDAY(1023, "Birthday must be in the past", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(1024, "Product not found", HttpStatus.NOT_FOUND),
+    PRODUCT_EXISTED(1025, "Product existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(1026, "Category not found", HttpStatus.NOT_FOUND),
+    CATEGORY_EXISTED(1027, "Category existed", HttpStatus.BAD_REQUEST),
+    IMAGE_NOT_FOUND(1028, "Image not found", HttpStatus.NOT_FOUND),
+    UPLOAD_IMAGE_ERROR(1029, "Upload image error", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_SIZE_TOO_LARGE(1030, "File size too large", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(1031, "Invalid file type", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
