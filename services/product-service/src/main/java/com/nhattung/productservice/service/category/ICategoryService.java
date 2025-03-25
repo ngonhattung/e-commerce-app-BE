@@ -1,5 +1,6 @@
 package com.nhattung.productservice.service.category;
 
+import com.nhattung.productservice.dto.CategoryDto;
 import com.nhattung.productservice.entity.Category;
 import com.nhattung.productservice.request.CreateCategoryRequest;
 import com.nhattung.productservice.request.UpdateCategoryRequest;
@@ -15,5 +16,7 @@ public interface ICategoryService {
     List<Category> getAllCategories();
     Category getCategoryByName(String name);
     List<Category> getCategoriesByName(String name);
+    CategoryDto convertToDto(Category category);
+    List<CategoryDto> convertToDtos(List<Category> categories);
 
 }

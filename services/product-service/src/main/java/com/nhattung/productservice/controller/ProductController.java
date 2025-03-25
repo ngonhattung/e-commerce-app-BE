@@ -1,0 +1,144 @@
+package com.nhattung.productservice.controller;
+
+import com.nhattung.productservice.dto.ProductDto;
+import com.nhattung.productservice.entity.Product;
+import com.nhattung.productservice.request.CreateProductRequest;
+import com.nhattung.productservice.request.UpdateProductRequest;
+import com.nhattung.productservice.response.ApiResponse;
+import com.nhattung.productservice.service.category.ICategoryService;
+import com.nhattung.productservice.service.image.IImageService;
+import com.nhattung.productservice.service.product.IProductService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/products")
+public class ProductController {
+
+    private final IProductService productService;
+    private final ICategoryService categoryService;
+    private final IImageService imageService;
+
+
+    @PostMapping("/create")
+    public ApiResponse<ProductDto> createProduct(@RequestBody CreateProductRequest request,
+                                                 @RequestParam List<MultipartFile> files) {
+        Product product = productService.saveProduct(request);
+
+        // Save images
+        imageService.saveImages(files, product);
+
+        ProductDto productDto = productService.convertToDto(product);
+        return ApiResponse.<ProductDto>builder()
+                .message("Product created successfully")
+                .result(productDto)
+                .build();
+    }
+
+    @GetMapping("product/{id}")
+    public ApiResponse<ProductDto> getProductById(@PathVariable Long id) {
+        Product product = productService.getProductById(id);
+        ProductDto productDto = productService.convertToDto(product);
+        return ApiResponse.<ProductDto>builder()
+                .message("Product retrieved successfully")
+                .result(productDto)
+                .build();
+    }
+
+    @GetMapping("/all")
+    public ApiResponse<List<ProductDto>> getAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @GetMapping("/category/{categoryName}")
+    public ApiResponse<List<ProductDto>> getProductsByCategory(@PathVariable String categoryName) {
+        List<Product> products = productService.getProductsByCategory(categoryName);
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @PutMapping("/update/{id}")
+    public ApiResponse<ProductDto> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest request) {
+        Product product = productService.updateProduct(id, request);
+        ProductDto productDto = productService.convertToDto(product);
+        return ApiResponse.<ProductDto>builder()
+                .message("Product updated successfully")
+                .result(productDto)
+                .build();
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ApiResponse<String> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ApiResponse.<String>builder()
+                .message("Product deleted successfully")
+                .result("Product deleted")
+                .build();
+    }
+
+    @GetMapping("/brand/{brand}")
+    public ApiResponse<List<ProductDto>> getProductsByBrand(@PathVariable String brand) {
+        List<Product> products = productService.getProductsByBrand(brand);
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @GetMapping("/category/{category}/brand/{brand}")
+    public ApiResponse<List<ProductDto>> getProductsByCategoryAndBrand(@PathVariable String category,
+                                                                       @PathVariable String brand) {
+        List<Product> products = productService.getProductsByCategoryAndBrand(category, brand);
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @GetMapping("/name/{name}")
+    public ApiResponse<List<ProductDto>> getProductsByName(@PathVariable String name) {
+        List<Product> products = productService.getProductsByName(name);
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @GetMapping("/brand/{brand}/name/{name}")
+    public ApiResponse<List<ProductDto>> getProductsByBrandAndName(@PathVariable String brand,
+                                                                   @PathVariable String name) {
+        List<Product> products = productService.getProductsByBrandAndName(brand, name);
+        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
+    @GetMapping("/brand/{brand}/name/{name}/count")
+    public ApiResponse<Long> countProductsByBrandAndName(@PathVariable String brand,
+                                                         @PathVariable String name) {
+        Long count = productService.countProductsByBrandAndName(brand, name);
+        return ApiResponse.<Long>builder()
+                .message("Products counted successfully")
+                .result(count)
+                .build();
+    }
+
+
+}

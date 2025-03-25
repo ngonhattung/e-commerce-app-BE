@@ -1,5 +1,6 @@
 package com.nhattung.productservice.service.category;
 
+import com.nhattung.productservice.dto.CategoryDto;
 import com.nhattung.productservice.entity.Category;
 import com.nhattung.productservice.exception.AppException;
 import com.nhattung.productservice.exception.ErrorCode;
@@ -7,6 +8,7 @@ import com.nhattung.productservice.repository.CategoryRepository;
 import com.nhattung.productservice.request.CreateCategoryRequest;
 import com.nhattung.productservice.request.UpdateCategoryRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +20,7 @@ public class CategoryService implements ICategoryService {
 
 
     private final CategoryRepository categoryRepository;
-
+    private final ModelMapper modelMapper;
     @Override
     public Category saveCategory(CreateCategoryRequest createCategoryRequest) {
         Category category = Category.builder()
@@ -67,6 +69,18 @@ public class CategoryService implements ICategoryService {
     @Override
     public List<Category> getCategoriesByName(String name) {
         return categoryRepository.findByNameContaining(name);
+    }
+
+    @Override
+    public CategoryDto convertToDto(Category category) {
+        return modelMapper.map(category, CategoryDto.class);
+    }
+
+    @Override
+    public List<CategoryDto> convertToDtos(List<Category> categories) {
+        return categories.stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
 }

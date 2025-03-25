@@ -2,6 +2,7 @@ package com.nhattung.productservice.service.image;
 
 
 import com.nhattung.productservice.entity.Image;
+import com.nhattung.productservice.entity.Product;
 import com.nhattung.productservice.exception.AppException;
 import com.nhattung.productservice.exception.ErrorCode;
 import com.nhattung.productservice.repository.ImageRepository;
@@ -46,7 +47,7 @@ public class ImageService implements IImageService {
     }
 
     @Override
-    public List<String> uploadImages(List<MultipartFile> files) {
+    public List<String> saveImages(List<MultipartFile> files, Product product) {
         List<String> fileUrls = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -78,6 +79,7 @@ public class ImageService implements IImageService {
                 image.setFileName(fileName);
                 image.setFileUri(fileUrl);
                 image.setFileType(fileType);
+                image.setProduct(product);
                 imageRepository.save(image);
 
                 fileUrls.add(fileUrl);

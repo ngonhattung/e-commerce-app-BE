@@ -25,6 +25,12 @@ spring:
             - Path=${app.apiPrefix}/notification/**
           filters:
             - StripPrefix=2
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=${app.apiPrefix}/products/**
+          filters:
+            - StripPrefix=2
   security:
     oauth2:
       resourceserver:

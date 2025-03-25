@@ -1,5 +1,6 @@
 package com.nhattung.productservice.dto;
 
+import com.nhattung.productservice.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,6 @@ public class ProductDto {
     private String brand;
     private BigDecimal costPrice;
     private BigDecimal sellingPrice;
-    private Long categoryId;
+    private Category category;
     private List<ImageDto> images;
 }
