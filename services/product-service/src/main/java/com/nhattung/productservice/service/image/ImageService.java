@@ -47,8 +47,7 @@ public class ImageService implements IImageService {
     }
 
     @Override
-    public List<String> saveImages(List<MultipartFile> files, Product product) {
-        List<String> fileUrls = new ArrayList<>();
+    public void saveImages(List<MultipartFile> files, Product product) {
 
         for (MultipartFile file : files) {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -70,24 +69,24 @@ public class ImageService implements IImageService {
                         PutObjectRequest.builder()
                                 .bucket(bucketName)
                                 .key(fileName)
+                                .contentType(fileType)
                                 .build(),
                         RequestBody.fromBytes(file.getBytes())
                 );
 
                 // Lưu thông tin vào database
-                Image image = new Image();
-                image.setFileName(fileName);
-                image.setFileUri(fileUrl);
-                image.setFileType(fileType);
-                image.setProduct(product);
+                Image image = Image.builder()
+                        .fileName(fileName)
+                        .fileUri(fileUrl)
+                        .fileType(fileType)
+                        .product(product)
+                        .build();
                 imageRepository.save(image);
 
-                fileUrls.add(fileUrl);
             } catch (IOException e) {
                 throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
             }
         }
-        return fileUrls;
     }
 
 

@@ -2,6 +2,9 @@ package com.nhattung.productservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.sql.Timestamp;
 
 @Entity
 @Getter
@@ -18,6 +21,10 @@ public class Image {
     private String fileName;
     private String fileType;
     private String fileUri;
+
+
+    @CreationTimestamp
+    private Timestamp createdAt;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

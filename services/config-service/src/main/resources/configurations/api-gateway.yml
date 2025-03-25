@@ -28,7 +28,7 @@ spring:
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=${app.apiPrefix}/products/**
+            - Path=${app.apiPrefix}/products/**, ${app.apiPrefix}/categories/**
           filters:
             - StripPrefix=2
   security:

@@ -1,6 +1,7 @@
 package com.nhattung.productservice.exception;
 
-import com.nhattung.userservice.response.ApiResponse;
+
+import com.nhattung.productservice.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

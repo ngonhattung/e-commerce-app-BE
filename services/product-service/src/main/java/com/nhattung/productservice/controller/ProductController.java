@@ -9,6 +9,7 @@ import com.nhattung.productservice.service.category.ICategoryService;
 import com.nhattung.productservice.service.image.IImageService;
 import com.nhattung.productservice.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,9 +25,9 @@ public class ProductController {
     private final IImageService imageService;
 
 
-    @PostMapping("/create")
-    public ApiResponse<ProductDto> createProduct(@RequestBody CreateProductRequest request,
-                                                 @RequestParam List<MultipartFile> files) {
+    @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductDto> createProduct(@ModelAttribute CreateProductRequest request,
+                                                 @RequestParam("files") List<MultipartFile> files) {
         Product product = productService.saveProduct(request);
 
         // Save images
@@ -69,10 +70,14 @@ public class ProductController {
                 .build();
     }
 
-    @PutMapping("/update/{id}")
-    public ApiResponse<ProductDto> updateProduct(@PathVariable Long id, @RequestBody UpdateProductRequest request) {
+    @PutMapping(value ="/update/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductDto> updateProduct(@PathVariable Long id,
+                                                 @ModelAttribute UpdateProductRequest request,
+                                                 @RequestParam("files") List<MultipartFile> files
+                                                 ) {
         Product product = productService.updateProduct(id, request);
         ProductDto productDto = productService.convertToDto(product);
+        imageService.saveImages(files, product);
         return ApiResponse.<ProductDto>builder()
                 .message("Product updated successfully")
                 .result(productDto)

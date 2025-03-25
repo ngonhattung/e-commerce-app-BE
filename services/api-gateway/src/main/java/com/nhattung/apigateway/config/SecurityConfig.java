@@ -23,6 +23,8 @@ public class SecurityConfig {
                 apiPrefix + "/notification/**",
                 apiPrefix + "/otp/**",
                 apiPrefix + "/user-address/**",
+                apiPrefix + "/products/**",
+                apiPrefix + "/categories/**",
         };
 
         http

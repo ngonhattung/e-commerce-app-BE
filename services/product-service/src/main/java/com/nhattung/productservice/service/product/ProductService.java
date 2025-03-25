@@ -54,6 +54,7 @@ public class ProductService implements IProductService {
     private Product createProduct(CreateProductRequest request, Category category) {
         return Product.builder()
                 .name(request.getName())
+                .description(request.getDescription())
                 .brand(request.getBrand())
                 .costPrice(request.getCostPrice())
                 .sellingPrice(request.getSellingPrice())

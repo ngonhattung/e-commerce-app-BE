@@ -10,5 +10,6 @@ import java.util.List;
 public interface IImageService {
     Image getImageById(Long id);
     List<Image> getImages();
-    List<String> saveImages(List<MultipartFile> files, Product product);
+    void saveImages(List<MultipartFile> files, Product product);
+    //void updateImages(List<MultipartFile> files, Product product);
 }

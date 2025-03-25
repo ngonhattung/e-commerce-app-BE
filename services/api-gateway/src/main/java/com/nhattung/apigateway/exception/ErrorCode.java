@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public enum ErrorCode {
-    UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    UNAUTHENTICATED(1006, "Unauthenticated gateway", HttpStatus.UNAUTHORIZED),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
