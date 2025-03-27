@@ -41,6 +41,13 @@ public enum ErrorCode {
     INVALID_FILE_TYPE(1031, "Invalid file type", HttpStatus.BAD_REQUEST),
     FILE_SIZE_MISMATCH(1032, "File size mismatch", HttpStatus.BAD_REQUEST),
     EMPTY_CATEGORY_NAME(1034, "Category name cannot be empty", HttpStatus.BAD_REQUEST),
+    INVALID_QUANTITY(1035, "Quantity must be greater than 0", HttpStatus.BAD_REQUEST),
+    EMPTY_PRODUCT_NAME(1036, "Product name cannot be empty", HttpStatus.BAD_REQUEST),
+    EMPTY_BRAND(1037, "Brand cannot be empty", HttpStatus.BAD_REQUEST),
+    EMPTY_COST_PRICE(1038, "Cost price cannot be empty", HttpStatus.BAD_REQUEST),
+    INVALID_COST_PRICE(1039, "Cost price must be greater than 0", HttpStatus.BAD_REQUEST),
+    EMPTY_SELLING_PRICE(1040, "Selling price cannot be empty", HttpStatus.BAD_REQUEST),
+    INVALID_SELLING_PRICE(1041, "Selling price must be greater than 0", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

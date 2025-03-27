@@ -8,6 +8,7 @@ import com.nhattung.productservice.response.ApiResponse;
 import com.nhattung.productservice.service.category.ICategoryService;
 import com.nhattung.productservice.service.image.IImageService;
 import com.nhattung.productservice.service.product.IProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ProductController {
 
 
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ProductDto> createProduct(@ModelAttribute CreateProductRequest request,
+    public ApiResponse<ProductDto> createProduct(@Valid @ModelAttribute CreateProductRequest request,
                                                  @RequestParam("files") List<MultipartFile> files) {
         Product product = productService.saveProduct(request);
         // Save images
@@ -72,7 +73,7 @@ public class ProductController {
 
     @PutMapping(value ="/update/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> updateProduct(@PathVariable Long id,
-                                                 @ModelAttribute UpdateProductRequest request,
+                                                 @Valid @ModelAttribute UpdateProductRequest request,
                                                  @RequestParam("imageIds") List<Long> imageIds,
                                                  @RequestParam("files") List<MultipartFile> files
                                                  ) {

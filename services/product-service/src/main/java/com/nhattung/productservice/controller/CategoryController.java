@@ -6,6 +6,7 @@ import com.nhattung.productservice.request.CreateCategoryRequest;
 import com.nhattung.productservice.request.UpdateCategoryRequest;
 import com.nhattung.productservice.response.ApiResponse;
 import com.nhattung.productservice.service.category.ICategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class CategoryController {
     private final ICategoryService categoryService;
 
     @PostMapping("/create")
-    public ApiResponse<CategoryDto> createCategory(@RequestBody CreateCategoryRequest request) {
+    public ApiResponse<CategoryDto> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         Category category = categoryService.saveCategory(request);
         CategoryDto categoryDto = categoryService.convertToDto(category);
         return ApiResponse.<CategoryDto>builder()
@@ -30,7 +31,7 @@ public class CategoryController {
 
     @PutMapping("/update/{id}")
     public ApiResponse<CategoryDto> updateCategory(@PathVariable Long id,
-                                                   @RequestBody UpdateCategoryRequest request) {
+                                                   @Valid @RequestBody UpdateCategoryRequest request) {
         Category category = categoryService.updateCategory(request, id);
         CategoryDto categoryDto = categoryService.convertToDto(category);
         return ApiResponse.<CategoryDto>builder()
