@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -35,6 +36,7 @@ public class ImageService implements IImageService {
             "image/jpeg", "image/png", "image/gif", "image/webp",
             "video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo"
     );
+
     @Override
     public Image getImageById(Long id) {
         return imageRepository.findById(id)
@@ -89,5 +91,45 @@ public class ImageService implements IImageService {
         }
     }
 
+    @Override
+    public void updateImages(List<Long> imageIdsToUpdate, List<MultipartFile> newFiles) {
+
+        if (imageIdsToUpdate.size() != newFiles.size()) {
+            throw new AppException(ErrorCode.FILE_SIZE_MISMATCH);
+        }
+
+        for (int i = 0; i < imageIdsToUpdate.size(); i++) {
+            Long imageId = imageIdsToUpdate.get(i);
+            MultipartFile newFile = newFiles.get(i);
+
+            Optional<Image> imageOptional = imageRepository.findById(imageId);
+            if (imageOptional.isPresent()) {
+                Image image = imageOptional.get();
+
+                // Upload ảnh mới lên S3
+                try {
+                    String newFileName = System.currentTimeMillis() + "_" + newFile.getOriginalFilename();
+                    String newFileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + newFileName;
+                    String fileType = newFile.getContentType();
+                    s3Client.putObject(
+                            PutObjectRequest.builder()
+                                    .bucket(bucketName)
+                                    .key(newFileName)
+                                    .contentType(newFile.getContentType())
+                                    .build(),
+                            RequestBody.fromBytes(newFile.getBytes())
+                    );
+
+                    // Cập nhật đường dẫn trong database
+                    image.setFileName(newFileName);
+                    image.setFileType(fileType);
+                    image.setFileUri(newFileUrl);
+                    imageRepository.save(image);
+                } catch (IOException e) {
+                    throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
+                }
+            }
+        }
+    }
 
 }

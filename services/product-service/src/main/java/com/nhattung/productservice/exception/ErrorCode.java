@@ -39,6 +39,8 @@ public enum ErrorCode {
     UPLOAD_IMAGE_ERROR(1029, "Upload image error", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_SIZE_TOO_LARGE(1030, "File size too large", HttpStatus.BAD_REQUEST),
     INVALID_FILE_TYPE(1031, "Invalid file type", HttpStatus.BAD_REQUEST),
+    FILE_SIZE_MISMATCH(1032, "File size mismatch", HttpStatus.BAD_REQUEST),
+    EMPTY_CATEGORY_NAME(1034, "Category name cannot be empty", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

@@ -29,10 +29,10 @@ public class ProductController {
     public ApiResponse<ProductDto> createProduct(@ModelAttribute CreateProductRequest request,
                                                  @RequestParam("files") List<MultipartFile> files) {
         Product product = productService.saveProduct(request);
-
         // Save images
-        imageService.saveImages(files, product);
-
+        if(!files.isEmpty()){
+            imageService.saveImages(files, product);
+        }
         ProductDto productDto = productService.convertToDto(product);
         return ApiResponse.<ProductDto>builder()
                 .message("Product created successfully")
@@ -73,11 +73,14 @@ public class ProductController {
     @PutMapping(value ="/update/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> updateProduct(@PathVariable Long id,
                                                  @ModelAttribute UpdateProductRequest request,
+                                                 @RequestParam("imageIds") List<Long> imageIds,
                                                  @RequestParam("files") List<MultipartFile> files
                                                  ) {
         Product product = productService.updateProduct(id, request);
+        if(!files.isEmpty()){
+            imageService.updateImages(imageIds, files);
+        }
         ProductDto productDto = productService.convertToDto(product);
-        imageService.saveImages(files, product);
         return ApiResponse.<ProductDto>builder()
                 .message("Product updated successfully")
                 .result(productDto)
