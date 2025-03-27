@@ -10,6 +10,7 @@ import com.nhattung.productservice.service.image.IImageService;
 import com.nhattung.productservice.service.product.IProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +25,7 @@ public class ProductController {
     private final IProductService productService;
     private final ICategoryService categoryService;
     private final IImageService imageService;
-
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> createProduct(@Valid @ModelAttribute CreateProductRequest request,
@@ -45,6 +46,9 @@ public class ProductController {
     public ApiResponse<ProductDto> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         ProductDto productDto = productService.convertToDto(product);
+//        String key = "products::" + id;
+//        Object value = redisTemplate.opsForValue().get(key);
+//        Product product1 = (Product) value;
         return ApiResponse.<ProductDto>builder()
                 .message("Product retrieved successfully")
                 .result(productDto)

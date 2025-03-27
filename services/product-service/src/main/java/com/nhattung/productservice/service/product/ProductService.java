@@ -14,6 +14,10 @@ import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,12 +31,18 @@ public class ProductService implements IProductService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
     private final ImageRepository imageRepository;
+
+
+    @Cacheable(value = "products", key = "#id")
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
+
+    @CachePut(value = "products", key = "#request.name")
+    @CacheEvict(value = "products", key = "'allProducts'")
     @Override
     public Product saveProduct(CreateProductRequest request) {
         if (isProductExisted(request.getName(), request.getBrand())) {
@@ -62,6 +72,8 @@ public class ProductService implements IProductService {
                 .build();
     }
 
+
+    @CachePut(value = "products", key = "#id")
     @Override
     public Product updateProduct(Long id, UpdateProductRequest request) {
         return productRepository.findById(id)
@@ -83,6 +95,11 @@ public class ProductService implements IProductService {
         existingProduct.setCategory(category);
         return existingProduct;
     }
+
+    @Caching(evict = {
+            @CacheEvict(value = "products", key = "#id"),
+            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)
+    })
     @Override
     public void deleteProduct(Long id) {
         productRepository.findById(id)
@@ -91,6 +108,8 @@ public class ProductService implements IProductService {
                 });
     }
 
+
+    @Cacheable(value = "products", key = "'allProducts'")
     @Override
     public List<Product> getAllProducts() {
         return productRepository.findAll();
