@@ -10,7 +10,9 @@ import com.nhattung.productservice.exception.ErrorCode;
 import com.nhattung.productservice.repository.CategoryRepository;
 import com.nhattung.productservice.repository.ImageRepository;
 import com.nhattung.productservice.repository.ProductRepository;
+import com.nhattung.productservice.repository.httpclient.InventoryClient;
 import com.nhattung.productservice.request.CreateProductRequest;
+import com.nhattung.productservice.request.InventoryRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,7 +33,7 @@ public class ProductService implements IProductService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
     private final ImageRepository imageRepository;
-
+    private final InventoryClient inventoryClient;
 
     @Cacheable(value = "products", key = "#id")
     @Override
@@ -55,7 +57,17 @@ public class ProductService implements IProductService {
                             .name(request.getCategoryName())
                             .build());
                 });
-        return productRepository.save(createProduct(request, category));
+
+
+        Product product = productRepository.save(createProduct(request, category));
+
+        InventoryRequest inventoryRequest = InventoryRequest.builder()
+                .productId(product.getId())
+                .quantity(request.getQuantity())
+                .build();
+        inventoryClient.addInventory(inventoryRequest);
+
+        return product;
     }
 
     private boolean isProductExisted(String name, String brand) {
@@ -93,6 +105,13 @@ public class ProductService implements IProductService {
             throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
         existingProduct.setCategory(category);
+
+        InventoryRequest inventoryRequest = InventoryRequest.builder()
+                .productId(existingProduct.getId())
+                .quantity(request.getQuantity())
+                .build();
+        inventoryClient.updateInventory(inventoryRequest);
+
         return existingProduct;
     }
 
@@ -106,6 +125,7 @@ public class ProductService implements IProductService {
                 .ifPresentOrElse(productRepository::delete,() -> {
                     throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                 });
+        inventoryClient.deleteInventory(id);
     }
 
 

@@ -18,9 +18,7 @@ import java.util.List;
 @Slf4j
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/products/**",
-    };
+    private final String[] PUBLIC_ENDPOINTS = {};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

@@ -31,6 +31,12 @@ spring:
             - Path=${app.apiPrefix}/products/**, ${app.apiPrefix}/categories/**
           filters:
             - StripPrefix=2
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=${app.apiPrefix}/inventory/**
+          filters:
+            - StripPrefix=2
   security:
     oauth2:
       resourceserver:

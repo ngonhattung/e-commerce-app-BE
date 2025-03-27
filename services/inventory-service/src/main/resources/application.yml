@@ -5,6 +5,6 @@ spring:
     config:
       fail-fast: true
   application:
-    name: inventory_service
+    name: inventory-service
 
 

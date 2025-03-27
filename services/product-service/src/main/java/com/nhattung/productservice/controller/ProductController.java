@@ -2,6 +2,7 @@ package com.nhattung.productservice.controller;
 
 import com.nhattung.productservice.dto.ProductDto;
 import com.nhattung.productservice.entity.Product;
+import com.nhattung.productservice.repository.httpclient.InventoryClient;
 import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import com.nhattung.productservice.response.ApiResponse;
@@ -26,7 +27,6 @@ public class ProductController {
     private final ICategoryService categoryService;
     private final IImageService imageService;
     private final RedisTemplate<String, Object> redisTemplate;
-
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> createProduct(@Valid @ModelAttribute CreateProductRequest request,
                                                  @RequestParam("files") List<MultipartFile> files) {
