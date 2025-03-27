@@ -1,6 +1,6 @@
-package com.nhattung.inventory_service.repository;
+package com.nhattung.inventoryservice.repository;
 
-import com.nhattung.inventory_service.entity.Inventory;
+import com.nhattung.inventoryservice.entity.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

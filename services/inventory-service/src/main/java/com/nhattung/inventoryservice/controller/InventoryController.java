@@ -1,8 +1,8 @@
-package com.nhattung.inventory_service.controller;
+package com.nhattung.inventoryservice.controller;
 
-import com.nhattung.inventory_service.request.InventoryRequest;
-import com.nhattung.inventory_service.response.ApiResponse;
-import com.nhattung.inventory_service.service.IInventoryService;
+import com.nhattung.inventoryservice.request.InventoryRequest;
+import com.nhattung.inventoryservice.response.ApiResponse;
+import com.nhattung.inventoryservice.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +21,7 @@ public class InventoryController {
                 .build();
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ApiResponse<Void> updateInventory(@RequestBody InventoryRequest request) {
         inventoryService.updateInventory(request);
         return ApiResponse.<Void>builder()
@@ -29,7 +29,7 @@ public class InventoryController {
                 .build();
     }
 
-    @PostMapping("/delete/{productId}")
+    @DeleteMapping("/delete/{productId}")
     public ApiResponse<Void> deleteInventory(@PathVariable("productId") Long productId) {
         inventoryService.deleteInventory(productId);
         return ApiResponse.<Void>builder()

@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.response;
+package com.nhattung.inventoryservice.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

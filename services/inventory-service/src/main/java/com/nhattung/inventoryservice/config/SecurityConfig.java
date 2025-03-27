@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.config;
+package com.nhattung.inventoryservice.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,9 @@ import java.util.List;
 @Slf4j
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {};
+    private final String[] PUBLIC_ENDPOINTS = {
+            "/inventory/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

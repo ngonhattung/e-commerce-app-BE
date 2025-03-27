@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service;
+package com.nhattung.inventoryservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

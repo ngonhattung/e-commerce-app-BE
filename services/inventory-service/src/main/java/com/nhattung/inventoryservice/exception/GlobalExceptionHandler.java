@@ -1,8 +1,8 @@
-package com.nhattung.inventory_service.exception;
+package com.nhattung.inventoryservice.exception;
 
 
 
-import com.nhattung.inventory_service.response.ApiResponse;
+import com.nhattung.inventoryservice.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;

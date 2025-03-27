@@ -1,6 +1,6 @@
-package com.nhattung.inventory_service.service;
+package com.nhattung.inventoryservice.service;
 
-import com.nhattung.inventory_service.request.InventoryRequest;
+import com.nhattung.inventoryservice.request.InventoryRequest;
 
 public interface IInventoryService {
 

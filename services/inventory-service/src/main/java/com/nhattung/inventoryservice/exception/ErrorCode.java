@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.exception;
+package com.nhattung.inventoryservice.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

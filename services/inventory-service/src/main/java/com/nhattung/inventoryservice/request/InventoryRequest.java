@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.request;
+package com.nhattung.inventoryservice.request;
 
 
 import lombok.AllArgsConstructor;

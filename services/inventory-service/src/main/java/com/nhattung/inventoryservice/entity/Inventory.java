@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.entity;
+package com.nhattung.inventoryservice.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

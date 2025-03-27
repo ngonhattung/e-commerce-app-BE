@@ -1,8 +1,8 @@
-package com.nhattung.inventory_service.config;
+package com.nhattung.inventoryservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhattung.inventory_service.exception.ErrorCode;
-import com.nhattung.inventory_service.response.ApiResponse;
+import com.nhattung.inventoryservice.exception.ErrorCode;
+import com.nhattung.inventoryservice.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

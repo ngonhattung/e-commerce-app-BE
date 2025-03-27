@@ -1,11 +1,11 @@
-package com.nhattung.inventory_service.service;
+package com.nhattung.inventoryservice.service;
 
 
-import com.nhattung.inventory_service.entity.Inventory;
-import com.nhattung.inventory_service.exception.AppException;
-import com.nhattung.inventory_service.exception.ErrorCode;
-import com.nhattung.inventory_service.repository.InventoryRepository;
-import com.nhattung.inventory_service.request.InventoryRequest;
+import com.nhattung.inventoryservice.entity.Inventory;
+import com.nhattung.inventoryservice.exception.AppException;
+import com.nhattung.inventoryservice.exception.ErrorCode;
+import com.nhattung.inventoryservice.repository.InventoryRepository;
+import com.nhattung.inventoryservice.request.InventoryRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

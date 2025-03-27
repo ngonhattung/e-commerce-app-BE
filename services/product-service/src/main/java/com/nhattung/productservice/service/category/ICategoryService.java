@@ -15,7 +15,6 @@ public interface ICategoryService {
     Category getCategoryById(Long id);
     List<Category> getAllCategories();
     Category getCategoryByName(String name);
-    List<Category> getCategoriesByName(String name);
     CategoryDto convertToDto(Category category);
     List<CategoryDto> convertToDtos(List<Category> categories);
 

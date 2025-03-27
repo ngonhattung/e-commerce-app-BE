@@ -1,4 +1,4 @@
-package com.nhattung.inventory_service.exception;
+package com.nhattung.inventoryservice.exception;
 
 public class AppException extends RuntimeException{
     public AppException(ErrorCode errorCode) {

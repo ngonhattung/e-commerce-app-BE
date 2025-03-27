@@ -66,10 +66,6 @@ public class CategoryService implements ICategoryService {
         return categoryRepository.findByName(name);
     }
 
-    @Override
-    public List<Category> getCategoriesByName(String name) {
-        return categoryRepository.findByNameContaining(name);
-    }
 
     @Override
     public CategoryDto convertToDto(Category category) {

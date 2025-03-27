@@ -8,6 +8,7 @@ import com.nhattung.productservice.response.ApiResponse;
 import com.nhattung.productservice.service.category.ICategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public class CategoryController {
 
     private final ICategoryService categoryService;
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/create")
     public ApiResponse<CategoryDto> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
         Category category = categoryService.saveCategory(request);
@@ -29,6 +32,8 @@ public class CategoryController {
                 .build();
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/update/{id}")
     public ApiResponse<CategoryDto> updateCategory(@PathVariable Long id,
                                                    @Valid @RequestBody UpdateCategoryRequest request) {
@@ -40,6 +45,7 @@ public class CategoryController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
@@ -48,7 +54,7 @@ public class CategoryController {
                 .build();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("category/{id}")
     public ApiResponse<CategoryDto> getCategoryById(@PathVariable Long id) {
         Category category = categoryService.getCategoryById(id);
         CategoryDto categoryDto = categoryService.convertToDto(category);
@@ -58,23 +64,13 @@ public class CategoryController {
                 .build();
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("category/name/{name}")
     public ApiResponse<CategoryDto> getCategoryByName(@PathVariable String name) {
         Category category = categoryService.getCategoryByName(name);
         CategoryDto categoryDto = categoryService.convertToDto(category);
         return ApiResponse.<CategoryDto>builder()
                 .message("Category fetched successfully")
                 .result(categoryDto)
-                .build();
-    }
-
-    @GetMapping("/names/{name}")
-    public ApiResponse<List<CategoryDto>> getCategoriesByName(@PathVariable String name) {
-        List<Category> categories = categoryService.getCategoriesByName(name);
-        List<CategoryDto> categoryDtos = categoryService.convertToDtos(categories);
-        return ApiResponse.<List<CategoryDto>>builder()
-                .message("Categories fetched successfully")
-                .result(categoryDtos)
                 .build();
     }
 

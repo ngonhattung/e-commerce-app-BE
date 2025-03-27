@@ -11,8 +11,8 @@
 	<groupId>com.nhattung</groupId>
 	<artifactId>inventory-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>inventory_service</name>
-	<description>inventory_service</description>
+	<name>inventory-service</name>
+	<description>inventory-service</description>
 	<url/>
 	<licenses>
 		<license/>

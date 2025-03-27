@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,15 +25,18 @@ import java.util.List;
 public class ProductController {
 
     private final IProductService productService;
-    private final ICategoryService categoryService;
+    //private final ICategoryService categoryService;
     private final IImageService imageService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    //private final RedisTemplate<String, Object> redisTemplate;
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> createProduct(@Valid @ModelAttribute CreateProductRequest request,
-                                                 @RequestParam("files") List<MultipartFile> files) {
+                                                 @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         Product product = productService.saveProduct(request);
         // Save images
-        if(!files.isEmpty()){
+        if(files != null && !files.isEmpty()){
             imageService.saveImages(files, product);
         }
         ProductDto productDto = productService.convertToDto(product);
@@ -75,14 +79,15 @@ public class ProductController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value ="/update/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ProductDto> updateProduct(@PathVariable Long id,
                                                  @Valid @ModelAttribute UpdateProductRequest request,
-                                                 @RequestParam("imageIds") List<Long> imageIds,
-                                                 @RequestParam("files") List<MultipartFile> files
+                                                 @RequestParam(value = "imageIds", required = false) List<Long> imageIds,
+                                                 @RequestParam(value = "files", required = false) List<MultipartFile> files
                                                  ) {
         Product product = productService.updateProduct(id, request);
-        if(!files.isEmpty()){
+        if(files != null && !files.isEmpty() && imageIds != null){
             imageService.updateImages(imageIds, files);
         }
         ProductDto productDto = productService.convertToDto(product);
@@ -92,6 +97,7 @@ public class ProductController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ApiResponse<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
