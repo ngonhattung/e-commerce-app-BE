@@ -11,18 +11,6 @@
         <module name="discovery-service" />
         <module name="config-service" />
       </profile>
-      <profile name="Annotation profile for inventory_service" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
-        </processorPath>
-        <module name="api-gateway" />
-        <module name="product-service" />
-        <module name="auth-service" />
-        <module name="user-service" />
-      </profile>
       <profile name="Annotation profile for inventory-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -34,12 +22,26 @@
         <module name="notification-service" />
         <module name="inventory-service" />
       </profile>
+      <profile name="Annotation profile for cart-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
+        </processorPath>
+        <module name="api-gateway" />
+        <module name="product-service" />
+        <module name="cart-service" />
+        <module name="auth-service" />
+        <module name="user-service" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
       <module name="auth-service" options="-parameters" />
+      <module name="cart-service" options="-parameters" />
       <module name="common-dto" options="" />
       <module name="config-service" options="-parameters" />
       <module name="discovery-service" options="-parameters" />
