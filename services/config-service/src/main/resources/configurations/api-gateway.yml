@@ -37,6 +37,13 @@ spring:
             - Path=${app.apiPrefix}/inventory/**
           filters:
             - StripPrefix=2
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=${app.apiPrefix}/cart/**, ${app.apiPrefix}/cartItems/**
+          filters:
+            - StripPrefix=2
+
   security:
     oauth2:
       resourceserver:
