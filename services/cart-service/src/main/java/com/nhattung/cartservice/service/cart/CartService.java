@@ -6,6 +6,7 @@ import com.nhattung.cartservice.exception.AppException;
 import com.nhattung.cartservice.exception.ErrorCode;
 import com.nhattung.cartservice.repository.CartItemRepository;
 import com.nhattung.cartservice.repository.CartRepository;
+import com.nhattung.cartservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,10 @@ public class CartService implements ICartService{
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final AuthenticatedUser authenticatedUser;
     @Override
-    public Cart getCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+    public Cart getCart() {
+        Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
 
         BigDecimal totalAmount = cart.getTotalAmount();
@@ -33,8 +35,8 @@ public class CartService implements ICartService{
 
     @Transactional
     @Override
-    public void clearCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+    public void clearCart() {
+        Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
         cartItemRepository.deleteAll(cart.getItems());
         cart.clearCart();
@@ -43,14 +45,14 @@ public class CartService implements ICartService{
 
 
     @Override
-    public BigDecimal getTotalAmount(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
+    public BigDecimal getTotalAmount() {
+        Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
         return cart.getTotalAmount();
     }
 
     @Override
-    public void initializeCart(Long userId) {
+    public void initializeCart(String userId) {
         cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     Cart cart = new Cart();

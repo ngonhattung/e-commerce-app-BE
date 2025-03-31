@@ -1,6 +1,5 @@
 package com.nhattung.cartservice.service.cartItem;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhattung.cartservice.dto.CartItemDto;
 import com.nhattung.cartservice.dto.ProductDto;
 import com.nhattung.cartservice.entity.Cart;
@@ -11,12 +10,10 @@ import com.nhattung.cartservice.repository.CartItemRepository;
 import com.nhattung.cartservice.repository.CartRepository;
 import com.nhattung.cartservice.repository.httpclient.ProductClient;
 import com.nhattung.cartservice.request.AddItemToCartRequest;
-import com.nhattung.cartservice.request.RemoveItemFromCartRequest;
 import com.nhattung.cartservice.request.UpdateItemQuantityRequest;
 import com.nhattung.cartservice.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,7 +37,7 @@ public class CartItemService implements ICartItemService{
         //4. If yes, update the quantity
         //5. If no, add the product to the cart
 
-        Cart cart = cartService.getCart(request.getUserId());
+        Cart cart = cartService.getCart();
         ProductDto product = productClient.getProductById(request.getProductId());
         if (product == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
@@ -65,16 +62,16 @@ public class CartItemService implements ICartItemService{
     }
 
     @Override
-    public void removeItemFromCart(RemoveItemFromCartRequest request) {
-        Cart cart = cartService.getCart(request.getUserId());
-        CartItem cartItem = getCartItem(request.getUserId(), request.getProductId());
+    public void removeItemFromCart(Long productId) {
+        Cart cart = cartService.getCart();
+        CartItem cartItem = getCartItem(productId);
         cart.removeItem(cartItem);
         cartRepository.save(cart);
     }
 
     @Override
     public void updateItemQuantity(UpdateItemQuantityRequest request) {
-        Cart cart = cartService.getCart(request.getUserId());
+        Cart cart = cartService.getCart();
         cart.getItems()
                 .stream()
                 .filter(item -> item.getProductId().equals(request.getProductId()))
@@ -94,8 +91,8 @@ public class CartItemService implements ICartItemService{
     }
 
     @Override
-    public CartItem getCartItem(Long userId, Long productId) {
-        Cart cart = cartService.getCart(userId);
+    public CartItem getCartItem(Long productId) {
+        Cart cart = cartService.getCart();
         return cart.getItems()
                 .stream()
                 .filter(item -> item.getProductId().equals(productId))
@@ -104,8 +101,8 @@ public class CartItemService implements ICartItemService{
     }
 
     @Override
-    public Set<CartItem> getCartItems(Long userId) {
-        Cart cart = cartService.getCart(userId);
+    public Set<CartItem> getCartItems() {
+        Cart cart = cartService.getCart();
         return cart.getItems();
     }
 

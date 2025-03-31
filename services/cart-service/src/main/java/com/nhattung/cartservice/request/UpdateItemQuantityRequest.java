@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class UpdateItemQuantityRequest {
-    private Long userId;
     private Long productId;
     private int quantity;
 

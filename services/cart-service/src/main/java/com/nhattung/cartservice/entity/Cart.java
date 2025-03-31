@@ -22,7 +22,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private BigDecimal totalAmount = BigDecimal.ZERO;
-    private Long userId;
+    private String userId;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<CartItem> items = new HashSet<>();
