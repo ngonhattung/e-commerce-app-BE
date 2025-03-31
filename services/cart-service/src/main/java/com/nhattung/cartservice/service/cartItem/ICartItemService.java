@@ -14,7 +14,7 @@ public interface ICartItemService {
     void updateItemQuantity(UpdateItemQuantityRequest request);
     CartItem getCartItem(Long productId);
     Set<CartItem> getCartItems();
-    Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems);
+    Set<CartItemDto> getConvertedCartItems(Set<CartItem> cartItems);
     CartItemDto convertToDto(CartItem cartItem);
 
 }

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -107,10 +108,10 @@ public class CartItemService implements ICartItemService{
     }
 
     @Override
-    public Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems) {
+    public Set<CartItemDto> getConvertedCartItems(Set<CartItem> cartItems) {
         return cartItems.stream()
                 .map(this::convertToDto)
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(Collectors.toSet());
     }
 
     @Override
