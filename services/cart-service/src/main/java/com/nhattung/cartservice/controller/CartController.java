@@ -6,7 +6,6 @@ import com.nhattung.cartservice.response.ApiResponse;
 import com.nhattung.cartservice.service.cart.CartService;
 import com.nhattung.cartservice.service.cartItem.CartItemService;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.shaded.com.google.protobuf.Api;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;

@@ -6,3 +6,9 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 name:
   value: nhattung
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
