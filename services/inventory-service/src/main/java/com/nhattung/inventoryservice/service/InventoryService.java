@@ -5,6 +5,7 @@ import com.nhattung.inventoryservice.entity.Inventory;
 import com.nhattung.inventoryservice.exception.AppException;
 import com.nhattung.inventoryservice.exception.ErrorCode;
 import com.nhattung.inventoryservice.repository.InventoryRepository;
+import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,5 +50,12 @@ public class InventoryService implements IInventoryService {
         return inventoryRepository.findByProductId(productId)
                 .map(Inventory::getQuantity)
                 .orElse(0);
+    }
+
+    @Override
+    public boolean checkInventory(GetQuantityRequest request) {
+        Inventory inventory = inventoryRepository.findByProductId(request.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+        return inventory.getQuantity() >= request.getQuantity();
     }
 }

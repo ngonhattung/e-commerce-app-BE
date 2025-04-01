@@ -41,14 +41,5 @@ public class NotificationController {
 
             }
         }
-
-        emailService.sendEmail(SendEmailRequest.builder()
-                        .to(Recipient.builder()
-                                .email(message.getReceiver())
-                                .build())
-                        .subject(message.getParams().get("subject").toString())
-                        .htmlContent(message.getParams().get("content").toString())
-                .build());
-
     }
 }

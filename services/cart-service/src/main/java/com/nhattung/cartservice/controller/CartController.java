@@ -1,8 +1,10 @@
 package com.nhattung.cartservice.controller;
 
+import com.nhattung.cartservice.dto.CartDto;
 import com.nhattung.cartservice.entity.Cart;
 import com.nhattung.cartservice.response.ApiResponse;
 import com.nhattung.cartservice.service.cart.CartService;
+import com.nhattung.cartservice.service.cartItem.CartItemService;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.shaded.com.google.protobuf.Api;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,14 @@ import java.math.BigDecimal;
 public class CartController {
 
     private final CartService cartService;
-
+    private final CartItemService cartItemService;
     @GetMapping("/get")
-    public ApiResponse<Cart> getCart() {
+    public ApiResponse<CartDto> getCart() {
         Cart cart = cartService.getCart();
-        return ApiResponse.<Cart>builder()
+        CartDto cartDto = cartItemService.convertToDto(cart);
+        return ApiResponse.<CartDto>builder()
                 .message("Cart retrieved successfully")
-                .result(cart)
+                .result(cartDto)
                 .build();
     }
 

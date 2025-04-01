@@ -8,6 +8,7 @@ import com.nhattung.userservice.exception.AppException;
 import com.nhattung.userservice.exception.ErrorCode;
 import com.nhattung.userservice.exception.ErrorNomalizer;
 import com.nhattung.userservice.repository.UserProfileRepository;
+import com.nhattung.userservice.repository.httpclient.CartClient;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.utils.RandomUtil;
@@ -41,6 +42,7 @@ public class UserProfileService implements IUserProfileService {
     private final Keycloak keycloak;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ErrorNomalizer errorNomalizer;
+    private final CartClient cartClient;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
             String fullName = request.getFullName().trim();
@@ -74,6 +76,7 @@ public class UserProfileService implements IUserProfileService {
             List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
             UserRepresentation user = userRepresentations.get(0);
 
+
             //sendVerificationEmail(user.getId());
 
             UserProfile userProfile = UserProfile.builder()
@@ -86,10 +89,12 @@ public class UserProfileService implements IUserProfileService {
                     .userId(user.getId())
                     .build();
 
+            //Initialize cart for user
+            cartClient.initializeCart(user.getId());
 
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("email")
-                .receiver(userProfile.getEmail())
+                .receiver(request.getEmail())
                 .templateCode("WELCOME_EMAIL")
                 .params(Map.of(
                         "subject","Welcome to Dream Shop",
@@ -193,11 +198,17 @@ public class UserProfileService implements IUserProfileService {
                 "            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);\n" +
                 "        }\n" +
                 "        .header {\n" +
-                "            text-align: center;\n" +
+                "            display: flex;\n" +
+                "            justify-content: center;\n" +
+                "            align-items: center;\n" +
                 "            padding: 10px 0;\n" +
+                "            width: 100%;\n" +
                 "        }\n" +
                 "        .header img {\n" +
-                "            max-width: 150px;\n" +
+                "            max-width: 300px;\n" +
+                "            height: auto;\n" +
+                "            display: block;\n" +
+                "            margin: 0 auto;\n" +
                 "        }\n" +
                 "        .content {\n" +
                 "            text-align: center;\n" +
@@ -223,10 +234,10 @@ public class UserProfileService implements IUserProfileService {
                 "<body>\n" +
                 "    <div class=\"container\">\n" +
                 "        <div class=\"header\">\n" +
-                "            <img src=\"https://your-logo-url.com/logo.png\" alt=\"Logo\">\n" +
+                "            <img src=\"https://res.cloudinary.com/dclf0ngcu/image/upload/v1743265120/dreamy-mart/logo-blue_cnfw0g.png\" alt=\"Logo\">\n" +
                 "        </div>\n" +
                 "        <div class=\"content\">\n" +
-                "            <h2>Welcome to Our E-Commerce Store!</h2>\n" +
+                "            <h2>Welcome to Dream E-Commerce Store!</h2>\n" +
                 "            <p>Thank you for registering with us. We are excited to have you on board.</p>\n" +
                 "            <p>Start exploring our wide range of products and enjoy exclusive discounts.</p>\n" +
                 "            <a href=\"https://your-ecommerce-website.com\" class=\"button\">Shop Now</a>\n" +

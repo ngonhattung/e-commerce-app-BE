@@ -180,6 +180,8 @@ public class ProductService implements IProductService {
                 .map(image -> modelMapper.map(image, ImageDto.class))
                 .toList();
         productDto.setImages(imageDtos);
+        int quantity = inventoryClient.getInventory(product.getId());
+        productDto.setQuantity(quantity);
         return productDto;
     }
 

@@ -1,6 +1,8 @@
 package com.nhattung.cartservice.service.cartItem;
 
+import com.nhattung.cartservice.dto.CartDto;
 import com.nhattung.cartservice.dto.CartItemDto;
+import com.nhattung.cartservice.entity.Cart;
 import com.nhattung.cartservice.entity.CartItem;
 import com.nhattung.cartservice.request.AddItemToCartRequest;
 import com.nhattung.cartservice.request.UpdateItemQuantityRequest;
@@ -16,5 +18,6 @@ public interface ICartItemService {
     Set<CartItem> getCartItems();
     Set<CartItemDto> getConvertedCartItems(Set<CartItem> cartItems);
     CartItemDto convertToDto(CartItem cartItem);
+    CartDto convertToDto(Cart cart);
 
 }

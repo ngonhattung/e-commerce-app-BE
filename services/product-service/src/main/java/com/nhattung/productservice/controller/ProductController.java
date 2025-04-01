@@ -46,7 +46,7 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("product/{id}")
+    @GetMapping("/product/{id}")
     public ApiResponse<ProductDto> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         ProductDto productDto = productService.convertToDto(product);

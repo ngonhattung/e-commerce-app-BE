@@ -85,10 +85,17 @@ public class OtpService implements IOtpService{
                 "            text-align: center;\n" +
                 "        }\n" +
                 "        .header {\n" +
+                "            display: flex;\n" +
+                "            justify-content: center;\n" +
+                "            align-items: center;\n" +
                 "            padding: 10px 0;\n" +
+                "            width: 100%;\n" +
                 "        }\n" +
                 "        .header img {\n" +
-                "            max-width: 150px;\n" +
+                "            max-width: 300px;\n" +
+                "            height: auto;\n" +
+                "            display: block;\n" +
+                "            margin: 0 auto;\n" +
                 "        }\n" +
                 "        .content {\n" +
                 "            color: #333;\n" +
@@ -109,13 +116,13 @@ public class OtpService implements IOtpService{
                 "<body>\n" +
                 "    <div class=\"container\">\n" +
                 "        <div class=\"header\">\n" +
-                "            <img src=\"https://your-logo-url.com/logo.png\" alt=\"Logo\">\n" +
+                "            <img src=\"https://res.cloudinary.com/dclf0ngcu/image/upload/v1743265120/dreamy-mart/logo-blue_cnfw0g.png\" alt=\"Logo\">\n" +
                 "        </div>\n" +
                 "        <div class=\"content\">\n" +
                 "            <h2>OTP Verification</h2>\n" +
                 "            <p>Your One-Time Password (OTP) for verification is:</p>\n" +
                 "            <div class=\"otp\">" + otp + "</div>\n" +
-                "            <p>Please enter this OTP to complete your verification. This OTP is valid for 1 minutes.</p>\n" +
+                "            <p>Please enter this OTP to complete your verification. This OTP is valid for 1 minute.</p>\n" +
                 "        </div>\n" +
                 "        <div class=\"footer\">\n" +
                 "            <p>If you did not request this, please ignore this email.</p>\n" +

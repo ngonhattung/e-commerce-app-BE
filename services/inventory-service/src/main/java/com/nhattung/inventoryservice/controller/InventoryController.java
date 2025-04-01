@@ -1,5 +1,6 @@
 package com.nhattung.inventoryservice.controller;
 
+import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
 import com.nhattung.inventoryservice.response.ApiResponse;
 import com.nhattung.inventoryservice.service.IInventoryService;
@@ -37,10 +38,15 @@ public class InventoryController {
                 .build();
     }
 
-    @GetMapping("/{productId}")
-    public ApiResponse<Integer> getInventory(@PathVariable("productId") Long productId) {
-        return ApiResponse.<Integer>builder()
-                .result(inventoryService.getInventory(productId))
+    @GetMapping("/get/{productId}")
+    public int getInventory(@PathVariable("productId") Long productId) {
+        return inventoryService.getInventory(productId);
+    }
+
+    @PostMapping("/checkToCart")
+    public ApiResponse<Boolean> checkInventoryToCart(@RequestBody GetQuantityRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .result(inventoryService.checkInventory(request))
                 .build();
     }
 

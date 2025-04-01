@@ -25,6 +25,7 @@ public class SecurityConfig {
                 apiPrefix + "/user-address/**",
                 apiPrefix + "/products/**",
                 apiPrefix + "/categories/**",
+                apiPrefix + "/cart/initialize/**",
         };
 
         http

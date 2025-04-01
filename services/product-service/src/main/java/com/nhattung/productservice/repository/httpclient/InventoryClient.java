@@ -17,4 +17,7 @@ public interface InventoryClient {
     @DeleteMapping(value = "/inventory/delete/{productId}",produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteInventory(@PathVariable("productId") Long productId);
 
+    @GetMapping(value = "/inventory/get/{productId}",produces = MediaType.APPLICATION_JSON_VALUE)
+    int getInventory(@PathVariable("productId") Long productId);
+
 }

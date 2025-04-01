@@ -37,8 +37,8 @@ public class CartItemController {
                 .build();
     }
 
-    @PostMapping("/remove")
-    public ApiResponse<Void> removeItemFromCart(@RequestBody Long productId) {
+    @PostMapping("/remove/{productId}")
+    public ApiResponse<Void> removeItemFromCart(@PathVariable("productId") Long productId) {
         cartItemService.removeItemFromCart(productId);
         return ApiResponse.<Void>builder()
                 .message("Item removed from cart successfully")

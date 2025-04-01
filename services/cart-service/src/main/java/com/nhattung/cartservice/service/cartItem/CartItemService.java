@@ -1,5 +1,6 @@
 package com.nhattung.cartservice.service.cartItem;
 
+import com.nhattung.cartservice.dto.CartDto;
 import com.nhattung.cartservice.dto.CartItemDto;
 import com.nhattung.cartservice.dto.ProductDto;
 import com.nhattung.cartservice.entity.Cart;
@@ -17,7 +18,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,10 +38,20 @@ public class CartItemService implements ICartItemService{
         //4. If yes, update the quantity
         //5. If no, add the product to the cart
 
+
+
         Cart cart = cartService.getCart();
-        ProductDto product = productClient.getProductById(request.getProductId());
+
+        if(cart.getItems().size() >= 20) {
+            throw new AppException(ErrorCode.CART_ITEM_LIMIT);
+        }
+        ProductDto product = productClient.getProductById(request.getProductId()).getResult();
         if (product == null) {
             throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        if(product.getQuantity() < request.getQuantity()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_ENOUGH);
         }
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(request.getProductId()))
@@ -53,6 +63,9 @@ public class CartItemService implements ICartItemService{
             cartItem.setUnitPrice(product.getSellingPrice());
             cartItem.setQuantity(request.getQuantity());
         }else {
+            if(cartItem.getQuantity() + request.getQuantity() > product.getQuantity()) {
+                throw new AppException(ErrorCode.PRODUCT_NOT_ENOUGH);
+            }
             cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
         }
 
@@ -79,7 +92,7 @@ public class CartItemService implements ICartItemService{
                 .findFirst()
                 .ifPresent(cartItem -> {
                     cartItem.setQuantity(request.getQuantity());
-                    cartItem.setUnitPrice(productClient.getProductById(request.getProductId()).getSellingPrice());
+                    cartItem.setUnitPrice(productClient.getProductById(request.getProductId()).getResult().getSellingPrice());
                     cartItem.setTotalPrice();
                     cartItemRepository.save(cartItem);
                 });
@@ -117,8 +130,15 @@ public class CartItemService implements ICartItemService{
     @Override
     public CartItemDto convertToDto(CartItem cartItem) {
         CartItemDto cartItemDto = modelMapper.map(cartItem, CartItemDto.class);
-        ProductDto productDto = productClient.getProductById(cartItem.getProductId());
+        ProductDto productDto = productClient.getProductById(cartItem.getProductId()).getResult();
         cartItemDto.setProduct(productDto);
         return cartItemDto;
+    }
+
+    @Override
+    public CartDto convertToDto(Cart cart) {
+        CartDto cartDto = modelMapper.map(cart, CartDto.class);
+        cartDto.setItems(getConvertedCartItems(cart.getItems()));
+        return cartDto;
     }
 }

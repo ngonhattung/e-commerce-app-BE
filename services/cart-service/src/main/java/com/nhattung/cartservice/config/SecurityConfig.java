@@ -19,6 +19,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
+            "/cart/initialize/**",
     };
 
     @Bean
