@@ -18,12 +18,12 @@ public class CartController {
     private final CartService cartService;
     private final CartItemService cartItemService;
     @GetMapping("/get")
-    public ApiResponse<CartDto> getCart() {
-        Cart cart = cartService.getCart();
-        CartDto cartDto = cartItemService.convertToDto(cart);
-        return ApiResponse.<CartDto>builder()
+    public ApiResponse<Cart> getCart() {
+//        Cart cart = cartService.getCart();
+//        CartDto cartDto = cartItemService.convertToDto(cart);
+        return ApiResponse.<Cart>builder()
                 .message("Cart retrieved successfully")
-                .result(cartDto)
+                .result(cartService.getCart())
                 .build();
     }
 

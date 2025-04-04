@@ -6,6 +6,7 @@ import com.nhattung.cartservice.entity.CartItem;
 import com.nhattung.cartservice.request.AddItemToCartRequest;
 import com.nhattung.cartservice.request.UpdateItemQuantityRequest;
 import com.nhattung.cartservice.response.ApiResponse;
+import com.nhattung.cartservice.response.PageResponse;
 import com.nhattung.cartservice.service.cartItem.CartItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -47,12 +48,13 @@ public class CartItemController {
 
 
     @GetMapping("/getAll")
-    public ApiResponse<Set<CartItemDto>> getCartItems() {
-        Set<CartItem> cartItems = cartItemService.getCartItems();
-        Set<CartItemDto> cartItemDtos = cartItemService.getConvertedCartItems(cartItems);
-        return ApiResponse.<Set<CartItemDto>>builder()
+    public ApiResponse<PageResponse<CartItemDto>> getCartItems(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ApiResponse.<PageResponse<CartItemDto>>builder()
                 .message("Cart item retrieved successfully")
-                .result(cartItemDtos)
+                .result(cartItemService.getPagedCartItems(page, size))
                 .build();
     }
 

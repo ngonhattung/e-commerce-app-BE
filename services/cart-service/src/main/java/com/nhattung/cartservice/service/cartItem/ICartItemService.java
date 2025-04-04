@@ -6,6 +6,8 @@ import com.nhattung.cartservice.entity.Cart;
 import com.nhattung.cartservice.entity.CartItem;
 import com.nhattung.cartservice.request.AddItemToCartRequest;
 import com.nhattung.cartservice.request.UpdateItemQuantityRequest;
+import com.nhattung.cartservice.response.PageResponse;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Set;
@@ -16,8 +18,9 @@ public interface ICartItemService {
     void updateItemQuantity(UpdateItemQuantityRequest request);
     CartItem getCartItem(Long productId);
     Set<CartItem> getCartItems();
-    Set<CartItemDto> getConvertedCartItems(Set<CartItem> cartItems);
+    PageResponse<CartItemDto> getPagedCartItems(int page, int size);
+    Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems);
     CartItemDto convertToDto(CartItem cartItem);
-    CartDto convertToDto(Cart cart);
+//    CartDto convertToDto(Cart cart);
 
 }

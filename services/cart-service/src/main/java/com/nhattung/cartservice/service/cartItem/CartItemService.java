@@ -12,12 +12,18 @@ import com.nhattung.cartservice.repository.CartRepository;
 import com.nhattung.cartservice.repository.httpclient.ProductClient;
 import com.nhattung.cartservice.request.AddItemToCartRequest;
 import com.nhattung.cartservice.request.UpdateItemQuantityRequest;
+import com.nhattung.cartservice.response.PageResponse;
 import com.nhattung.cartservice.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -121,7 +127,28 @@ public class CartItemService implements ICartItemService{
     }
 
     @Override
-    public Set<CartItemDto> getConvertedCartItems(Set<CartItem> cartItems) {
+    public PageResponse<CartItemDto> getPagedCartItems(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+        Cart cart = cartService.getCart();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Page<CartItem> cartItemsPage = cartItemRepository.findAllByCartId(cart.getId(), pageable);
+
+        Set<CartItemDto> cartItemDtos = getConvertedCartItems(cartItemsPage.getContent());
+
+        return PageResponse.<CartItemDto>builder()
+                .currentPage(page)
+                .totalPages(cartItemsPage.getTotalPages())
+                .totalElements(cartItemsPage.getTotalElements())
+                .pageSize(cartItemsPage.getSize())
+                .data(cartItemDtos)
+                .build();
+    }
+
+    @Override
+    public Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems) {
         return cartItems.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toSet());
@@ -135,10 +162,10 @@ public class CartItemService implements ICartItemService{
         return cartItemDto;
     }
 
-    @Override
-    public CartDto convertToDto(Cart cart) {
-        CartDto cartDto = modelMapper.map(cart, CartDto.class);
-        cartDto.setItems(getConvertedCartItems(cart.getItems()));
-        return cartDto;
-    }
+//    @Override
+//    public CartDto convertToDto(Cart cart) {
+//        CartDto cartDto = modelMapper.map(cart, CartDto.class);
+//        cartDto.setItems(getConvertedCartItems(cart.getItems()));
+//        return cartDto;
+//    }
 }

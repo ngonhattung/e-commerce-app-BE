@@ -3,8 +3,11 @@ package com.nhattung.cartservice.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Setter
 @Getter
@@ -21,6 +24,11 @@ public class CartItem {
     private BigDecimal unitPrice;
     private BigDecimal totalPrice;
     private Long productId;
+
+    @CreationTimestamp
+    private Timestamp createdAt;
+    @UpdateTimestamp
+    private Timestamp updatedAt;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
