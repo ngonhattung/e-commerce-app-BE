@@ -43,6 +43,12 @@ spring:
             - Path=${app.apiPrefix}/cart/**, ${app.apiPrefix}/cartItems/**
           filters:
             - StripPrefix=2
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=${app.apiPrefix}/orders/**
+          filters:
+            - StripPrefix=2
 
   security:
     oauth2:
