@@ -14,12 +14,17 @@ import com.nhattung.productservice.repository.httpclient.InventoryClient;
 import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.InventoryRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
+import com.nhattung.productservice.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,7 +49,7 @@ public class ProductService implements IProductService {
 
 
     @CachePut(value = "products", key = "#request.name")
-    @CacheEvict(value = "products", key = "'allProducts'")
+//    @CacheEvict(value = "products", key = "'allProducts'")
     @Override
     public Product saveProduct(CreateProductRequest request) {
         if (isProductExisted(request.getName(), request.getBrand())) {
@@ -117,7 +122,7 @@ public class ProductService implements IProductService {
 
     @Caching(evict = {
             @CacheEvict(value = "products", key = "#id"),
-            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)
+//            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)
     })
     @Override
     public void deleteProduct(Long id) {
@@ -129,10 +134,31 @@ public class ProductService implements IProductService {
     }
 
 
-    @Cacheable(value = "products", key = "'allProducts'")
+
     @Override
     public List<Product> getAllProducts() {
         return productRepository.findAll();
+    }
+
+//    @Cacheable(value = "products", key = "'allProducts'")
+    @Override
+    public PageResponse<ProductDto> getPagedProducts(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+
+        Page<Product> productPage = productRepository.findAll(pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
     }
 
     @Override
@@ -141,8 +167,48 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    public PageResponse<ProductDto> getPagedProductsByCategory(String category, int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+
+        Page<Product> productPage = productRepository.findByCategoryName(category, pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
+    }
+
+    @Override
     public List<Product> getProductsByBrand(String brand) {
         return productRepository.findByBrand(brand);
+    }
+
+    @Override
+    public PageResponse<ProductDto> getPagedProductsByBrand(String brand, int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+
+        Page<Product> productPage = productRepository.findByBrand(brand, pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
     }
 
     @Override
@@ -151,13 +217,70 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    public PageResponse<ProductDto> getPagedProductsByCategoryAndBrand(
+            String category, String brand, int page, int size) {
+
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Page<Product> productPage = productRepository.findByCategoryNameAndBrand(category, brand, pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
+
+    }
+
+    @Override
     public List<Product> getProductsByName(String name) {
         return productRepository.findByName(name);
     }
 
     @Override
+    public PageResponse<ProductDto> getPagedProductsByName(String name, int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Page<Product> productPage = productRepository.findByName(name, pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
+    }
+
+    @Override
     public List<Product> getProductsByBrandAndName(String brand, String name) {
         return productRepository.findByBrandAndName(brand, name);
+    }
+
+    @Override
+    public PageResponse<ProductDto> getPagedProductsByBrandAndName(String brand, String name, int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Page<Product> productPage = productRepository.findByBrandAndName(brand, name, pageable);
+        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
     }
 
     @Override

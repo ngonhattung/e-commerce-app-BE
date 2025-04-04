@@ -48,6 +48,7 @@ public enum ErrorCode {
     INVALID_COST_PRICE(1039, "Cost price must be greater than 0", HttpStatus.BAD_REQUEST),
     EMPTY_SELLING_PRICE(1040, "Selling price cannot be empty", HttpStatus.BAD_REQUEST),
     INVALID_SELLING_PRICE(1041, "Selling price must be greater than 0", HttpStatus.BAD_REQUEST),
+    INVALID_PAGE_SIZE(1042, "Page size must be greater than 0", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

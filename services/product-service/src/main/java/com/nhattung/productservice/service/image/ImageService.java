@@ -15,10 +15,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +23,7 @@ public class ImageService implements IImageService {
 
     private final ImageRepository imageRepository;
     private final S3Client s3Client;
-
+    private final UUID uuid;
     @Value("${aws.s3.bucketName}")
     private String bucketName;
 
@@ -52,7 +49,7 @@ public class ImageService implements IImageService {
     public void saveImages(List<MultipartFile> files, Product product) {
 
         for (MultipartFile file : files) {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = uuid.toString() + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
             String fileType = file.getContentType();
             String fileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + fileName;
 
@@ -108,7 +105,7 @@ public class ImageService implements IImageService {
 
                 // Upload ảnh mới lên S3
                 try {
-                    String newFileName = System.currentTimeMillis() + "_" + newFile.getOriginalFilename();
+                    String newFileName = uuid.toString() + "_" + System.currentTimeMillis() + "_" + newFile.getOriginalFilename();
                     String newFileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + newFileName;
                     String fileType = newFile.getContentType();
                     s3Client.putObject(

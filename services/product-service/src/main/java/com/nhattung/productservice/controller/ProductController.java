@@ -6,6 +6,7 @@ import com.nhattung.productservice.repository.httpclient.InventoryClient;
 import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import com.nhattung.productservice.response.ApiResponse;
+import com.nhattung.productservice.response.PageResponse;
 import com.nhattung.productservice.service.category.ICategoryService;
 import com.nhattung.productservice.service.image.IImageService;
 import com.nhattung.productservice.service.product.IProductService;
@@ -60,22 +61,25 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<List<ProductDto>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
-        return ApiResponse.<List<ProductDto>>builder()
+    public ApiResponse<PageResponse<ProductDto>> getAllProducts(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getPagedProducts(page, size))
                 .build();
     }
 
-    @GetMapping("/category/{categoryName}")
-    public ApiResponse<List<ProductDto>> getProductsByCategory(@PathVariable String categoryName) {
-        List<Product> products = productService.getProductsByCategory(categoryName);
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
-        return ApiResponse.<List<ProductDto>>builder()
+    @GetMapping("/category")
+    public ApiResponse<PageResponse<ProductDto>> getProductsByCategory(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "categoryName") String categoryName
+    ) {
+        return ApiResponse.<PageResponse<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getPagedProductsByCategory(categoryName, page, size))
                 .build();
     }
 
@@ -107,45 +111,51 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("/brand/{brand}")
-    public ApiResponse<List<ProductDto>> getProductsByBrand(@PathVariable String brand) {
-        List<Product> products = productService.getProductsByBrand(brand);
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
-        return ApiResponse.<List<ProductDto>>builder()
+    @GetMapping("/brand")
+    public ApiResponse<PageResponse<ProductDto>> getProductsByBrand(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "brandName") String brand
+    ) {
+        return ApiResponse.<PageResponse<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getPagedProductsByBrand(brand, page, size))
                 .build();
     }
 
-    @GetMapping("/category/{category}/brand/{brand}")
-    public ApiResponse<List<ProductDto>> getProductsByCategoryAndBrand(@PathVariable String category,
-                                                                       @PathVariable String brand) {
-        List<Product> products = productService.getProductsByCategoryAndBrand(category, brand);
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
-        return ApiResponse.<List<ProductDto>>builder()
+    @GetMapping("/category/brand")
+    public ApiResponse<PageResponse<ProductDto>> getProductsByCategoryAndBrand(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "categoryName") String categoryName,
+            @RequestParam(value = "brandName") String brand
+    ) {
+        return ApiResponse.<PageResponse<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getPagedProductsByCategoryAndBrand(categoryName, brand, page, size))
                 .build();
     }
 
-    @GetMapping("/name/{name}")
-    public ApiResponse<List<ProductDto>> getProductsByName(@PathVariable String name) {
-        List<Product> products = productService.getProductsByName(name);
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+    @GetMapping("/name")
+    public ApiResponse<List<ProductDto>> getProductsByName(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "name") String name) {
         return ApiResponse.<List<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getConvertedProducts(productService.getProductsByName(name)))
                 .build();
     }
 
-    @GetMapping("/brand/{brand}/name/{name}")
-    public ApiResponse<List<ProductDto>> getProductsByBrandAndName(@PathVariable String brand,
-                                                                   @PathVariable String name) {
-        List<Product> products = productService.getProductsByBrandAndName(brand, name);
-        List<ProductDto> productDtos = productService.getConvertedProducts(products);
+    @GetMapping("/brand/name")
+    public ApiResponse<List<ProductDto>> getProductsByBrandAndName(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "brandName") String brand,
+            @RequestParam(value = "name") String name) {
         return ApiResponse.<List<ProductDto>>builder()
                 .message("Products retrieved successfully")
-                .result(productDtos)
+                .result(productService.getConvertedProducts(productService.getProductsByBrandAndName(brand, name)))
                 .build();
     }
 
