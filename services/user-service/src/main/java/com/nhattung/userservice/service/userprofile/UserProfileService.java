@@ -11,6 +11,7 @@ import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.repository.httpclient.CartClient;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
+import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.utils.RandomUtil;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,10 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -119,6 +124,28 @@ public class UserProfileService implements IUserProfileService {
     @Override
     public List<UserProfile> getAllUserProfiles() {
         return userProfileRepository.findAll();
+    }
+
+    @Override
+    public PageResponse<UserProfileDto> getPagedUserProfiles(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page-1,size, sort);
+
+        Page<UserProfile> userProfilePage = userProfileRepository.findAll(pageable);
+        List<UserProfileDto> userProfileDtos = convertToDto(userProfilePage.getContent());
+
+        return PageResponse.<UserProfileDto>builder()
+                .currentPage(page)
+                .totalPages(userProfilePage.getTotalPages())
+                .totalElements(userProfilePage.getTotalElements())
+                .pageSize(userProfilePage.getSize())
+                .data(userProfileDtos)
+                .build();
+
     }
 
     @Override

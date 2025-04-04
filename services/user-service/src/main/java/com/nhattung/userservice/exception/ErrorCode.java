@@ -31,6 +31,7 @@ public enum ErrorCode {
     EMPTY_AVATAR(1021, "Avatar cannot be empty", HttpStatus.BAD_REQUEST),
     INVALID_AVATAR(1022, "Avatar must be a valid URL", HttpStatus.BAD_REQUEST),
     INVALID_BIRTHDAY(1023, "Birthday must be in the past", HttpStatus.BAD_REQUEST),
+    INVALID_PAGE_SIZE(1024, "Page size must be between 1 and 100", HttpStatus.BAD_REQUEST),
 
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

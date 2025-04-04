@@ -5,6 +5,7 @@ import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.AppException;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
+import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,14 +38,13 @@ public class UserProfileController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profiles")
-    public ApiResponse<List<UserProfileDto>> getAllUserProfiles() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        List<UserProfile> userProfiles = userProfileService.getAllUserProfiles();
-        List<UserProfileDto> userProfileDtos = userProfileService.convertToDto(userProfiles);
-
-        return ApiResponse.<List<UserProfileDto>>builder()
+    public ApiResponse<PageResponse<UserProfileDto>> getAllUserProfiles(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ApiResponse.<PageResponse<UserProfileDto>>builder()
                 .message("User profiles fetched successfully")
-                .result(userProfileDtos)
+                .result(userProfileService.getPagedUserProfiles(page, size))
                 .build();
     }
 
