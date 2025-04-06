@@ -26,6 +26,7 @@ public class CartService implements ICartService{
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final AuthenticatedUser authenticatedUser;
+    private final ModelMapper modelMapper;
     @Override
     public Cart getCart() {
         Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
@@ -66,6 +67,11 @@ public class CartService implements ICartService{
                     cart.setUserId(userId);
                     return cartRepository.save(cart);
                 });
+    }
+
+    @Override
+    public CartDto convertToDto(Cart cart) {
+        return modelMapper.map(cart, CartDto.class);
     }
 
 

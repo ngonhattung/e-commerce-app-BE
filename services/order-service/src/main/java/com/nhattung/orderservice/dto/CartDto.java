@@ -1,6 +1,5 @@
-package com.nhattung.cartservice.dto;
+package com.nhattung.orderservice.dto;
 
-import com.nhattung.cartservice.entity.CartItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

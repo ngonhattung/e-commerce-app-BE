@@ -1,21 +1,19 @@
 package com.nhattung.cartservice.dto;
 
-import com.nhattung.cartservice.entity.CartItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartDto {
+public class ItemInCartDto {
     private Long id;
-    private BigDecimal totalAmount;
-    private String userId;
-    private Set<ItemInCartDto> items;
+    private int quantity;
+    private BigDecimal unitPrice;
+    private BigDecimal totalPrice;
+    private String productId;
 }
