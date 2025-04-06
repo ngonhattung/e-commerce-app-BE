@@ -49,6 +49,12 @@ spring:
             - Path=${app.apiPrefix}/orders/**
           filters:
             - StripPrefix=2
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+              - Path=${app.apiPrefix}/payment/**
+          filters:
+              - StripPrefix=2
 
   security:
     oauth2:
