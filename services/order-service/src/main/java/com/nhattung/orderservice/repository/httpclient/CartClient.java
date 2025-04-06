@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.GetMapping;
         configuration = {AuthRequestInterceptor.class})
 public interface CartClient {
     @GetMapping(value = "/cart/get",produces = MediaType.APPLICATION_JSON_VALUE)
-    CartDto getCart();
+    ApiResponse<CartDto> getCart();
 }

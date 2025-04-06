@@ -1,9 +1,7 @@
 package com.nhattung.orderservice.service;
 
 
-import com.nhattung.orderservice.dto.CartDto;
-import com.nhattung.orderservice.dto.ItemInCartDto;
-import com.nhattung.orderservice.dto.OrderDto;
+import com.nhattung.orderservice.dto.*;
 import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.entity.OrderItem;
 import com.nhattung.orderservice.enums.OrderStatus;
@@ -32,7 +30,7 @@ public class OrderService implements IOrderService{
     private final ModelMapper modelMapper;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
-        CartDto cart = cartClient.getCart();
+        CartDto cart = cartClient.getCart().getResult();
         var cartItems = cart.getItems()
                 .stream()
                 .filter(cartItem -> request.getSelectedCartItemIds().contains(cartItem.getId()))
@@ -48,6 +46,7 @@ public class OrderService implements IOrderService{
         return orderRepository.save(order);
     }
 
+
     private Order createOrder() {
         return Order.builder()
                 .userId(authenticatedUser.getUserId())
@@ -57,12 +56,12 @@ public class OrderService implements IOrderService{
                 .build();
     }
 
-    private List<OrderItem> createOrderItems(Order order, List<ItemInCartDto> selectedItems) {
+    private List<OrderItem> createOrderItems(Order order, List<CartItemDto> selectedItems) {
         return selectedItems
                 .stream()
                 .map(item -> OrderItem.builder()
                         .order(order)
-                        .productId(item.getProductId())
+                        .productId(item.getProduct().getId())
                         .quantity(item.getQuantity())
                         .price(item.getUnitPrice())
                         .build())
@@ -91,6 +90,28 @@ public class OrderService implements IOrderService{
     }
     @Override
     public OrderDto convertToDto(Order order) {
-        return modelMapper.map(order, OrderDto.class);
+        OrderDto orderDto =  modelMapper.map(order, OrderDto.class);
+        orderDto.setItems(convertToOrderItemDtoList(order));
+        return orderDto;
+    }
+
+    private OrderItemDto convertToOrderItemDto(OrderItem orderItem) {
+        OrderItemDto orderItemDto = modelMapper.map(orderItem, OrderItemDto.class);
+        ProductDto productDto = cartClient.getCart()
+                .getResult()
+                .getItems()
+                .stream()
+                .map(CartItemDto::getProduct)
+                .filter(product -> product.getId().equals(orderItem.getProductId()))
+                .findFirst()
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        orderItemDto.setProduct(productDto);
+        return orderItemDto;
+    }
+    private List<OrderItemDto> convertToOrderItemDtoList(Order order) {
+        return order.getOrderItems()
+                .stream()
+                .map(this::convertToOrderItemDto)
+                .toList();
     }
 }

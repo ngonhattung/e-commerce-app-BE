@@ -16,5 +16,5 @@ public class CartDto {
     private Long id;
     private BigDecimal totalAmount;
     private String userId;
-    private Set<ItemInCartDto> items;
+    private Set<CartItemDto> items;
 }

@@ -1,4 +1,4 @@
-package com.nhattung.cartservice.dto;
+package com.nhattung.orderservice.dto;
 
 
 import lombok.AllArgsConstructor;

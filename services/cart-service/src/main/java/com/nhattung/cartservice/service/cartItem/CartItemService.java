@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -162,10 +163,10 @@ public class CartItemService implements ICartItemService{
         return cartItemDto;
     }
 
-//    @Override
-//    public CartDto convertToDto(Cart cart) {
-//        CartDto cartDto = modelMapper.map(cart, CartDto.class);
-//        cartDto.setItems(getConvertedCartItems(cart.getItems()));
-//        return cartDto;
-//    }
+    @Override
+    public CartDto convertToDto(Cart cart) {
+        CartDto cartDto = modelMapper.map(cart, CartDto.class);
+        cartDto.setItems(getConvertedCartItems(new ArrayList<>(cart.getItems())));
+        return cartDto;
+    }
 }

@@ -2,11 +2,14 @@ package com.nhattung.cartservice.service.cart;
 
 
 import com.nhattung.cartservice.dto.CartDto;
+import com.nhattung.cartservice.dto.CartItemDto;
+import com.nhattung.cartservice.dto.ProductDto;
 import com.nhattung.cartservice.entity.Cart;
 import com.nhattung.cartservice.exception.AppException;
 import com.nhattung.cartservice.exception.ErrorCode;
 import com.nhattung.cartservice.repository.CartItemRepository;
 import com.nhattung.cartservice.repository.CartRepository;
+import com.nhattung.cartservice.repository.httpclient.ProductClient;
 import com.nhattung.cartservice.service.cartItem.CartItemService;
 import com.nhattung.cartservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class CartService implements ICartService{
     private final CartItemRepository cartItemRepository;
     private final AuthenticatedUser authenticatedUser;
     private final ModelMapper modelMapper;
+    private final ProductClient productClient;
     @Override
     public Cart getCart() {
         Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
@@ -69,10 +73,11 @@ public class CartService implements ICartService{
                 });
     }
 
-    @Override
-    public CartDto convertToDto(Cart cart) {
-        return modelMapper.map(cart, CartDto.class);
-    }
+//    @Override
+//    public CartDto convertToDto(Cart cart) {
+//        CartDto cartDto = modelMapper.map(cart, CartDto.class);
+//        ProductDto productDto = productClient.getProductById(cartDto.get).getResult();
+//    }
 
 
 }

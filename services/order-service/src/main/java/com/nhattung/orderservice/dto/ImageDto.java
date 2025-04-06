@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
-@Builder
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class OrderItemDto {
+@AllArgsConstructor
+@Builder
+public class ImageDto {
     private Long id;
-    private int quantity;
-    private BigDecimal price;
-    private ProductDto product;
+    private String fileName;
+    private String fileType;
+    private String fileUri;
 }

@@ -11,5 +11,5 @@ public interface ICartService {
     void clearCart();
     BigDecimal getTotalAmount();
     void initializeCart(String userId);
-    CartDto convertToDto(Cart cart);
+    //CartDto convertToDto(Cart cart);
 }

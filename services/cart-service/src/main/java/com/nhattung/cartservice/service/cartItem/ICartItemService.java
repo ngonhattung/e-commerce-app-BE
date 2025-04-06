@@ -21,6 +21,6 @@ public interface ICartItemService {
     PageResponse<CartItemDto> getPagedCartItems(int page, int size);
     Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems);
     CartItemDto convertToDto(CartItem cartItem);
-//    CartDto convertToDto(Cart cart);
+    CartDto convertToDto(Cart cart);
 
 }
