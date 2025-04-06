@@ -22,3 +22,14 @@ spring:
 
 server:
   port: 8097
+
+
+momo:
+  partner-code: MOMOBKUN20180529
+  redirect-url: http://localhost:8097/api/v1/payment/notify
+  end-point: https://test-payment.momo.vn/v2/gateway/api
+  ipn-url: http://localhost:8097/api/v1/payment/ipn-handler
+  access-key: klm05TvNBzhg7h7j
+  secret-key: at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa
+  request-type: captureWallet
+
