@@ -2,6 +2,7 @@ package com.nhattung.orderservice.controller;
 
 import com.nhattung.orderservice.dto.OrderDto;
 import com.nhattung.orderservice.entity.Order;
+import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.response.ApiResponse;
 import com.nhattung.orderservice.service.IOrderService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,8 @@ public class OrderController {
     private final IOrderService orderService;
 
     @PostMapping("/place-order")
-    public ApiResponse<Order> placeOrder(@RequestBody List<Long> selectedCartItemIds) {
-        Order order = orderService.placeOrder(selectedCartItemIds);
+    public ApiResponse<Order> placeOrder(@RequestBody SelectedCartItemRequest request) {
+        Order order = orderService.placeOrder(request);
         return ApiResponse.<Order>builder()
                 .message("Order placed successfully")
                 .result(order)

@@ -11,6 +11,7 @@ import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.repository.httpclient.CartClient;
+import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -30,11 +31,11 @@ public class OrderService implements IOrderService{
     private final CartClient cartClient;
     private final ModelMapper modelMapper;
     @Override
-    public Order placeOrder(List<Long> selectedCartItemIds) {
+    public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart();
         var cartItems = cart.getItems()
                 .stream()
-                .filter(cartItem -> selectedCartItemIds.contains(cartItem.getId()))
+                .filter(cartItem -> request.getSelectedCartItemIds().contains(cartItem.getId()))
                 .toList();
         if(cartItems.isEmpty()){
             throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
