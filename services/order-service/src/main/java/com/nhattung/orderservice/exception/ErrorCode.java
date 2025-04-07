@@ -54,6 +54,7 @@ public enum ErrorCode {
     CART_ITEM_LIMIT(1045, "Cart item limit is 20", HttpStatus.BAD_REQUEST),
     INVALID_PAGE_SIZE(1046, "Page size must be between 1 and 100", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(1047, "Order not found", HttpStatus.NOT_FOUND),
+    PROMOTION_MINIMUM_ORDER_VALUE_NOT_MET(1048, "Promotion minimum order value not met", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

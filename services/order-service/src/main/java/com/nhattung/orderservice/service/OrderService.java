@@ -9,6 +9,7 @@ import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.repository.httpclient.CartClient;
+import com.nhattung.orderservice.repository.httpclient.PromotionClient;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +17,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class OrderService implements IOrderService{
     private final OrderRepository orderRepository;
     private final AuthenticatedUser authenticatedUser;
     private final CartClient cartClient;
+    private final PromotionClient promotionClient;
     private final ModelMapper modelMapper;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
@@ -39,11 +43,27 @@ public class OrderService implements IOrderService{
             throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
         Order order = createOrder();
+        PromotionDto promotion = promotionClient.getActivePromotionByCode(request.getCouponCode()).getResult();
+        order.setPromotionId(promotion.getId());
+        BigDecimal totalAmount = calculateTotalAmount(createOrderItems(order, cartItems));
+        BigDecimal finalAmount = getFinalAmount(promotion, totalAmount);
         List<OrderItem> orderItems = createOrderItems(order, cartItems);
         order.setOrderItems(new HashSet<>(orderItems));
-        order.setTotalAmount(calculateTotalAmount(orderItems));
+        order.setTotalAmount(finalAmount);
 
         return orderRepository.save(order);
+    }
+
+    private BigDecimal getFinalAmount(PromotionDto promotion, BigDecimal totalAmount) {
+        if(promotion.getMinimumOrderValue().compareTo(totalAmount) > 0) {
+            throw new AppException(ErrorCode.PROMOTION_MINIMUM_ORDER_VALUE_NOT_MET);
+        }
+        BigDecimal percentDiscount = totalAmount
+                    .multiply(promotion.getDiscountPercent())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal totalAmountWithPromotion = promotion.getDiscountAmount().max(percentDiscount);
+
+        return totalAmount.subtract(totalAmountWithPromotion);
     }
 
 
@@ -52,7 +72,6 @@ public class OrderService implements IOrderService{
                 .userId(authenticatedUser.getUserId())
                 .orderStatus(OrderStatus.ORDER_CREATED)
                 .orderDate(LocalDate.now())
-                .promotionId(1L)
                 .build();
     }
 

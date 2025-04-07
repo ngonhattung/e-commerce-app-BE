@@ -51,6 +51,7 @@ public enum ErrorCode {
     INVALID_PAGE_SIZE(1042, "Page size must be greater than 0", HttpStatus.BAD_REQUEST),
     PROMOTION_ALREADY_EXISTS(1043, "Promotion already exists", HttpStatus.BAD_REQUEST),
     PROMOTION_NOT_FOUND(1044, "Promotion not found", HttpStatus.NOT_FOUND),
+    PROMOTION_NOT_ACTIVE(1045, "Promotion not active", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

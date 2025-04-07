@@ -12,8 +12,10 @@ public interface IPromotionService {
     Promotion savePromotion(CreatePromotionRequest request);
     Promotion getPromotion(Long promotionId);
     Promotion getPromotionByCouponCode(String couponCode);
+    Promotion getPromotionActiveByCouponCode(String couponCode);
     Promotion updatePromotion(Long promotionId, UpdatePromotionRequest request);
     List<Promotion> getAllPromotions();
+    List<Promotion> getAllActivePromotions();
     void deletePromotion(Long promotionId);
     PromotionDto convertToDto(Promotion promotion);
     List<PromotionDto> convertToDto(List<Promotion> promotions);

@@ -13,4 +13,6 @@ import java.util.List;
 @Builder
 public class SelectedCartItemRequest {
     private List<Long> selectedCartItemIds;
+    @Builder.Default
+    private String couponCode = "DEFAULT";
 }

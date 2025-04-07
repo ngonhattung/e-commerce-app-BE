@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -59,9 +60,26 @@ public class PromotionService implements IPromotionService{
     }
 
     @Override
+    public Promotion getPromotionActiveByCouponCode(String couponCode) {
+        Promotion promotion = promotionRepository.findByCouponCode(couponCode)
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+        if (!promotion.getIsActive()) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
+        }
+        if(promotion.getStartDate() != null && promotion.getStartDate().isAfter(Instant.now())) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
+        }
+        if(promotion.getEndDate() != null && promotion.getEndDate().isBefore(Instant.now())) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
+        }
+        return promotion;
+    }
+
+    @Override
     public Promotion updatePromotion(Long promotionId, UpdatePromotionRequest request) {
         return promotionRepository.findById(promotionId)
                 .map(existingPromotion -> updateExistingPromotion(existingPromotion, request))
+                .map(promotionRepository::save)
                 .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
     }
 
@@ -81,6 +99,11 @@ public class PromotionService implements IPromotionService{
     @Override
     public List<Promotion> getAllPromotions() {
         return promotionRepository.findAll();
+    }
+
+    @Override
+    public List<Promotion> getAllActivePromotions() {
+        return List.of();
     }
 
     @Override

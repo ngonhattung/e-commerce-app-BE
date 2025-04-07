@@ -28,7 +28,7 @@ public class PromotionController {
                 .build();
     }
 
-    @PostMapping("/update/{promotionId}")
+    @PutMapping("/update/{promotionId}")
     public ApiResponse<PromotionDto> updatePromotion(
             @PathVariable("promotionId") Long promotionId,
             @RequestBody UpdatePromotionRequest request) {
@@ -56,6 +56,16 @@ public class PromotionController {
         PromotionDto promotionDto = promotionService.convertToDto(promotion);
         return ApiResponse.<PromotionDto>builder()
                 .message("Get promotion successfully")
+                .result(promotionDto)
+                .build();
+    }
+
+    @GetMapping("/active/{promotionCode}")
+    public ApiResponse<PromotionDto> getActivePromotionByCode(@PathVariable("promotionCode") String promotionCode) {
+        Promotion promotion = promotionService.getPromotionActiveByCouponCode(promotionCode);
+        PromotionDto promotionDto = promotionService.convertToDto(promotion);
+        return ApiResponse.<PromotionDto>builder()
+                .message("Get active promotion successfully")
                 .result(promotionDto)
                 .build();
     }
