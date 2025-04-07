@@ -26,9 +26,9 @@ public class UserProfileController {
 
     private final IUserProfileService userProfileService;
 
-    @GetMapping("/user/{userId}/profile")
-    public ApiResponse<UserProfileDto> getUserProfile(@PathVariable Long userId) {
-        UserProfile userProfile = userProfileService.getUserProfile(userId);
+    @GetMapping("/user/profile")
+    public ApiResponse<UserProfileDto> getUserProfile() {
+        UserProfile userProfile = userProfileService.getUserProfile();
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
         return ApiResponse.<UserProfileDto>builder()
                 .message("User profile fetched successfully")
@@ -48,10 +48,9 @@ public class UserProfileController {
                 .build();
     }
 
-    @PutMapping("/user/{userId}/update")
-    public ApiResponse<UserProfileDto> updateUserProfile(@PathVariable Long userId,
-                                                         @RequestBody UpdateUserProfileRequest request) {
-        UserProfile userProfile = userProfileService.updateUserProfile(userId, request);
+    @PutMapping("/user/update")
+    public ApiResponse<UserProfileDto> updateUserProfile(@RequestBody UpdateUserProfileRequest request) {
+        UserProfile userProfile = userProfileService.updateUserProfile(request);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
         return ApiResponse.<UserProfileDto>builder()
                 .message("User profile updated successfully")
@@ -60,10 +59,10 @@ public class UserProfileController {
     }
 
 
-    @DeleteMapping("/user/{userId}/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteUserProfile(@PathVariable String userId) {
+    @DeleteMapping("/user/delete")
+    public ResponseEntity<ApiResponse<Void>> deleteUserProfile() {
         try {
-            userProfileService.deleteUser(userId);
+            userProfileService.deleteUser();
             return ResponseEntity.ok(
                     ApiResponse.<Void>builder()
                             .message("User profile deleted successfully")

@@ -10,6 +10,7 @@ import com.nhattung.userservice.repository.AddressRepository;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.request.CreateAddressRequest;
 import com.nhattung.userservice.request.UpdateAddressRequest;
+import com.nhattung.userservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +23,18 @@ public class AddressService implements IAddressService {
     private final AddressRepository addressRepository;
     private final UserProfileRepository userProfileRepository;
     private final ObjectMapper objectMapper;
+    private final AuthenticatedUser authenticatedUser;
     @Override
     public Address saveAddress(CreateAddressRequest request) {
 
-        UserProfile userProfile = userProfileRepository.findById(request.getUserId())
+        UserProfile userProfile = userProfileRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Address address = Address.builder()
                 .city(request.getCity())
                 .district(request.getDistrict())
                 .street(request.getStreet())
-                .user(userProfile)
+                .userId(userProfile.getUserId())
                 .build();
         return addressRepository.save(address);
     }
@@ -54,8 +56,8 @@ public class AddressService implements IAddressService {
     }
 
     @Override
-    public List<Address> getAllAddressByUserId(Long userId) {
-        return addressRepository.findAllByUserId(userId);
+    public List<Address> getAllAddressByUserId() {
+        return addressRepository.findAllByUserId(authenticatedUser.getUserId());
     }
 
     @Override

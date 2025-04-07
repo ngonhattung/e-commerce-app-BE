@@ -10,13 +10,13 @@ import java.util.List;
 
 public interface IUserProfileService {
     UserProfile createUserProfile(CreateUserProfileRequest request);
-    UserProfile getUserProfile(Long userId);
+    UserProfile getUserProfile();
     List<UserProfile> getAllUserProfiles();
     PageResponse<UserProfileDto> getPagedUserProfiles(int page, int size);
-    UserProfile updateUserProfile(Long userId, UpdateUserProfileRequest request);
-    void deleteUser(String userId);
+    UserProfile updateUserProfile(UpdateUserProfileRequest request);
+    void deleteUser();
     UserProfileDto convertToDto(UserProfile userProfile);
     List<UserProfileDto> convertToDto(List<UserProfile> userProfiles);
-    void sendVerificationEmail(String userId);
+    void sendVerificationEmail();
     void forgotPassword(String email);
 }

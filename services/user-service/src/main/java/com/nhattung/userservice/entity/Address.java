@@ -18,9 +18,6 @@ public class Address {
     private String street;
     private String district;
     private String city;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserProfile user;
+    private String userId;
 
 }

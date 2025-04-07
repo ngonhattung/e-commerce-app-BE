@@ -11,7 +11,7 @@ public interface IAddressService {
     Address saveAddress(CreateAddressRequest request);
     Address updateAddress(UpdateAddressRequest request, Long id);
     void deleteAddress(Long id);
-    List<Address> getAllAddressByUserId(Long userId);
+    List<Address> getAllAddressByUserId();
     AddressDto convertToDto(Address address);
     List<AddressDto> convertToDtos(List<Address> addresses);
 

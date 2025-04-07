@@ -12,6 +12,7 @@ import com.nhattung.userservice.repository.httpclient.CartClient;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.PageResponse;
+import com.nhattung.userservice.utils.AuthenticatedUser;
 import com.nhattung.userservice.utils.RandomUtil;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class UserProfileService implements IUserProfileService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ErrorNomalizer errorNomalizer;
     private final CartClient cartClient;
+    private final AuthenticatedUser authenticatedUser;
     @Override
     public UserProfile createUserProfile(CreateUserProfileRequest request) {
             String fullName = request.getFullName().trim();
@@ -116,8 +118,8 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public UserProfile getUserProfile(Long profileId) {
-        return userProfileRepository.findById(profileId)
+    public UserProfile getUserProfile() {
+        return userProfileRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
@@ -149,8 +151,8 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public UserProfile updateUserProfile(Long profileId, UpdateUserProfileRequest request) {
-        return Optional.ofNullable(getUserProfile(profileId))
+    public UserProfile updateUserProfile(UpdateUserProfileRequest request) {
+        return Optional.ofNullable(getUserProfile())
                 .map(userProfile -> {
                     userProfile.setFullName(request.getFullName());
                     userProfile.setPhone(request.getPhone());
@@ -162,7 +164,8 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public void deleteUser(String userId) {
+    public void deleteUser() {
+        String userId = authenticatedUser.getUserId();
         UsersResource usersResource = getUsersResource();
         usersResource.delete(userId);
         userProfileRepository.findByUserId(userId)
@@ -184,9 +187,9 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public void sendVerificationEmail(String userId) {
+    public void sendVerificationEmail() {
         UsersResource usersResource = getUsersResource();
-        usersResource.get(userId).sendVerifyEmail();
+        usersResource.get(authenticatedUser.getUserId()).sendVerifyEmail();
     }
 
     @Override

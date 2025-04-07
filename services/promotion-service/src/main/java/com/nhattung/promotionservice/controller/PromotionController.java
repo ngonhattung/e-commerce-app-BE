@@ -6,6 +6,7 @@ import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
 import com.nhattung.promotionservice.response.ApiResponse;
 import com.nhattung.promotionservice.service.IPromotionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class PromotionController {
     private final IPromotionService promotionService;
 
     @PostMapping("/create")
-    public ApiResponse<PromotionDto> savePromotion(@RequestBody CreatePromotionRequest request) {
+    public ApiResponse<PromotionDto> savePromotion(@Valid @RequestBody CreatePromotionRequest request) {
         Promotion promotion = promotionService.savePromotion(request);
         PromotionDto promotionDto = promotionService.convertToDto(promotion);
         return ApiResponse.<PromotionDto>builder()
@@ -31,7 +32,7 @@ public class PromotionController {
     @PutMapping("/update/{promotionId}")
     public ApiResponse<PromotionDto> updatePromotion(
             @PathVariable("promotionId") Long promotionId,
-            @RequestBody UpdatePromotionRequest request) {
+            @Valid @RequestBody UpdatePromotionRequest request) {
         Promotion promotion = promotionService.updatePromotion(promotionId,request);
         PromotionDto promotionDto = promotionService.convertToDto(promotion);
         return ApiResponse.<PromotionDto>builder()

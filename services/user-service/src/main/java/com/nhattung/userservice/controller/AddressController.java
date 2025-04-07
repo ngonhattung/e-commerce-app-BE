@@ -19,9 +19,9 @@ public class AddressController {
 
     private final IAddressService addressService;
 
-    @GetMapping("/get/{userId}")
-    public ApiResponse<List<AddressDto>> getAddressByUserID(@PathVariable Long userId) {
-        List<Address> address = addressService.getAllAddressByUserId(userId);
+    @GetMapping("/get")
+    public ApiResponse<List<AddressDto>> getAddressByUserID() {
+        List<Address> address = addressService.getAllAddressByUserId();
         List<AddressDto> addressDto = addressService.convertToDtos(address);
         return ApiResponse.<List<AddressDto>>builder()
                 .message("Address found successfully")

@@ -18,5 +18,4 @@ public class CreateAddressRequest {
     @NotBlank(message = "EMPTY_CITY")
     @Size(min = 2, max = 50,message = "INVALID_CITY")
     private String city;
-    private Long userId;
 }

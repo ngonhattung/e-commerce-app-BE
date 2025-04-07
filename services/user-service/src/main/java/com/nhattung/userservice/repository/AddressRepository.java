@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-    List<Address> findAllByUserId(Long userId);
+    List<Address> findAllByUserId(String userId);
 }
