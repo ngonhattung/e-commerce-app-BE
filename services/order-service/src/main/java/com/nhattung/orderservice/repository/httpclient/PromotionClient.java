@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "promotion-service", configuration = {AuthRequestInterceptor.class})
 public interface PromotionClient {
 
-    @GetMapping(value = "/active/{promotionCode}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "promotions/active/{promotionCode}",produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<PromotionDto> getActivePromotionByCode(@PathVariable("promotionCode") String promotionCode);
 }

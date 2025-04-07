@@ -29,6 +29,15 @@
         <module name="user-service" />
         <module name="notification-service" />
       </profile>
+      <profile name="Annotation profile for delivery-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+        </processorPath>
+        <module name="delivery-service" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
@@ -38,6 +47,7 @@
       <module name="cart-service" options="-parameters" />
       <module name="common-dto" options="" />
       <module name="config-service" options="-parameters" />
+      <module name="delivery-service" options="-parameters" />
       <module name="discovery-service" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />

@@ -61,6 +61,12 @@ spring:
             - Path=${app.apiPrefix}/promotions/**
           filters:
             - StripPrefix=2
+        - id: delivery-service
+          uri: lb://delivery-service
+          predicates:
+            - Path=${app.apiPrefix}/delivery/**
+          filters:
+            - StripPrefix=2
 
   security:
     oauth2:
