@@ -55,6 +55,7 @@ public enum ErrorCode {
     INVALID_PAGE_SIZE(1046, "Page size must be between 1 and 100", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(1047, "Order not found", HttpStatus.NOT_FOUND),
     ERROR_HASH(1048, "Error hash", HttpStatus.INTERNAL_SERVER_ERROR),
+    CALLBACK_ERROR(1049, "Callback error", HttpStatus.INTERNAL_SERVER_ERROR),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
