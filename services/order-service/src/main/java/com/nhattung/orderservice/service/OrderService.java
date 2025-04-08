@@ -1,10 +1,13 @@
 package com.nhattung.orderservice.service;
 
 
+import com.nhattung.dto.OrderItemSagaDto;
+import com.nhattung.dto.OrderSagaDto;
+import com.nhattung.enums.OrderStatus;
+import com.nhattung.event.dto.OrderSagaEvent;
 import com.nhattung.orderservice.dto.*;
 import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.entity.OrderItem;
-import com.nhattung.orderservice.enums.OrderStatus;
 import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
@@ -14,6 +17,7 @@ import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,7 +25,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class OrderService implements IOrderService{
     private final CartClient cartClient;
     private final PromotionClient promotionClient;
     private final ModelMapper modelMapper;
+    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart().getResult();
@@ -43,6 +48,7 @@ public class OrderService implements IOrderService{
             throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
         Order order = createOrder();
+        order.setOrderStatus(OrderStatus.ORDER_CREATED);
         PromotionDto promotion = promotionClient.getActivePromotionByCode(request.getCouponCode()).getResult();
         order.setPromotionId(promotion.getId());
         BigDecimal totalAmount = calculateTotalAmount(createOrderItems(order, cartItems));
@@ -51,6 +57,28 @@ public class OrderService implements IOrderService{
         order.setOrderItems(new HashSet<>(orderItems));
         order.setTotalAmount(finalAmount);
 
+        OrderSagaDto orderSagaDto = OrderSagaDto.builder()
+                .orderId(order.getId())
+                .userId(authenticatedUser.getUserId())
+                .totalPrice(finalAmount)
+                .shippingAddress(request.getShippingAddress())
+                .orderItems(orderItems
+                        .stream()
+                        .map(item -> OrderItemSagaDto.builder()
+                                .orderItemId(item.getId())
+                                .productId(item.getProductId())
+                                .quantity(item.getQuantity())
+                                .price(item.getPrice())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
+
+        OrderSagaEvent orderSagaEvent = OrderSagaEvent.builder()
+                .order(orderSagaDto)
+                .orderStatus(OrderStatus.ORDER_CREATED)
+                .message("Order created")
+                .build();
+        kafkaTemplate.send("order-created-topic", orderSagaEvent);
         return orderRepository.save(order);
     }
 
@@ -70,7 +98,6 @@ public class OrderService implements IOrderService{
     private Order createOrder() {
         return Order.builder()
                 .userId(authenticatedUser.getUserId())
-                .orderStatus(OrderStatus.ORDER_CREATED)
                 .orderDate(LocalDate.now())
                 .build();
     }

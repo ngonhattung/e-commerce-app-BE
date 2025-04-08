@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21\bin"/>
-    <property name="sun.java.command" value="C:\Users\NHAT TUNG\AppData\Local\Temp\surefire8002668179368458299\surefirebooter-20250408095923122_3.jar C:\Users\NHAT TUNG\AppData\Local\Temp\surefire8002668179368458299 2025-04-08T09-59-23_005-jvmRun1 surefire-20250408095923122_1tmp surefire_0-20250408095923122_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\NHAT TUNG\AppData\Local\Temp\surefire9043205685802836052\surefirebooter-20250408101222121_3.jar C:\Users\NHAT TUNG\AppData\Local\Temp\surefire9043205685802836052 2025-04-08T10-12-22_025-jvmRun1 surefire-20250408101222121_1tmp surefire_0-20250408101222121_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\target\test-classes;D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\target\classes;C:\Users\NHAT TUNG\.m2\repository\junit\junit\3.8.1\junit-3.8.1.jar;C:\Users\NHAT TUNG\.m2\repository\org\projectlombok\lombok\1.18.36\lombok-1.18.36.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\NHAT TUNG\AppData\Local\Temp\surefire8002668179368458299\surefirebooter-20250408095923122_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\NHAT TUNG\AppData\Local\Temp\surefire9043205685802836052\surefirebooter-20250408101222121_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.3+7-LTS-152"/>

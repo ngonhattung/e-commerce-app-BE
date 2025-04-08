@@ -1,6 +1,6 @@
 D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\App.java
-D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\dto\Order.java
-D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\dto\OrderItem.java
+D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\dto\OrderItemSagaDto.java
+D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\dto\OrderSagaDto.java
 D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\enums\OrderStatus.java
 D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\event\dto\NotificationEvent.java
 D:\Code TH JAVA\KTPM\e-commerce-app-be\services\common-dto\src\main\java\com\nhattung\event\dto\OrderSagaEvent.java

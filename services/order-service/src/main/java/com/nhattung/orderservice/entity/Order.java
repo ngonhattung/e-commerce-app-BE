@@ -1,6 +1,6 @@
 package com.nhattung.orderservice.entity;
 
-import com.nhattung.orderservice.enums.OrderStatus;
+import com.nhattung.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
