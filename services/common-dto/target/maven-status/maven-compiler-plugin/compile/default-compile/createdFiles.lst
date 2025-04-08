@@ -1,3 +1,10 @@
-com\nhattung\event\dto\NotificationEvent$NotificationEventBuilder.class
+com\nhattung\enums\OrderStatus.class
 com\nhattung\App.class
 com\nhattung\event\dto\NotificationEvent.class
+com\nhattung\dto\Order.class
+com\nhattung\event\dto\OrderSagaEvent$OrderSagaEventBuilder.class
+com\nhattung\dto\OrderItem$OrderItemBuilder.class
+com\nhattung\dto\OrderItem.class
+com\nhattung\event\dto\NotificationEvent$NotificationEventBuilder.class
+com\nhattung\event\dto\OrderSagaEvent.class
+com\nhattung\dto\Order$OrderBuilder.class
