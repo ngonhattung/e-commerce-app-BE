@@ -56,6 +56,7 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(1047, "Order not found", HttpStatus.NOT_FOUND),
     ERROR_HASH(1048, "Error hash", HttpStatus.INTERNAL_SERVER_ERROR),
     CALLBACK_ERROR(1049, "Callback error", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_NOT_FOUND(1050, "Payment not found", HttpStatus.NOT_FOUND),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

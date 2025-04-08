@@ -1,14 +1,13 @@
 package com.nhattung.paymentservice.controller;
 
 import com.nhattung.paymentservice.request.MoMoCallbackRequest;
+import com.nhattung.paymentservice.request.PaymentRequest;
 import com.nhattung.paymentservice.response.ApiResponse;
 import com.nhattung.paymentservice.response.MoMoPaymentResponse;
-import com.nhattung.paymentservice.service.MomoService;
+import com.nhattung.paymentservice.service.momo.MomoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,15 +18,18 @@ public class PaymentController {
     private final MomoService momoService;
 
     @PostMapping("/create-momo-payment")
-    public MoMoPaymentResponse createMomoPayment() {
-        return momoService.createPayment();
+    public ApiResponse<MoMoPaymentResponse> createMomoPayment(@RequestBody PaymentRequest request) {
+        return ApiResponse.<MoMoPaymentResponse>builder()
+                .message("Payment created successfully with Order ID: " + request.getOrderId())
+                .result(momoService.createPayment(request))
+                .build();
     }
 
     @PostMapping("/refund")
-    public ApiResponse<MoMoPaymentResponse> refundPayment() {
+    public ApiResponse<MoMoPaymentResponse> refundPayment(@RequestBody PaymentRequest request) {
         return ApiResponse.<MoMoPaymentResponse>builder()
                 .message("Refund request sent successfully")
-                .result(momoService.refundPayment())
+                .result(momoService.refundPayment(request))
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.nhattung.paymentservice.service;
+package com.nhattung.paymentservice.service.momo;
 
 import com.nhattung.paymentservice.exception.AppException;
 import com.nhattung.paymentservice.exception.ErrorCode;
@@ -6,6 +6,7 @@ import com.nhattung.paymentservice.repository.httpclient.MomoClient;
 import com.nhattung.paymentservice.request.MoMoCallbackRequest;
 import com.nhattung.paymentservice.request.MoMoPaymentRequest;
 import com.nhattung.paymentservice.request.MoMoRefundRequest;
+import com.nhattung.paymentservice.request.PaymentRequest;
 import com.nhattung.paymentservice.response.MoMoPaymentResponse;
 import com.nhattung.paymentservice.utils.MoMoSignatureUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -38,13 +38,13 @@ public class MomoService {
     private final MomoClient momoClient;
     private final MoMoSignatureUtil moMoSignatureUtil;
 
-    public MoMoPaymentResponse createPayment(){
+    public MoMoPaymentResponse createPayment(PaymentRequest request){
 
-        String orderId = UUID.randomUUID().toString();
+        Long orderId = request.getOrderId();
         String requestId = UUID.randomUUID().toString();
-        long amount = 100000; // Amount in VND
+        BigDecimal amount = request.getTotalAmount();
         String orderInfo = "Payment for order " + orderId;
-        String extraData = "Khong co khuyen mai"; // Optional extra data
+        String extraData = ""; // Optional extra data
         String lang = "vi"; // Language for the payment page
         String rawSignature = String.format(
                 "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
@@ -77,14 +77,14 @@ public class MomoService {
         return momoClient.createPayment(momoRequest);
     }
 
-    public MoMoPaymentResponse refundPayment()
+    public MoMoPaymentResponse refundPayment(PaymentRequest request)
     {
-        String orderId = UUID.randomUUID().toString();
+        Long orderId =  request.getOrderId();
         String requestId = UUID.randomUUID().toString();
-        long amount = 100000; // Amount in VND
-        String lang = "vi"; // Language for the payment page
+        BigDecimal amount = request.getTotalAmount();
+        String lang = "vi";
 
-        String rawSignature = String.format("accessKey=%s&amount=%d&orderId=%s&partnerCode=%s&requestId=%s",
+        String rawSignature = String.format("accessKey=%s&amount=%s&orderId=%s&partnerCode=%s&requestId=%s",
                 ACCESS_KEY, amount, orderId, PARTNER_CODE, requestId);
 
         log.info("Raw signature: " + rawSignature);
@@ -111,7 +111,8 @@ public class MomoService {
         return momoClient.refundPayment(refundRequest);
     }
 
-    public boolean processPaymentResponse(MoMoCallbackRequest request) {
+    public boolean isPaymentSuccess;
+    public void processPaymentResponse(MoMoCallbackRequest request) {
         String newAccessKey = request.getAccessKey();
         if(request.getAccessKey() == null || request.getAccessKey().isEmpty()) {
             newAccessKey = ACCESS_KEY;
@@ -141,13 +142,12 @@ public class MomoService {
             }
 
             if(!request.getSignature().equals(signature))
-                return false;
+                isPaymentSuccess = false;
 
-            log.info("Signature verified successfully " + request.getResultCode());
-            return request.getResultCode() == 0;
+            isPaymentSuccess = request.getResultCode() == 0;
         }catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            log.error("Error processing payment response: {}", e.getMessage());
+            isPaymentSuccess = false;
         }
 
     }

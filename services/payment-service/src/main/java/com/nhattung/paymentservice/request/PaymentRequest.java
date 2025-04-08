@@ -11,13 +11,8 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoMoRefundRequest {
-    private String partnerCode;
+public class PaymentRequest {
     private Long orderId;
-    private String requestId;
-    private BigDecimal amount;
-    private String accessKey;
-    private String lang;
-    private String description;
-    private String signature;
+    private String userId;
+    private BigDecimal totalAmount;
 }

@@ -21,7 +21,7 @@ public class OrderController {
     public ApiResponse<Order> placeOrder(@RequestBody SelectedCartItemRequest request) {
         Order order = orderService.placeOrder(request);
         return ApiResponse.<Order>builder()
-                .message("Order placed successfully")
+                .message("Order created successfully with ID: " + order.getId())
                 .result(order)
                 .build();
     }

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,8 +15,8 @@ public class MoMoPaymentRequest {
     private String partnerCode;
     private String requestType;
     private String ipnUrl;
-    private String orderId;
-    private Long amount;
+    private Long orderId;
+    private BigDecimal amount;
     private String orderInfo;
     private String requestId;
     private String redirectUrl;
