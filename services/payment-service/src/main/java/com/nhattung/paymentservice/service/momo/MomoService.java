@@ -147,14 +147,11 @@ public class MomoService {
                 throw new AppException(ErrorCode.ERROR_HASH);
             }
 
-            if (!request.getSignature().equals(signature))
-                throw new AppException(ErrorCode.SIGNATURE_NOT_MATCHED);
-
             OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
             paymentSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
 
             Payment payment = paymentService.getPaymentByOrderId(request.getOrderId());
-            if (request.getResultCode() == 0) {
+            if (request.getResultCode() == 0 && request.getSignature().equals(signature)) {
                 log.info("Payment successful: {}", request);
                 payment.setPaymentStatus(OrderStatus.PAYMENT_COMPLETED);
                 paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_COMPLETED);
