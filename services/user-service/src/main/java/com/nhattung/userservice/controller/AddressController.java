@@ -30,7 +30,7 @@ public class AddressController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<AddressDto> addAddress(@RequestBody @Valid CreateAddressRequest request) {
+    public ApiResponse<AddressDto> addAddress(@Valid @RequestBody CreateAddressRequest request) {
         Address address = addressService.saveAddress(request);
         AddressDto addressDto = addressService.convertToDto(address);
         return ApiResponse.<AddressDto>builder()

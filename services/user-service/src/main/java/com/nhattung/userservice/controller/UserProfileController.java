@@ -7,13 +7,16 @@ import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,9 +51,12 @@ public class UserProfileController {
                 .build();
     }
 
-    @PutMapping("/user/update")
-    public ApiResponse<UserProfileDto> updateUserProfile(@RequestBody UpdateUserProfileRequest request) {
-        UserProfile userProfile = userProfileService.updateUserProfile(request);
+    @PutMapping(value = "/user/update",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<UserProfileDto> updateUserProfile(
+            @Valid @ModelAttribute UpdateUserProfileRequest request,
+            @RequestParam(value = "avatar", required = false) MultipartFile avatar
+    ) {
+        UserProfile userProfile = userProfileService.updateUserProfile(request,avatar);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
         return ApiResponse.<UserProfileDto>builder()
                 .message("User profile updated successfully")

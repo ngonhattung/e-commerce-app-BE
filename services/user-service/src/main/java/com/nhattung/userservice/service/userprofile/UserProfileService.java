@@ -14,6 +14,7 @@ import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.utils.AuthenticatedUser;
 import com.nhattung.userservice.utils.RandomUtil;
+import com.nhattung.userservice.utils.UploadToS3;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,11 +31,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,8 +49,9 @@ public class UserProfileService implements IUserProfileService {
     private final ErrorNomalizer errorNomalizer;
     private final CartClient cartClient;
     private final AuthenticatedUser authenticatedUser;
+    private final UploadToS3 uploadToS3;
     @Override
-    public UserProfile createUserProfile(CreateUserProfileRequest request) {
+    public UserProfile createUserProfile(CreateUserProfileRequest request,MultipartFile avatar) {
             String fullName = request.getFullName().trim();
             String[] nameParts = fullName.split(" ");
             UserRepresentation userRepresentation = new UserRepresentation();
@@ -85,13 +85,17 @@ public class UserProfileService implements IUserProfileService {
 
 
             //sendVerificationEmail(user.getId());
-
+            //Upload avatar to S3
+            String avatarUrl = "";
+            if (avatar != null && !avatar.isEmpty()) {
+                 avatarUrl = uploadToS3.uploadAvatarToS3(avatar);
+            }
             UserProfile userProfile = UserProfile.builder()
                     .fullName(request.getFullName())
                     .email(request.getEmail())
                     .phone(request.getPhone())
                     .gender(request.isGender())
-                    .avatar(request.getAvatar())
+                    .avatar(avatarUrl)
                     .dateOfBirth(request.getDateOfBirth())
                     .userId(user.getId())
                     .build();
@@ -151,13 +155,19 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public UserProfile updateUserProfile(UpdateUserProfileRequest request) {
+    public UserProfile updateUserProfile(UpdateUserProfileRequest request,MultipartFile avatar) {
+        String avatarUrl;
+        if (avatar != null && !avatar.isEmpty()) {
+            avatarUrl = uploadToS3.uploadAvatarToS3(avatar);
+        } else {
+            avatarUrl = "";
+        }
         return Optional.ofNullable(getUserProfile())
                 .map(userProfile -> {
                     userProfile.setFullName(request.getFullName());
                     userProfile.setPhone(request.getPhone());
                     userProfile.setGender(request.isGender());
-                    userProfile.setAvatar(request.getAvatar());
+                    userProfile.setAvatar(avatarUrl);
                     userProfile.setDateOfBirth(request.getDateOfBirth());
                     return userProfileRepository.save(userProfile);
                 }).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -204,6 +214,8 @@ public class UserProfileService implements IUserProfileService {
 
         return keycloak.realm(REALM).users();
     }
+
+
 
     public String formWelcomeEmailContent(){
         return "<!DOCTYPE html>\n" +

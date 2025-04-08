@@ -35,7 +35,4 @@ public class UserProfile {
     @UpdateTimestamp
     private Timestamp updatedAt;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Address> addresses = new ArrayList<>();
 }

@@ -25,10 +25,6 @@ public class CreateUserProfileRequest {
     @Pattern(regexp = "^[0-9]{10,15}$", message = "INVALID_PHONE")
     private String phone;
 
-    @NotBlank(message = "EMPTY_AVATAR")
-    //@Pattern(regexp = "^(http|https)://.*$", message = "INVALID_AVATAR")
-    private String avatar;
-
     @Past(message = "INVALID_BIRTHDAY")
     private LocalDate dateOfBirth;
 

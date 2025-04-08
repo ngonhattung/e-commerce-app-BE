@@ -29,6 +29,12 @@ spring:
   cache:
     type: redis
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+
 
 server:
   port: 8091
@@ -45,6 +51,12 @@ idp:
     username: admin
     password: admin
 
+aws:
+  s3:
+    bucketName: springboot-ms-product-bucket
+  region: ap-southeast-1
+  accessKey: AKIAYDWHTGML7NBSMHOB
+  secretKey: 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
 ##openfeign
 #feign:
 #  client:

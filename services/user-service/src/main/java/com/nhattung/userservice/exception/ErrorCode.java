@@ -32,6 +32,9 @@ public enum ErrorCode {
     INVALID_AVATAR(1022, "Avatar must be a valid URL", HttpStatus.BAD_REQUEST),
     INVALID_BIRTHDAY(1023, "Birthday must be in the past", HttpStatus.BAD_REQUEST),
     INVALID_PAGE_SIZE(1024, "Page size must be between 1 and 100", HttpStatus.BAD_REQUEST),
+    FILE_SIZE_TOO_LARGE(1025, "File size too large", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(1026, "Invalid file type", HttpStatus.BAD_REQUEST),
+    UPLOAD_IMAGE_ERROR(1027, "Upload image error", HttpStatus.INTERNAL_SERVER_ERROR),
 
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

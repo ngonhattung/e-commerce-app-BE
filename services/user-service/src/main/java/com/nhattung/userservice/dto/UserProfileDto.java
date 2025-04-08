@@ -12,6 +12,7 @@ public class UserProfileDto {
     private String fullName;
     private String phone;
     private String avatar;
+    private String email;
     private LocalDate dateOfBirth;
     private boolean gender;
 

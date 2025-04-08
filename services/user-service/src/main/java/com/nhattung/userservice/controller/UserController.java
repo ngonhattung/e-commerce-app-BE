@@ -5,10 +5,11 @@ import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.service.userprofile.IUserProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,9 +17,12 @@ public class UserController {
 
     private final IUserProfileService userProfileService;
 
-    @PostMapping("/registration")
-    public ApiResponse<UserProfileDto> createUserProfile(@RequestBody CreateUserProfileRequest request) {
-        UserProfile userProfile = userProfileService.createUserProfile(request);
+    @PostMapping(value = "/registration",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<UserProfileDto> createUserProfile(
+            @Valid @ModelAttribute CreateUserProfileRequest request,
+            @RequestParam(value = "avatar", required = false) MultipartFile avatar
+    ) {
+        UserProfile userProfile = userProfileService.createUserProfile(request,avatar);
         UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
         return ApiResponse.<UserProfileDto>builder()
                 .message("User created successfully")

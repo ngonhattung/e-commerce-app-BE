@@ -22,9 +22,14 @@ public class SecurityConfig {
                 apiPrefix + "/auth/**",
                 apiPrefix + "/notification/**",
                 apiPrefix + "/otp/**",
-                apiPrefix + "/user-address/**",
-                apiPrefix + "/products/**",
-                apiPrefix + "/categories/**",
+                apiPrefix +  "/products/product/**",
+                apiPrefix +  "/products/all",
+                apiPrefix +  "/products/category/**",
+                apiPrefix +  "/products/brand/**",
+                apiPrefix +  "/products/name/**",
+                apiPrefix +  "/categories/category/**",
+                apiPrefix +  "/categories/name/**",
+                apiPrefix +  "/categories/all",
                 apiPrefix + "/cart/initialize/**",
         };
 
