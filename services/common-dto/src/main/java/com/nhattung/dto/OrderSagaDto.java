@@ -18,4 +18,8 @@ public class OrderSagaDto {
     private BigDecimal totalPrice;
     private String shippingAddress;
     private Set<OrderItemSagaDto> orderItems;
+
+    public OrderSagaDto(Long orderId) {
+        this.orderId = orderId;
+    }
 }

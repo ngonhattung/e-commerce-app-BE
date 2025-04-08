@@ -14,7 +14,7 @@ public class MoMoCallbackRequest {
     private String accessKey;
     private String requestId;
     private Long amount;
-    private String orderId;
+    private Long orderId;
     private String orderInfo;
     private String orderType;
     private Long transId;

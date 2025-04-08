@@ -1,5 +1,9 @@
 package com.nhattung.paymentservice.service.momo;
 
+import com.nhattung.dto.OrderSagaDto;
+import com.nhattung.enums.OrderStatus;
+import com.nhattung.event.dto.OrderSagaEvent;
+import com.nhattung.paymentservice.entity.Payment;
 import com.nhattung.paymentservice.exception.AppException;
 import com.nhattung.paymentservice.exception.ErrorCode;
 import com.nhattung.paymentservice.repository.httpclient.MomoClient;
@@ -8,10 +12,13 @@ import com.nhattung.paymentservice.request.MoMoPaymentRequest;
 import com.nhattung.paymentservice.request.MoMoRefundRequest;
 import com.nhattung.paymentservice.request.PaymentRequest;
 import com.nhattung.paymentservice.response.MoMoPaymentResponse;
+import com.nhattung.paymentservice.service.payment.IPaymentService;
+import com.nhattung.paymentservice.service.payment.PaymentService;
 import com.nhattung.paymentservice.utils.MoMoSignatureUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,8 +44,9 @@ public class MomoService {
 
     private final MomoClient momoClient;
     private final MoMoSignatureUtil moMoSignatureUtil;
-
-    public MoMoPaymentResponse createPayment(PaymentRequest request){
+    private final IPaymentService paymentService;
+    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    public MoMoPaymentResponse createPayment(PaymentRequest request) {
 
         Long orderId = request.getOrderId();
         String requestId = UUID.randomUUID().toString();
@@ -57,7 +65,7 @@ public class MomoService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.ERROR_HASH);
         }
-        if(signature.isEmpty()) {
+        if (signature.isEmpty()) {
             throw new AppException(ErrorCode.ERROR_HASH);
         }
         MoMoPaymentRequest momoRequest = MoMoPaymentRequest.builder()
@@ -77,9 +85,8 @@ public class MomoService {
         return momoClient.createPayment(momoRequest);
     }
 
-    public MoMoPaymentResponse refundPayment(PaymentRequest request)
-    {
-        Long orderId =  request.getOrderId();
+    public MoMoPaymentResponse refundPayment(PaymentRequest request) {
+        Long orderId = request.getOrderId();
         String requestId = UUID.randomUUID().toString();
         BigDecimal amount = request.getTotalAmount();
         String lang = "vi";
@@ -95,7 +102,7 @@ public class MomoService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.ERROR_HASH);
         }
-        if(signature.isEmpty()) {
+        if (signature.isEmpty()) {
             throw new AppException(ErrorCode.ERROR_HASH);
         }
         MoMoRefundRequest refundRequest = MoMoRefundRequest.builder()
@@ -111,10 +118,9 @@ public class MomoService {
         return momoClient.refundPayment(refundRequest);
     }
 
-    public boolean isPaymentSuccess;
     public void processPaymentResponse(MoMoCallbackRequest request) {
         String newAccessKey = request.getAccessKey();
-        if(request.getAccessKey() == null || request.getAccessKey().isEmpty()) {
+        if (request.getAccessKey() == null || request.getAccessKey().isEmpty()) {
             newAccessKey = ACCESS_KEY;
         }
         try {
@@ -137,17 +143,39 @@ public class MomoService {
             } catch (Exception e) {
                 throw new AppException(ErrorCode.ERROR_HASH);
             }
-            if(signature.isEmpty()) {
+            if (signature.isEmpty()) {
                 throw new AppException(ErrorCode.ERROR_HASH);
             }
 
-            if(!request.getSignature().equals(signature))
-                isPaymentSuccess = false;
+            if (!request.getSignature().equals(signature))
+                throw new AppException(ErrorCode.SIGNATURE_NOT_MATCHED);
 
-            isPaymentSuccess = request.getResultCode() == 0;
-        }catch (Exception e) {
+            OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
+            paymentSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
+
+            Payment payment = paymentService.getPaymentByOrderId(request.getOrderId());
+            if (request.getResultCode() == 0) {
+                log.info("Payment successful: {}", request);
+                payment.setPaymentStatus(OrderStatus.PAYMENT_COMPLETED);
+                paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_COMPLETED);
+                paymentSagaEvent.setMessage("Payment completed successfully");
+                paymentService.savePayment(payment);
+            } else {
+                log.info("Payment failed: {}", request);
+                payment.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
+                paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_FAILED);
+                paymentSagaEvent.setMessage("Payment failed");
+                paymentService.savePayment(payment);
+            }
+
+            // Send payment saga event to Kafka
+            kafkaTemplate.send("payment-response-topic", paymentSagaEvent);
+
+
+        } catch (Exception e) {
             log.error("Error processing payment response: {}", e.getMessage());
-            isPaymentSuccess = false;
+            throw new AppException(ErrorCode.ERROR_HASH);
+
         }
 
     }

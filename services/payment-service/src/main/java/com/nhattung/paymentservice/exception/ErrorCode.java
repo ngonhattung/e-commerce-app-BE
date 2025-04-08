@@ -57,6 +57,7 @@ public enum ErrorCode {
     ERROR_HASH(1048, "Error hash", HttpStatus.INTERNAL_SERVER_ERROR),
     CALLBACK_ERROR(1049, "Callback error", HttpStatus.INTERNAL_SERVER_ERROR),
     PAYMENT_NOT_FOUND(1050, "Payment not found", HttpStatus.NOT_FOUND),
+    SIGNATURE_NOT_MATCHED(1051, "Signature not matched", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

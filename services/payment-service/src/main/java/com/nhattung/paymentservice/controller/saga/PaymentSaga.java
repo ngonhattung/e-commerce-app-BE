@@ -18,9 +18,6 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentSaga {
-
-    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
-    private final MomoService momoService;
     private final IPaymentService paymentService;
 
     @KafkaListener(topics = "order-created-topic")
@@ -34,19 +31,6 @@ public class PaymentSaga {
                 .paymentStatus(OrderStatus.PAYMENT_PROCESSING)
                 .orderId(orderSagaEvent.getOrder().getOrderId())
                 .build();
-        OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
-        paymentSagaEvent.setOrder(orderSagaEvent.getOrder());
-        if (momoService.isPaymentSuccess) {
-            payment.setPaymentStatus(OrderStatus.PAYMENT_COMPLETED);
-            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_COMPLETED);
-            paymentSagaEvent.setMessage("Payment completed successfully");
-        } else {
-            payment.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
-            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_FAILED);
-            paymentSagaEvent.setMessage("Payment failed");
-        }
         paymentService.savePayment(payment);
-        kafkaTemplate.send("payment-response-topic", paymentSagaEvent);
-        log.info("Sent payment saga event: {}", paymentSagaEvent);
     }
 }
