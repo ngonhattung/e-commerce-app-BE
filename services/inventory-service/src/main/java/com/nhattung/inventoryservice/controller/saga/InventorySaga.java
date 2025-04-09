@@ -12,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class InventorySaga {
 
     private final IInventoryService inventoryService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    private final Map<String, List<InventoryService.InventoryCompensation>> compensationMap = new ConcurrentHashMap<>();
     @KafkaListener(topics = "order-created-topic")
     public void handleInventoryChecking(OrderSagaEvent orderSagaEvent) {
 
@@ -60,6 +62,7 @@ public class InventorySaga {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
         if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_PROCESSING) {
             // Xử lý subtract quantity
+            String orderId = orderSagaEvent.getOrder().getOrderId();
             var orderItems = orderSagaEvent.getOrder().getOrderItems();
             List<InventoryService.InventoryCompensation> compensations = new ArrayList<>();
             boolean allSuccess = true;
@@ -80,6 +83,8 @@ public class InventorySaga {
             }
 
             if (allSuccess) {
+                // Lưu danh sách thao tác để dùng khi cần rollback (trường hợp cancel)
+                compensationMap.put(orderId, compensations);
                 orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_COMPLETED);
                 orderSagaEvent.setMessage("Inventory processing completed");
             } else {
@@ -92,6 +97,20 @@ public class InventorySaga {
             }
             kafkaTemplate.send("inventory-response-topic", orderSagaEvent);
 
+        }
+    }
+
+    @KafkaListener(topics = "inventory-revert-topic")
+    public void handleInventoryRevert(OrderSagaEvent orderSagaEvent) {
+        log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
+        if (orderSagaEvent.getOrderStatus() == OrderStatus.ORDER_CANCELLED) {
+            // Xử lý revert quantity
+            String orderId = orderSagaEvent.getOrder().getOrderId();
+            List<InventoryService.InventoryCompensation> comps = compensationMap.get(orderId);
+            if (comps != null) {
+                comps.forEach(inventoryService::rollbackInventory);
+                compensationMap.remove(orderId); // Dọn dữ liệu
+            }
         }
     }
 }

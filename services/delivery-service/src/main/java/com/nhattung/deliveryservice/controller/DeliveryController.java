@@ -59,13 +59,12 @@ public class DeliveryController {
         if (OrderStatus.DELIVERY_COMPLETED.name().equals(request.getStatus())) {
             orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_COMPLETED);
             orderSagaEvent.setMessage("Delivery completed");
-            kafkaTemplate.send("delivery-completed-topic", orderSagaEvent);
         } else if (OrderStatus.DELIVERY_FAILED.name().equals(request.getStatus())) {
             orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_FAILED);
             orderSagaEvent.setMessage("Delivery failed");
-            kafkaTemplate.send("delivery-failed-topic", orderSagaEvent);
 
         }
+        kafkaTemplate.send("delivery-response-topic", orderSagaEvent);
 
         return ApiResponse.<Delivery>builder()
                 .message("Update delivery status successfully")

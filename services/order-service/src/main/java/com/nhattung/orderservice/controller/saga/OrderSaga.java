@@ -135,4 +135,32 @@ public class OrderSaga {
             kafkaTemplate.send("payment-refund-topic", orderSagaEvent);
         }
     }
+
+    @KafkaListener(topics = "delivery-response-topic")
+    @Transactional
+    public void handleDeliveryResponse(OrderSagaEvent orderSagaEvent)
+    {
+        log.info("Nhận phản hồi từ Delivery Service: {}", orderSagaEvent);
+
+        Order order = orderRepository.findById(orderSagaEvent.getOrder().getOrderId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(orderSagaEvent.getOrderStatus() == OrderStatus.DELIVERY_COMPLETED)
+        {
+            order.setOrderStatus(OrderStatus.ORDER_COMPLETED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setMessage("Delivery completed");
+            kafkaTemplate.send("order-completed-topic", orderSagaEvent);
+        } else if (orderSagaEvent.getOrderStatus() == OrderStatus.DELIVERY_FAILED) {
+
+            order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setMessage("Delivery failed, cancelling order");
+            log.error("Giao hàng thất bại cho đơn hàng: {}", order.getId());
+            kafkaTemplate.send("payment-refund-topic", orderSagaEvent);
+            kafkaTemplate.send("inventory-revert-topic", orderSagaEvent);
+        }
+    }
 }

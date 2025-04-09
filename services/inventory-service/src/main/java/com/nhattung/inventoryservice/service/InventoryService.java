@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,7 +23,6 @@ public class InventoryService implements IInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final RedisTemplate<String, Integer> redisTemplate;
-
     @Override
     public void updateInventory(InventoryRequest request) {
         inventoryRepository.findByProductId(request.getProductId()).map(inventory -> {
