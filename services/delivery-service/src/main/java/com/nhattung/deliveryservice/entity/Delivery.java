@@ -1,6 +1,7 @@
 package com.nhattung.deliveryservice.entity;
 
-import com.nhattung.deliveryservice.enums.DeliveryStatus;
+import com.nhattung.deliveryservice.enums.DeliveryMethod;
+import com.nhattung.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,13 +23,14 @@ public class Delivery {
     private Long id;
 
     private String shippingAddress;
-    private String shippingMethod;
+    @Enumerated(EnumType.STRING)
+    private DeliveryMethod shippingMethod;
 
     @Enumerated(EnumType.STRING)
-    private DeliveryStatus shippingStatus;
+    private OrderStatus shippingStatus;
 
     private Instant shippingDate;
-    private Long orderId;
+    private String orderId;
 
     @CreationTimestamp
     private Timestamp createdAt;

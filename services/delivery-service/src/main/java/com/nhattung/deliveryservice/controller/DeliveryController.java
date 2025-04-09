@@ -1,9 +1,14 @@
 package com.nhattung.deliveryservice.controller;
 
 import com.nhattung.deliveryservice.entity.Delivery;
+import com.nhattung.deliveryservice.request.UpdateStatusRequest;
 import com.nhattung.deliveryservice.response.ApiResponse;
 import com.nhattung.deliveryservice.service.IDeliveryService;
+import com.nhattung.dto.OrderSagaDto;
+import com.nhattung.enums.OrderStatus;
+import com.nhattung.event.dto.OrderSagaEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +19,7 @@ import java.util.List;
 public class DeliveryController {
 
     private final IDeliveryService deliveryService;
-
+    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     @GetMapping("/get-by-id/{deliveryId}")
     public ApiResponse<Delivery> getDeliveryById(@PathVariable Long deliveryId) {
         Delivery delivery = deliveryService.getDeliveryById(deliveryId);
@@ -41,10 +46,27 @@ public class DeliveryController {
                 .build();
     }
 
-    @PutMapping("/update-status/{deliveryId}/{status}")
-    public ApiResponse<Delivery> updateDeliveryStatus(@PathVariable Long deliveryId,
-                                                      @PathVariable String status) {
-        Delivery delivery = deliveryService.updateDeliveryStatus(deliveryId, status);
+    @PutMapping("/update-status")
+    public ApiResponse<Delivery> updateDeliveryStatus(@RequestBody UpdateStatusRequest request) {
+        if(request.getStatus() == null || request.getStatus().isEmpty()) {
+            return ApiResponse.<Delivery>builder()
+                    .message("Status cannot be null or empty")
+                    .build();
+        }
+        Delivery delivery = deliveryService.updateDeliveryStatus(request);
+        OrderSagaEvent orderSagaEvent = new OrderSagaEvent();
+        orderSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
+        if (OrderStatus.DELIVERY_COMPLETED.name().equals(request.getStatus())) {
+            orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_COMPLETED);
+            orderSagaEvent.setMessage("Delivery completed");
+            kafkaTemplate.send("delivery-completed-topic", orderSagaEvent);
+        } else if (OrderStatus.DELIVERY_FAILED.name().equals(request.getStatus())) {
+            orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_FAILED);
+            orderSagaEvent.setMessage("Delivery failed");
+            kafkaTemplate.send("delivery-failed-topic", orderSagaEvent);
+
+        }
+
         return ApiResponse.<Delivery>builder()
                 .message("Update delivery status successfully")
                 .result(delivery)

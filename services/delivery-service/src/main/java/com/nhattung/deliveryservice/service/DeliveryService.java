@@ -1,10 +1,11 @@
 package com.nhattung.deliveryservice.service;
 
 import com.nhattung.deliveryservice.entity.Delivery;
-import com.nhattung.deliveryservice.enums.DeliveryStatus;
 import com.nhattung.deliveryservice.exception.AppException;
 import com.nhattung.deliveryservice.exception.ErrorCode;
 import com.nhattung.deliveryservice.repository.DeliveryRepository;
+import com.nhattung.deliveryservice.request.UpdateStatusRequest;
+import com.nhattung.enums.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,8 @@ public class DeliveryService implements IDeliveryService{
     private final DeliveryRepository deliveryRepository;
 
     @Override
-    public Delivery createDelivery(Delivery delivery) {
-        return deliveryRepository.save(delivery);
+    public void createDelivery(Delivery delivery) {
+        deliveryRepository.save(delivery);
     }
 
     @Override
@@ -34,10 +35,10 @@ public class DeliveryService implements IDeliveryService{
     }
 
     @Override
-    public Delivery updateDeliveryStatus(Long id, String status) {
-        return deliveryRepository.findById(id)
+    public Delivery updateDeliveryStatus(UpdateStatusRequest request) {
+        return deliveryRepository.findById(request.getDeliveryId())
                 .map(delivery -> {
-                    delivery.setShippingStatus(DeliveryStatus.valueOf(status));
+                    delivery.setShippingStatus(OrderStatus.valueOf(request.getStatus()));
                     return deliveryRepository.save(delivery);
                 })
                 .orElseThrow(() -> new AppException(ErrorCode.DELIVERY_NOT_FOUND));
