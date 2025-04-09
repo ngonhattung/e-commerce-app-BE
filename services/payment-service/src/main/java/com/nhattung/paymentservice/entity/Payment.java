@@ -29,7 +29,7 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private OrderStatus paymentStatus;
 
-    private Long orderId;
+    private String orderId;
 
     @CreationTimestamp
     private Timestamp createdAt;

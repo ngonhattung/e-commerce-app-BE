@@ -16,8 +16,8 @@ public class PaymentService implements IPaymentService{
     private final PaymentRepository paymentRepository;
 
     @Override
-    public Payment savePayment(Payment payment) {
-        return paymentRepository.save(payment);
+    public void savePayment(Payment payment) {
+        paymentRepository.save(payment);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class PaymentService implements IPaymentService{
     }
 
     @Override
-    public Payment getPaymentByOrderId(Long orderId) {
+    public Payment getPaymentByOrderId(String orderId) {
         return paymentRepository.findByOrderId(orderId).orElseThrow(
                 () -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
     }

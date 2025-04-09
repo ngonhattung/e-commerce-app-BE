@@ -9,7 +9,7 @@ import java.util.List;
 public interface IOrderService {
 
     Order placeOrder(SelectedCartItemRequest request);
-    OrderDto getOrder(Long orderId);
+    OrderDto getOrder(String orderId);
     List<OrderDto> getOrdersByUserId();
     OrderDto convertToDto(Order order);
 }

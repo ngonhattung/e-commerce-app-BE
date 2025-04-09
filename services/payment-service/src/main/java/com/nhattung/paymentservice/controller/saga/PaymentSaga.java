@@ -20,7 +20,7 @@ import java.time.LocalDate;
 public class PaymentSaga {
     private final IPaymentService paymentService;
 
-    @KafkaListener(topics = "order-created-topic")
+    @KafkaListener(topics = "payment-processing-topic")
     public void processPayment(OrderSagaEvent orderSagaEvent) {
         log.info("Received order created event: {}", orderSagaEvent);
 

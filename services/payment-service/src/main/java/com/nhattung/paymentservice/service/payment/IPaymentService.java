@@ -5,9 +5,9 @@ import com.nhattung.paymentservice.entity.Payment;
 import java.util.List;
 
 public interface IPaymentService {
-    Payment savePayment(Payment payment);
+    void savePayment(Payment payment);
     Payment getPaymentById(Long id);
-    Payment getPaymentByOrderId(Long orderId);
+    Payment getPaymentByOrderId(String orderId);
     List<Payment> getAllPayments();
 
 }

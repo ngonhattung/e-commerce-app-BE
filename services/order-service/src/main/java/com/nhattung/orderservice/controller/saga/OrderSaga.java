@@ -22,6 +22,37 @@ public class OrderSaga {
 
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+
+
+    @KafkaListener(topics = "inventory-checkingResponse-topic")
+    public void handleInventoryResponse(OrderSagaEvent orderSagaEvent)
+    {
+        log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
+
+        Order order = orderRepository.findById(orderSagaEvent.getOrder().getOrderId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED)
+        {
+            order.setOrderStatus(OrderStatus.INVENTORY_CHECKED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setOrderStatus(OrderStatus.PAYMENT_PROCESSING);
+            orderSagaEvent.setMessage("Inventory checked, processing payment");
+            kafkaTemplate.send("payment-processing-topic", orderSagaEvent);
+        } else if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
+
+            order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setMessage("Inventory check failed, cancelling order");
+            log.error("Kiểm tra hàng tồn kho thất bại cho đơn hàng: {}", order.getId());
+            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
+        }
+    }
+
+
+
     @KafkaListener(topics = "payment-response-topic")
     @Transactional
     public void handlePaymentResponse(OrderSagaEvent orderSagaEvent)
@@ -45,6 +76,7 @@ public class OrderSaga {
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Payment failed, cancelling order");
+            log.error("Thanh toán thất bại cho đơn hàng: {}", order.getId());
             kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
         }
 

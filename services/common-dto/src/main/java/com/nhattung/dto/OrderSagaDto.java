@@ -13,13 +13,13 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class OrderSagaDto {
-    private Long orderId;
+    private String orderId;
     private String userId;
     private BigDecimal totalPrice;
     private String shippingAddress;
     private Set<OrderItemSagaDto> orderItems;
 
-    public OrderSagaDto(Long orderId) {
+    public OrderSagaDto(String orderId) {
         this.orderId = orderId;
     }
 }

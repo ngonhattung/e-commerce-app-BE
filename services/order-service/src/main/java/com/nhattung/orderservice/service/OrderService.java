@@ -25,6 +25,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,6 +98,7 @@ public class OrderService implements IOrderService{
 
     private Order createOrder() {
         return Order.builder()
+                .id(UUID.randomUUID().toString())
                 .userId(authenticatedUser.getUserId())
                 .orderDate(LocalDate.now())
                 .build();
@@ -121,7 +123,7 @@ public class OrderService implements IOrderService{
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     @Override
-    public OrderDto getOrder(Long orderId) {
+    public OrderDto getOrder(String orderId) {
         return orderRepository.findById(orderId)
                 .map(this::convertToDto)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));

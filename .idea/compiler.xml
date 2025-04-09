@@ -21,7 +21,7 @@
         </processorPath>
         <module name="delivery-service" />
       </profile>
-      <profile name="Annotation profile for payment-service" enabled="true">
+      <profile name="Annotation profile for inventory-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -30,8 +30,8 @@
         </processorPath>
         <module name="cart-service" />
         <module name="auth-service" />
-        <module name="payment-service" />
         <module name="inventory-service" />
+        <module name="payment-service" />
         <module name="promotion-service" />
         <module name="api-gateway" />
         <module name="product-service" />

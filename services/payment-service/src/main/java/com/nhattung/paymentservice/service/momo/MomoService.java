@@ -48,15 +48,17 @@ public class MomoService {
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     public MoMoPaymentResponse createPayment(PaymentRequest request) {
 
-        Long orderId = request.getOrderId();
+        String orderId = request.getOrderId();
         String requestId = UUID.randomUUID().toString();
         BigDecimal amount = request.getTotalAmount();
+
+
         String orderInfo = "Payment for order " + orderId;
         String extraData = ""; // Optional extra data
         String lang = "vi"; // Language for the payment page
         String rawSignature = String.format(
                 "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-                ACCESS_KEY, amount, extraData, IPN_URL, orderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
+                ACCESS_KEY, amount.longValue(), extraData, IPN_URL, orderId, orderInfo, PARTNER_CODE, REDIRECT_URL, requestId, REQUEST_TYPE);
 
         log.info("Raw signature: " + rawSignature);
         String signature = "";
@@ -74,7 +76,7 @@ public class MomoService {
                 .ipnUrl(IPN_URL)
                 .redirectUrl(REDIRECT_URL)
                 .orderId(orderId)
-                .amount(amount)
+                .amount(amount.longValue())
                 .orderInfo(orderInfo)
                 .requestId(requestId)
                 .lang(lang)
@@ -86,13 +88,13 @@ public class MomoService {
     }
 
     public MoMoPaymentResponse refundPayment(PaymentRequest request) {
-        Long orderId = request.getOrderId();
+        String orderId = request.getOrderId();
         String requestId = UUID.randomUUID().toString();
         BigDecimal amount = request.getTotalAmount();
         String lang = "vi";
 
         String rawSignature = String.format("accessKey=%s&amount=%s&orderId=%s&partnerCode=%s&requestId=%s",
-                ACCESS_KEY, amount, orderId, PARTNER_CODE, requestId);
+                ACCESS_KEY, amount.longValue(), orderId, PARTNER_CODE, requestId);
 
         log.info("Raw signature: " + rawSignature);
 
@@ -110,7 +112,7 @@ public class MomoService {
                 .accessKey(ACCESS_KEY)
                 .requestId(requestId)
                 .orderId(orderId)
-                .amount(amount)
+                .amount(amount.longValue())
                 .signature(signature)
                 .lang(lang)
                 .build();

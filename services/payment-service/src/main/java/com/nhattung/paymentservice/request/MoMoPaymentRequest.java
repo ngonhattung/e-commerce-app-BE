@@ -15,8 +15,8 @@ public class MoMoPaymentRequest {
     private String partnerCode;
     private String requestType;
     private String ipnUrl;
-    private Long orderId;
-    private BigDecimal amount;
+    private String orderId;
+    private Long amount;
     private String orderInfo;
     private String requestId;
     private String redirectUrl;

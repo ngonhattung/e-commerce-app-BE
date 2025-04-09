@@ -27,7 +27,7 @@ public class OrderController {
     }
 
     @GetMapping("/order/{orderId}")
-    public ApiResponse<OrderDto> getOrder(@PathVariable("orderId") Long orderId) {
+    public ApiResponse<OrderDto> getOrder(@PathVariable("orderId") String orderId) {
         OrderDto order = orderService.getOrder(orderId);
         return ApiResponse.<OrderDto>builder()
                 .message("Order retrieved successfully")

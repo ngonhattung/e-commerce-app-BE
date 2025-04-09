@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class MoMoRefundRequest {
     private String partnerCode;
-    private Long orderId;
+    private String orderId;
     private String requestId;
-    private BigDecimal amount;
+    private Long amount;
     private String accessKey;
     private String lang;
     private String description;
