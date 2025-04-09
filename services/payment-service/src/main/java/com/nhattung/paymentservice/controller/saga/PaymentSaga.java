@@ -33,4 +33,13 @@ public class PaymentSaga {
                 .build();
         paymentService.savePayment(payment);
     }
+
+    @KafkaListener(topics = "payment-refund-topic")
+    public void processRefund(OrderSagaEvent orderSagaEvent) {
+        log.info("Received order cancellation event: {}", orderSagaEvent);
+
+        Payment payment = paymentService.getPaymentByOrderId(orderSagaEvent.getOrder().getOrderId());
+        payment.setPaymentStatus(OrderStatus.PAYMENT_REFUND_PROCESSING);
+        paymentService.savePayment(payment);
+    }
 }

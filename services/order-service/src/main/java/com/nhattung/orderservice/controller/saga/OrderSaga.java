@@ -80,6 +80,33 @@ public class OrderSaga {
         }
     }
 
+    @KafkaListener(topics = "payment-refundResponse-topic")
+    @Transactional
+    public void handlePaymentRefundResponse(OrderSagaEvent orderSagaEvent)
+    {
+        log.info("Nhận phản hồi từ Payment Service: {}", orderSagaEvent);
+
+        Order order = orderRepository.findById(orderSagaEvent.getOrder().getOrderId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(orderSagaEvent.getOrderStatus() == OrderStatus.PAYMENT_REFUND_COMPLETED)
+        {
+            order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setMessage("Payment refund completed, cancelling order");
+            log.error("Hoàn tiền thất bại cho đơn hàng: {}", order.getId());
+            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
+        }else if (orderSagaEvent.getOrderStatus() == OrderStatus.PAYMENT_REFUND_FAILED) {
+            order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setMessage("Payment refund failed, cancelling order");
+            log.error("Hoàn tiền thất bại cho đơn hàng: {}", order.getId());
+            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
+        }
+    }
+
     @KafkaListener(topics = "inventory-response-topic")
     @Transactional
     public void handleInventoryResponse(OrderSagaEvent orderSagaEvent)
