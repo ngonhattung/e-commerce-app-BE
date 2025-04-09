@@ -4,15 +4,14 @@ import com.nhattung.dto.OrderSagaDto;
 import com.nhattung.enums.OrderStatus;
 import com.nhattung.event.dto.OrderSagaEvent;
 import com.nhattung.inventoryservice.service.IInventoryService;
+import com.nhattung.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class InventorySaga {
     private final IInventoryService inventoryService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     @KafkaListener(topics = "order-created-topic")
-    public void handleInventoryProcessing(OrderSagaEvent orderSagaEvent) {
+    public void handleInventoryChecking(OrderSagaEvent orderSagaEvent) {
 
         log.info("Nhận phản hồi từ Order Service: {}", orderSagaEvent);
 
@@ -31,7 +30,6 @@ public class InventorySaga {
 
         // Gom nhóm số lượng theo productId (nếu có trùng lặp)
         for (var item : orderItems) {
-            inventoryService.reserveProduct(orderSagaEvent.getOrder().getUserId(),item.getProductId(), item.getQuantity());
             productQuantities.merge(item.getProductId(), item.getQuantity(), Integer::sum);
         }
         // Gọi inventory service 1 lần duy nhất cho tất cả sản phẩm
@@ -57,6 +55,43 @@ public class InventorySaga {
         kafkaTemplate.send("inventory-checkingResponse-topic", orderSagaEvent);
     }
 
+    @KafkaListener(topics = "inventory-processing-topic")
+    public void handleInventoryProcessing(OrderSagaEvent orderSagaEvent) {
+        log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
+        if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_PROCESSING) {
+            // Xử lý subtract quantity
+            var orderItems = orderSagaEvent.getOrder().getOrderItems();
+            List<InventoryService.InventoryCompensation> compensations = new ArrayList<>();
+            boolean allSuccess = true;
 
+            for (var item : orderItems) {
+                Optional<InventoryService.InventoryCompensation> result = inventoryService.deductInventoryAfterPayment(
+                        orderSagaEvent.getOrder().getUserId(),
+                        item.getProductId(),
+                        item.getQuantity()
+                );
 
+                if (result.isPresent()) {
+                    compensations.add(result.get());
+                } else {
+                    allSuccess = false;
+                    break;
+                }
+            }
+
+            if (allSuccess) {
+                orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_COMPLETED);
+                orderSagaEvent.setMessage("Inventory processing completed");
+            } else {
+                // ROLLBACK đã trừ
+                for (InventoryService.InventoryCompensation comp : compensations) {
+                    inventoryService.rollbackInventory(comp);
+                }
+                orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_FAILED);
+                orderSagaEvent.setMessage("Inventory processing failed during deduction");
+            }
+            kafkaTemplate.send("inventory-response-topic", orderSagaEvent);
+
+        }
+    }
 }

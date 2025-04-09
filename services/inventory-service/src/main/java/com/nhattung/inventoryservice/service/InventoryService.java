@@ -8,23 +8,23 @@ import com.nhattung.inventoryservice.repository.InventoryRepository;
 import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryService implements IInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final RedisTemplate<String, Integer> redisTemplate;
+
     @Override
     public void updateInventory(InventoryRequest request) {
         inventoryRepository.findByProductId(request.getProductId()).map(inventory -> {
@@ -122,7 +122,47 @@ public class InventoryService implements IInventoryService {
         // Set số lượng giữ hàng với thời gian sống 20 phút
         redisTemplate.opsForValue().set(key, quantity, Duration.ofMinutes(20));
     }
+
+    public record InventoryCompensation(Long productId, int quantityBefore, int quantityDeducted) {}
+    @Override
+    public Optional<InventoryCompensation> deductInventoryAfterPayment(String userId, Long productId, Integer quantity) {
+        String key = buildReserveKey(userId, productId);
+
+        try {
+            Inventory inventory = inventoryRepository.findByProductId(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+
+            if (inventory.getQuantity() < quantity) {
+                return Optional.empty();
+            }
+
+            int quantityBefore = inventory.getQuantity(); // Số lượng trước khi trừ
+            inventory.setQuantity(quantityBefore - quantity);
+            inventoryRepository.save(inventory);
+            redisTemplate.delete(key);
+
+            return Optional.of(new InventoryCompensation(productId, quantityBefore, quantity));
+
+        } catch (Exception e) {
+            log.error("Error deducting inventory for productId {}: {}", productId, e.getMessage());
+            return Optional.empty();
+        }
+
+    }
+    @Override
+    public void rollbackInventory(InventoryCompensation comp) {
+        Inventory inventory = inventoryRepository.findByProductId(comp.productId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+
+        inventory.setQuantity(inventory.getQuantity() + comp.quantityDeducted());
+        inventoryRepository.save(inventory);
+
+        // Optional: nếu cần phục hồi key redis đã xóa
+        String key = buildReserveKey("rollback", comp.productId());
+        redisTemplate.opsForValue().set(key, comp.quantityDeducted(), Duration.ofMinutes(20));
+    }
     private String buildReserveKey(String userId, Long productId) {
         return "reserve:product:" + productId + ":user:" + userId;
     }
+
 }

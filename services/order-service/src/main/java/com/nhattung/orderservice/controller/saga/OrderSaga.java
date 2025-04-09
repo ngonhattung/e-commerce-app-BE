@@ -25,7 +25,8 @@ public class OrderSaga {
 
 
     @KafkaListener(topics = "inventory-checkingResponse-topic")
-    public void handleInventoryResponse(OrderSagaEvent orderSagaEvent)
+    @Transactional
+    public void handleInventoryChecked(OrderSagaEvent orderSagaEvent)
     {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
 
@@ -34,7 +35,7 @@ public class OrderSaga {
 
         if(orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED)
         {
-            order.setOrderStatus(OrderStatus.INVENTORY_CHECKED);
+            order.setOrderStatus(OrderStatus.PAYMENT_PROCESSING);
             orderRepository.save(order);
 
             orderSagaEvent.setOrderStatus(OrderStatus.PAYMENT_PROCESSING);
@@ -51,8 +52,6 @@ public class OrderSaga {
         }
     }
 
-
-
     @KafkaListener(topics = "payment-response-topic")
     @Transactional
     public void handlePaymentResponse(OrderSagaEvent orderSagaEvent)
@@ -64,7 +63,7 @@ public class OrderSaga {
 
         if(orderSagaEvent.getOrderStatus() == OrderStatus.PAYMENT_COMPLETED)
         {
-            order.setOrderStatus(OrderStatus.PAYMENT_COMPLETED);
+            order.setOrderStatus(OrderStatus.INVENTORY_PROCESSING);
             orderRepository.save(order);
 
             orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_PROCESSING);
@@ -79,7 +78,34 @@ public class OrderSaga {
             log.error("Thanh toán thất bại cho đơn hàng: {}", order.getId());
             kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
         }
+    }
 
+    @KafkaListener(topics = "inventory-response-topic")
+    @Transactional
+    public void handleInventoryResponse(OrderSagaEvent orderSagaEvent)
+    {
+        log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
 
+        Order order = orderRepository.findById(orderSagaEvent.getOrder().getOrderId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if(orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_COMPLETED)
+        {
+            order.setOrderStatus(OrderStatus.DELIVERY_PROCESSING);
+            orderRepository.save(order);
+
+            orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_PROCESSING);
+            orderSagaEvent.setMessage("Inventory processing completed");
+            kafkaTemplate.send("delivery-processing-topic", orderSagaEvent);
+        } else if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
+
+            order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderRepository.save(order);
+
+            orderSagaEvent.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            orderSagaEvent.setMessage("Inventory processing failed, cancelling order");
+            log.error("Xử lý hàng tồn kho thất bại cho đơn hàng: {}", order.getId());
+            kafkaTemplate.send("payment-refund-topic", orderSagaEvent);
+        }
     }
 }
