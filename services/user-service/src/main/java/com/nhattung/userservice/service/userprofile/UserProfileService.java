@@ -9,7 +9,9 @@ import com.nhattung.userservice.exception.ErrorCode;
 import com.nhattung.userservice.exception.ErrorNomalizer;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.repository.httpclient.CartClient;
+import com.nhattung.userservice.request.ChangePasswordRequest;
 import com.nhattung.userservice.request.CreateUserProfileRequest;
+import com.nhattung.userservice.request.ForgotPasswordRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.utils.AuthenticatedUser;
@@ -18,7 +20,9 @@ import com.nhattung.userservice.utils.UploadToS3;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -44,80 +48,85 @@ public class UserProfileService implements IUserProfileService {
     private final ModelMapper modelMapper;
     @Value("${idp.client.realm}")
     private String REALM;
+    @Value("${idp.client.id}")
+    private String CLIENT_ID;
+    @Value("${idp.client.secret}")
+    private String CLIENT_SECRET;
     private final Keycloak keycloak;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ErrorNomalizer errorNomalizer;
     private final CartClient cartClient;
     private final AuthenticatedUser authenticatedUser;
     private final UploadToS3 uploadToS3;
+
     @Override
-    public UserProfile createUserProfile(CreateUserProfileRequest request,MultipartFile avatar) {
-            String fullName = request.getFullName().trim();
-            String[] nameParts = fullName.split(" ");
-            UserRepresentation userRepresentation = new UserRepresentation();
-            userRepresentation.setUsername(request.getEmail());
-            userRepresentation.setEmail(request.getEmail());
-            userRepresentation.setFirstName(nameParts[0]);
-            userRepresentation.setLastName(nameParts.length > 1 ? fullName.substring(fullName.indexOf(" ") + 1) : "");
-            userRepresentation.setEnabled(true);
-            userRepresentation.setEmailVerified(true);
+    public UserProfile createUserProfile(CreateUserProfileRequest request, MultipartFile avatar) {
+        String fullName = request.getFullName().trim();
+        String[] nameParts = fullName.split(" ");
+        UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setUsername(request.getEmail());
+        userRepresentation.setEmail(request.getEmail());
+        userRepresentation.setFirstName(nameParts[0]);
+        userRepresentation.setLastName(nameParts.length > 1 ? fullName.substring(fullName.indexOf(" ") + 1) : "");
+        userRepresentation.setEnabled(true);
+        userRepresentation.setEmailVerified(true);
 
-            CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-            credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
-            credentialRepresentation.setValue(request.getPassword());
-            credentialRepresentation.setTemporary(false);
-            userRepresentation.setCredentials(List.of(credentialRepresentation));
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setValue(request.getPassword());
+        credentialRepresentation.setTemporary(false);
+        userRepresentation.setCredentials(List.of(credentialRepresentation));
 
-            log.info("User Representation: {}", userRepresentation);
+        log.info("User Representation: {}", userRepresentation);
 
-            UsersResource usersResource = getUsersResource();
-            Response response = usersResource.create(userRepresentation);
-            log.info("Status Code "+response.getStatus());
+        UsersResource usersResource = getUsersResource();
+        Response response = usersResource.create(userRepresentation);
+        log.info("Status Code " + response.getStatus());
 
-            if(!Objects.equals(201,response.getStatus())){
-                String errorMessage = response.readEntity(String.class);
-                throw errorNomalizer.handelKeyCloakException(new RuntimeException(errorMessage));
-            }
-
-
-            List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
-            UserRepresentation user = userRepresentations.get(0);
+        if (!Objects.equals(201, response.getStatus())) {
+            String errorMessage = response.readEntity(String.class);
+            throw errorNomalizer.handelKeyCloakException(new RuntimeException(errorMessage));
+        }
 
 
-            //sendVerificationEmail(user.getId());
-            //Upload avatar to S3
-            String avatarUrl = "";
-            if (avatar != null && !avatar.isEmpty()) {
-                 avatarUrl = uploadToS3.uploadAvatarToS3(avatar);
-            }
-            UserProfile userProfile = UserProfile.builder()
-                    .fullName(request.getFullName())
-                    .email(request.getEmail())
-                    .phone(request.getPhone())
-                    .gender(request.isGender())
-                    .avatar(avatarUrl)
-                    .dateOfBirth(request.getDateOfBirth())
-                    .userId(user.getId())
-                    .build();
+        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
+        UserRepresentation user = userRepresentations.get(0);
 
-            //Initialize cart for user
-            cartClient.initializeCart(user.getId());
+
+        //sendVerificationEmail(user.getId());
+        //Upload avatar to S3
+        String avatarUrl = "";
+        if (avatar != null && !avatar.isEmpty()) {
+            avatarUrl = uploadToS3.uploadAvatarToS3(avatar);
+        }
+        UserProfile userProfile = UserProfile.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .gender(request.isGender())
+                .avatar(avatarUrl)
+                .dateOfBirth(request.getDateOfBirth())
+                .userId(user.getId())
+                .build();
+
+        //Initialize cart for user
+        cartClient.initializeCart(user.getId());
 
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("email")
                 .receiver(request.getEmail())
                 .templateCode("WELCOME_EMAIL")
                 .params(Map.of(
-                        "subject","Welcome to Dream Shop",
-                        "content",formWelcomeEmailContent()
+                        "subject", "Welcome to Dream Shop",
+                        "content", formWelcomeEmailContent()
                 ))
                 .build();
 
 
-            //Publish message to Kafka
-            kafkaTemplate.send("notification-delivery",notificationEvent);
+        //Publish message to Kafka
+        kafkaTemplate.send("notification-delivery", notificationEvent);
 
-            return userProfileRepository.save(userProfile);
+        return userProfileRepository.save(userProfile);
 
     }
 
@@ -139,7 +148,7 @@ public class UserProfileService implements IUserProfileService {
         }
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<UserProfile> userProfilePage = userProfileRepository.findAll(pageable);
         List<UserProfileDto> userProfileDtos = convertToDto(userProfilePage.getContent());
@@ -155,14 +164,15 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public UserProfile updateUserProfile(UpdateUserProfileRequest request,MultipartFile avatar) {
+    public UserProfile updateUserProfile(UpdateUserProfileRequest request, MultipartFile avatar) {
         String avatarUrl;
+        UserProfile existingUserProfile = getUserProfile();
         if (avatar != null && !avatar.isEmpty()) {
             avatarUrl = uploadToS3.uploadAvatarToS3(avatar);
         } else {
-            avatarUrl = "";
+            avatarUrl = existingUserProfile.getAvatar();
         }
-        return Optional.ofNullable(getUserProfile())
+        return Optional.ofNullable(existingUserProfile)
                 .map(userProfile -> {
                     userProfile.setFullName(request.getFullName());
                     userProfile.setPhone(request.getPhone());
@@ -203,21 +213,66 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
-    public void forgotPassword(String email) {
+    public void forgotPassword(ForgotPasswordRequest request) {
         UsersResource usersResource = getUsersResource();
-        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(email, true);
+        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
+        if (userRepresentations.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
         UserRepresentation user = userRepresentations.get(0);
-        usersResource.get(user.getId()).executeActionsEmail(List.of("UPDATE_PASSWORD"));
+        String userId = user.getId();
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setValue(request.getNewPassword());
+        credentialRepresentation.setTemporary(false);
+        usersResource.get(userId).resetPassword(credentialRepresentation);
     }
 
-    private UsersResource getUsersResource(){
+    @Override
+    public void changePassword(ChangePasswordRequest request) {
+
+        UsersResource usersResource = getUsersResource();
+        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(request.getEmail(), true);
+        if (userRepresentations.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        UserRepresentation user = userRepresentations.get(0);
+        String userId = user.getId();
+
+
+        //verify old password
+        try {
+            Keycloak keycloakVerify = KeycloakBuilder.builder()
+                    .serverUrl("http://localhost:8081")
+                    .realm(REALM)
+                    .clientId(CLIENT_ID)
+                    .clientSecret(CLIENT_SECRET)
+                    .username(request.getEmail())
+                    .password(request.getOldPassword())
+                    .grantType(OAuth2Constants.PASSWORD)
+                    .build();
+
+            keycloakVerify.tokenManager().getAccessToken(); // ép login
+        } catch (Exception ex) {
+            throw new AppException(ErrorCode.OLD_PASSWORD_NOT_MATCH);
+        }
+
+
+        //update password
+        CredentialRepresentation newCredentialRepresentation = new CredentialRepresentation();
+        newCredentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        newCredentialRepresentation.setValue(request.getNewPassword());
+        newCredentialRepresentation.setTemporary(false);
+        usersResource.get(userId).resetPassword(newCredentialRepresentation);
+    }
+
+    private UsersResource getUsersResource() {
 
         return keycloak.realm(REALM).users();
     }
 
 
-
-    public String formWelcomeEmailContent(){
+    public String formWelcomeEmailContent() {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "<head>\n" +

@@ -1,6 +1,7 @@
 package com.nhattung.orderservice.entity;
 
 import com.nhattung.enums.OrderStatus;
+import com.nhattung.orderservice.enums.CancelReason;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,8 @@ public class Order {
     private BigDecimal totalAmount;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+    @Enumerated(EnumType.STRING)
+    private CancelReason cancelReason;
     private String userId;
     private Long promotionId;
 

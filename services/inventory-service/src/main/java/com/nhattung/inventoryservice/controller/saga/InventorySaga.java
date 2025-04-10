@@ -54,7 +54,6 @@ public class InventorySaga {
             orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_FAILED);
             orderSagaEvent.setMessage("Checking inventory completed, some products are not available");
         }
-        kafkaTemplate.send("inventory-checkingResponse-topic", orderSagaEvent);
     }
 
     @KafkaListener(topics = "inventory-processing-topic")

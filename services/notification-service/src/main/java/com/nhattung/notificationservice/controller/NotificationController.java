@@ -23,10 +23,9 @@ public class NotificationController {
     public void listenNotificationDelivery(NotificationEvent message) {
         log.info("Received message: {}", message);
 
-        if(message.getChannel().equals("email"))
-        {
+        if (message.getChannel().equals("email")) {
             switch (message.getTemplateCode()) {
-                case "SEND_OTP", "WELCOME_EMAIL":
+                case "SEND_OTP", "WELCOME_EMAIL", "ORDER_EMAIL":
                     emailService.sendEmail(SendEmailRequest
                             .builder()
                             .to(Recipient.builder()

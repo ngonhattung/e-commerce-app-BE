@@ -1,10 +1,14 @@
 package com.nhattung.inventoryservice.controller;
 
+import com.nhattung.dto.OrderSagaDto;
+import com.nhattung.enums.OrderStatus;
+import com.nhattung.event.dto.OrderSagaEvent;
 import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
 import com.nhattung.inventoryservice.response.ApiResponse;
 import com.nhattung.inventoryservice.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class InventoryController {
 
     private final IInventoryService inventoryService;
-
+    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     @PostMapping("/add")
     public ApiResponse<Void> addInventory(@RequestBody InventoryRequest request) {
         inventoryService.addInventory(request);
@@ -47,6 +51,27 @@ public class InventoryController {
     public ApiResponse<Boolean> checkInventoryToCart(@RequestBody GetQuantityRequest request) {
         return ApiResponse.<Boolean>builder()
                 .result(inventoryService.checkInventory(request))
+                .build();
+    }
+
+    @GetMapping("/checkToOrder/{orderId}")
+    public ApiResponse<Boolean> checkInventoryToOrder(@PathVariable("orderId") String orderId) {
+
+        OrderSagaEvent inventoryEvent = new OrderSagaEvent();
+        inventoryEvent.setOrder(new OrderSagaDto(orderId));
+
+        if(inventoryEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED) {
+            return ApiResponse.<Boolean>builder()
+                    .result(true)
+                    .build();
+        } else if (inventoryEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
+            return ApiResponse.<Boolean>builder()
+                    .result(false)
+                    .build();
+        }
+        kafkaTemplate.send("inventory-checkingResponse-topic", inventoryEvent);
+        return ApiResponse.<Boolean>builder()
+                .result(false)
                 .build();
     }
 

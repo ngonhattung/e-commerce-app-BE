@@ -1,13 +1,16 @@
 package com.nhattung.orderservice.controller.saga;
 
 import com.nhattung.enums.OrderStatus;
+import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.event.dto.OrderSagaEvent;
 import com.nhattung.orderservice.dto.OrderDto;
 import com.nhattung.orderservice.entity.Order;
+import com.nhattung.orderservice.enums.CancelReason;
 import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.service.IOrderService;
+import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,14 +18,16 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OrderSaga {
 
     private final OrderRepository orderRepository;
-    private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
-
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final AuthenticatedUser authenticatedUser;
 
     @KafkaListener(topics = "inventory-checkingResponse-topic")
     @Transactional
@@ -44,11 +49,13 @@ public class OrderSaga {
         } else if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
 
             order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            order.setCancelReason(CancelReason.INVENTORY_FAILED_AVAILABLE);
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Inventory check failed, cancelling order");
-            log.error("Kiểm tra hàng tồn kho thất bại cho đơn hàng: {}", order.getId());
-            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
+//            log.error("Kiểm tra hàng tồn kho thất bại cho đơn hàng: {}", order.getId());
+//            sendMailOrder("Order cancelled",
+//                    String.valueOf(CancelReason.INVENTORY_FAILED_AVAILABLE),101, orderSagaEvent);
         }
     }
 
@@ -72,11 +79,13 @@ public class OrderSaga {
         } else if (orderSagaEvent.getOrderStatus() == OrderStatus.PAYMENT_FAILED) {
 
             order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            order.setCancelReason(CancelReason.PAYMENT_FAILED);
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Payment failed, cancelling order");
             log.error("Thanh toán thất bại cho đơn hàng: {}", order.getId());
-            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
+            sendMailOrder("Order cancelled",
+                    String.valueOf(CancelReason.PAYMENT_FAILED),102, orderSagaEvent);
         }
     }
 
@@ -96,15 +105,16 @@ public class OrderSaga {
 
             orderSagaEvent.setMessage("Payment refund completed, cancelling order");
             log.error("Hoàn tiền thất bại cho đơn hàng: {}", order.getId());
-            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
         }else if (orderSagaEvent.getOrderStatus() == OrderStatus.PAYMENT_REFUND_FAILED) {
             order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Payment refund failed, cancelling order");
             log.error("Hoàn tiền thất bại cho đơn hàng: {}", order.getId());
-            kafkaTemplate.send("order-cancellation-topic", orderSagaEvent);
         }
+        kafkaTemplate.send("refund-response-topic", orderSagaEvent); //send email
+        sendMailOrder("Payment refund"
+                , orderSagaEvent.getMessage(),103, orderSagaEvent);
     }
 
     @KafkaListener(topics = "inventory-response-topic")
@@ -127,11 +137,14 @@ public class OrderSaga {
         } else if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
 
             order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            order.setCancelReason(CancelReason.INVENTORY_FAILED_AFTER_PAYMENT);
             orderRepository.save(order);
 
             orderSagaEvent.setOrderStatus(OrderStatus.ORDER_CANCELLED);
             orderSagaEvent.setMessage("Inventory processing failed, cancelling order");
             log.error("Xử lý hàng tồn kho thất bại cho đơn hàng: {}", order.getId());
+            sendMailOrder("Order cancelled",
+                    String.valueOf(CancelReason.INVENTORY_FAILED_AFTER_PAYMENT),104, orderSagaEvent);
             kafkaTemplate.send("payment-refund-topic", orderSagaEvent);
         }
     }
@@ -148,19 +161,51 @@ public class OrderSaga {
         if(orderSagaEvent.getOrderStatus() == OrderStatus.DELIVERY_COMPLETED)
         {
             order.setOrderStatus(OrderStatus.ORDER_COMPLETED);
+            order.setCancelReason(null);
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Delivery completed");
-            kafkaTemplate.send("order-completed-topic", orderSagaEvent);
+            sendMailOrder("Order completed", "Delivery completed",999, orderSagaEvent);
         } else if (orderSagaEvent.getOrderStatus() == OrderStatus.DELIVERY_FAILED) {
 
             order.setOrderStatus(OrderStatus.ORDER_CANCELLED);
+            order.setCancelReason(CancelReason.DELIVERY_FAILED);
             orderRepository.save(order);
 
             orderSagaEvent.setMessage("Delivery failed, cancelling order");
             log.error("Giao hàng thất bại cho đơn hàng: {}", order.getId());
             kafkaTemplate.send("payment-refund-topic", orderSagaEvent);
             kafkaTemplate.send("inventory-revert-topic", orderSagaEvent);
+            sendMailOrder("Order cancelled",
+                    String.valueOf(CancelReason.DELIVERY_FAILED),106, orderSagaEvent);
         }
+    }
+
+    public void sendMailOrder(String subject, String reason,int formCode,OrderSagaEvent orderSagaEvent)
+    {
+        NotificationEvent notificationEvent = NotificationEvent.builder()
+                .channel("email")
+                .receiver(authenticatedUser.getEmail())
+                .templateCode("ORDER_EMAIL")
+                .params(Map.of(
+                        "subject",subject,
+                        "content",formCancelOrderEmailContent(reason,formCode,orderSagaEvent)
+                ))
+                .build();
+        kafkaTemplate.send("notification-delivery", notificationEvent);
+    }
+
+    public String formCancelOrderEmailContent(String reason,int formCode, OrderSagaEvent orderSagaEvent)
+    {
+        return """
+                <html>
+                <body>
+                    <h1>Thông báo hủy đơn hàng</h1>
+                    <p>Đơn hàng của bạn đã bị hủy với lý do: %s</p>
+                    <p>Mã đơn hàng: %s</p>
+                    <p>Trạng thái đơn hàng: %s</p>
+                </body>
+                </html>
+                """.formatted(reason, orderSagaEvent.getOrder().getOrderId(), orderSagaEvent.getOrderStatus());
     }
 }

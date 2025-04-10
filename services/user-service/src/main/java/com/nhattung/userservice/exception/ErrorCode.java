@@ -35,6 +35,7 @@ public enum ErrorCode {
     FILE_SIZE_TOO_LARGE(1025, "File size too large", HttpStatus.BAD_REQUEST),
     INVALID_FILE_TYPE(1026, "Invalid file type", HttpStatus.BAD_REQUEST),
     UPLOAD_IMAGE_ERROR(1027, "Upload image error", HttpStatus.INTERNAL_SERVER_ERROR),
+    OLD_PASSWORD_NOT_MATCH(1028, "Old password not match", HttpStatus.BAD_REQUEST),
 
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

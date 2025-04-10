@@ -14,4 +14,11 @@ public class AuthenticatedUser {
         }
         return null;
     }
+    public String getEmail(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            return jwt.getClaimAsString("email"); // "sub" chứa userId trong Keycloak
+        }
+        return null;
+    }
 }

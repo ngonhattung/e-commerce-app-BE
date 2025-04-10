@@ -54,6 +54,16 @@ public class DeliveryController {
                     .build();
         }
         Delivery delivery = deliveryService.updateDeliveryStatus(request);
+        OrderSagaEvent orderSagaEvent = getOrderSagaEvent(request);
+        kafkaTemplate.send("delivery-response-topic", orderSagaEvent);
+
+        return ApiResponse.<Delivery>builder()
+                .message("Update delivery status successfully")
+                .result(delivery)
+                .build();
+    }
+
+    private OrderSagaEvent getOrderSagaEvent(UpdateStatusRequest request) {
         OrderSagaEvent orderSagaEvent = new OrderSagaEvent();
         orderSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
         if (OrderStatus.DELIVERY_COMPLETED.name().equals(request.getStatus())) {
@@ -64,11 +74,6 @@ public class DeliveryController {
             orderSagaEvent.setMessage("Delivery failed");
 
         }
-        kafkaTemplate.send("delivery-response-topic", orderSagaEvent);
-
-        return ApiResponse.<Delivery>builder()
-                .message("Update delivery status successfully")
-                .result(delivery)
-                .build();
+        return orderSagaEvent;
     }
 }

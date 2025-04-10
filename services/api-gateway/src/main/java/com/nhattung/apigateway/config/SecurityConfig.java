@@ -3,10 +3,15 @@ package com.nhattung.apigateway.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -31,10 +36,13 @@ public class SecurityConfig {
                 apiPrefix +  "/categories/name/**",
                 apiPrefix +  "/categories/all",
                 apiPrefix + "/cart/initialize/**",
+                apiPrefix + "/user-profile/user/forgot-password",
         };
+
 
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(Customizer.withDefaults())
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(PUBLIC_ENDPOINTS).permitAll()  // Không cần xác thực
                         .anyExchange()

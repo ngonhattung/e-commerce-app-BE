@@ -3,6 +3,8 @@ package com.nhattung.userservice.controller;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.AppException;
+import com.nhattung.userservice.request.ChangePasswordRequest;
+import com.nhattung.userservice.request.ForgotPasswordRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
 import com.nhattung.userservice.response.PageResponse;
@@ -82,5 +84,23 @@ public class UserProfileController {
                             .result(null)
                             .build());
         }
+    }
+
+    @PostMapping("/user/forgot-password")
+    public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        userProfileService.forgotPassword(request);
+        return ApiResponse.<Void>builder()
+                        .message("Change password successfully")
+                        .result(null)
+                        .build();
+    }
+
+    @PostMapping("/user/change-password")
+    public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        userProfileService.changePassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Change password successfully")
+                .result(null)
+                .build();
     }
 }
