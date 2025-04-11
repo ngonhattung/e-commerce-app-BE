@@ -229,6 +229,13 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
+    public boolean existsByEmail(String email) {
+        UsersResource usersResource = getUsersResource();
+        List<UserRepresentation> userRepresentations = usersResource.searchByEmail(email, true);
+        return !userRepresentations.isEmpty();
+    }
+
+    @Override
     public void changePassword(ChangePasswordRequest request) {
 
         UsersResource usersResource = getUsersResource();

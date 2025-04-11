@@ -37,6 +37,7 @@ public class SecurityConfig {
                 apiPrefix +  "/categories/all",
                 apiPrefix + "/cart/initialize/**",
                 apiPrefix + "/user-profile/user/forgot-password",
+                apiPrefix + "/user-profile/user/verify-email/**",
         };
 
 

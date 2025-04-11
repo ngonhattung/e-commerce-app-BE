@@ -103,4 +103,11 @@ public class UserProfileController {
                 .result(null)
                 .build();
     }
+    @GetMapping("/user/verify-email/{email}")
+    public ApiResponse<Boolean> sendVerificationEmail(@PathVariable(value = "email") String email) {
+        return ApiResponse.<Boolean>builder()
+                .message("Verification email sent successfully")
+                .result(userProfileService.existsByEmail(email))
+                .build();
+    }
 }

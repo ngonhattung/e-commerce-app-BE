@@ -26,6 +26,7 @@ public class SecurityConfig {
             "/registration",
             "/otp/**",
             "/user-profile/user/forgot-password",
+            "/user-profile/user/verify-email/**",
     };
 
     @Bean

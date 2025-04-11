@@ -22,5 +22,6 @@ public interface IUserProfileService {
     List<UserProfileDto> convertToDto(List<UserProfile> userProfiles);
     void sendVerificationEmail();
     void forgotPassword(ForgotPasswordRequest request);
+    boolean existsByEmail(String email);
     void changePassword(ChangePasswordRequest request);
 }
