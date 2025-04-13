@@ -49,4 +49,25 @@ public class AuthController {
                         .build()))
                 .build();
     }
+
+    @PostMapping("/google/login")
+    public ApiResponse<String> googleLogin() {
+        return ApiResponse.<String>builder()
+                .result(authService.createGoogleAuthUrl())
+                .build();
+    }
+
+    @PostMapping("/facebook/login")
+    public ApiResponse<String> facebookLogin() {
+        return ApiResponse.<String>builder()
+                .result(authService.createFacebookAuthUrl())
+                .build();
+    }
+
+    @PostMapping("/token")
+    public ApiResponse<AuthResponse> getTokenFromCode(@RequestBody String code) {
+        return ApiResponse.<AuthResponse>builder()
+                .result(authService.getTokenFromCode(code))
+                .build();
+    }
 }

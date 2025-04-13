@@ -2,8 +2,10 @@ package com.nhattung.inventoryservice.service;
 
 
 import com.nhattung.inventoryservice.entity.Inventory;
+import com.nhattung.inventoryservice.entity.InventoryCancel;
 import com.nhattung.inventoryservice.exception.AppException;
 import com.nhattung.inventoryservice.exception.ErrorCode;
+import com.nhattung.inventoryservice.repository.InventoryCancelRepository;
 import com.nhattung.inventoryservice.repository.InventoryRepository;
 import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
@@ -23,6 +25,7 @@ public class InventoryService implements IInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final RedisTemplate<String, Integer> redisTemplate;
+    private final InventoryCancelRepository inventoryCancelRepository;
     @Override
     public void updateInventory(InventoryRequest request) {
         inventoryRepository.findByProductId(request.getProductId()).map(inventory -> {
@@ -149,15 +152,21 @@ public class InventoryService implements IInventoryService {
     }
     @Override
     public void rollbackInventory(InventoryCompensation comp) {
-        Inventory inventory = inventoryRepository.findByProductId(comp.productId())
-                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+        //Nếu sản phẩm chưa có tồn kho cancel thì tạo mới
+        InventoryCancel inventoryCancel = inventoryCancelRepository.findByProductId(comp.productId())
+                .orElseGet(() -> InventoryCancel.builder()
+                        .productId(comp.productId())
+                        .quantity(0)
+                        .build());
 
-        inventory.setQuantity(inventory.getQuantity() + comp.quantityDeducted());
-        inventoryRepository.save(inventory);
+        //Cộng dồn số lượng đã cancel
+        inventoryCancel.setQuantity(inventoryCancel.getQuantity() + comp.quantityDeducted());
+        inventoryCancelRepository.save(inventoryCancel);
 
-        // Optional: nếu cần phục hồi key redis đã xóa
-        String key = buildReserveKey("rollback", comp.productId());
-        redisTemplate.opsForValue().set(key, comp.quantityDeducted(), Duration.ofMinutes(20));
+
+//        // Optional: nếu cần phục hồi key redis đã xóa
+//        String key = buildReserveKey("rollback", comp.productId());
+//        redisTemplate.opsForValue().set(key, comp.quantityDeducted(), Duration.ofMinutes(20));
     }
     private String buildReserveKey(String userId, Long productId) {
         return "reserve:product:" + productId + ":user:" + userId;

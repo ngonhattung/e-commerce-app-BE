@@ -19,6 +19,7 @@ public enum ErrorCode {
     ERROR_REFRESH_TOKEN(1015, "Token invalid or expired", HttpStatus.BAD_REQUEST),
     EMPTY_EMAIL(1033, "Email is required", HttpStatus.BAD_REQUEST),
     EMPTY_PASSWORD(1044, "Password is required", HttpStatus.BAD_REQUEST),
+    ERROR_GET_TOKEN_FROM_CODE(1045, "Error get token from code", HttpStatus.BAD_REQUEST),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

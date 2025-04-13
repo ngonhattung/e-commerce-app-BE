@@ -15,3 +15,4 @@ idp:
     secret: B9HnviniWRfOQEKzEhLROtl3USI13Irl
     grant-type: password
     scope: openid
+  frontendUrl: http://localhost:5173

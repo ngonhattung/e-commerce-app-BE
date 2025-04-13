@@ -12,6 +12,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,12 @@ public class AuthService implements IAuthService{
 
     @Value("${idp.client.grant-type}")
     private String GRANT_TYPE;
+
+    @Value("${idp.url}")
+    private String IDP_URL;
+
+    @Value("${idp.frontend.url}")
+    private String FRONTEND_URL;
 
 
     @Override
@@ -92,5 +99,50 @@ public class AuthService implements IAuthService{
         }
 
 
+    }
+
+    @Override
+    public String createGoogleAuthUrl() {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(IDP_URL+"/auth")
+                .queryParam("client_id", CLIENT_ID)
+                .queryParam("redirect_uri",FRONTEND_URL + "/callback")
+                .queryParam("response_type", "code")
+                .queryParam("scope", "openid email profile")
+                .queryParam("kc_idp_hint", "google");
+
+        return builder.toUriString();
+    }
+
+    @Override
+    public String createFacebookAuthUrl() {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(IDP_URL+"/auth")
+                .queryParam("client_id", CLIENT_ID)
+                .queryParam("redirect_uri",FRONTEND_URL + "/callback")
+                .queryParam("response_type", "code")
+                .queryParam("scope", "openid email profile")
+                .queryParam("kc_idp_hint", "facebook");
+
+        return builder.toUriString();
+    }
+
+    @Override
+    public AuthResponse getTokenFromCode(String code) {
+        try {
+            return keyCloakClient.getTokenFromCode(TokenFromCodeParam.builder()
+                    .client_id(CLIENT_ID)
+                    .client_secret(CLIENT_SECRET)
+                    .grant_type("authorization_code")
+                    .code(code)
+                    .redirect_uri(FRONTEND_URL + "/callback")
+                    .build());
+        } catch (FeignException.BadRequest e) {
+            throw new AppException(ErrorCode.ERROR_GET_TOKEN_FROM_CODE);
+        } catch (FeignException e) {
+            throw new AppException(ErrorCode.FEIGN_ERROR);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
     }
 }

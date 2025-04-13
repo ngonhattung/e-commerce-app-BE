@@ -11,4 +11,7 @@ public interface IAuthService {
     AuthResponse exchangeToken(LoginRequest request);
     LogoutResponse logout(RefreshRequest request);
     RefreshTokenResponse refreshToken(RefreshRequest request);
+    String createGoogleAuthUrl();
+    String createFacebookAuthUrl();
+    AuthResponse getTokenFromCode(String code);
 }
