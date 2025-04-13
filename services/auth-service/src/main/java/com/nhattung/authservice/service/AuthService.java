@@ -35,7 +35,7 @@ public class AuthService implements IAuthService{
     @Value("${idp.url}")
     private String IDP_URL;
 
-    @Value("${idp.frontend.url}")
+    @Value("${idp.frontendUrl}")
     private String FRONTEND_URL;
 
 
