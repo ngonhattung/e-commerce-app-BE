@@ -8,6 +8,7 @@ import com.nhattung.inventoryservice.request.InventoryRequest;
 import com.nhattung.inventoryservice.response.ApiResponse;
 import com.nhattung.inventoryservice.service.IInventoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class InventoryController {
 
     private final IInventoryService inventoryService;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     @PostMapping("/add")
     public ApiResponse<Void> addInventory(@RequestBody InventoryRequest request) {
@@ -57,21 +59,21 @@ public class InventoryController {
     @GetMapping("/checkToOrder/{orderId}")
     public ApiResponse<Boolean> checkInventoryToOrder(@PathVariable("orderId") String orderId) {
 
-        OrderSagaEvent inventoryEvent = new OrderSagaEvent();
-        inventoryEvent.setOrder(new OrderSagaDto(orderId));
+        OrderSagaEvent inventoryEvent = (OrderSagaEvent) redisTemplate.opsForValue().get(orderId);
+        boolean flag = false;
 
-        if(inventoryEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED) {
-            return ApiResponse.<Boolean>builder()
-                    .result(true)
-                    .build();
-        } else if (inventoryEvent.getOrderStatus() == OrderStatus.INVENTORY_FAILED) {
+        if(inventoryEvent == null) {
             return ApiResponse.<Boolean>builder()
                     .result(false)
                     .build();
         }
+        if(inventoryEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED) {
+            flag = true;
+        }
+        redisTemplate.delete(orderId);
         kafkaTemplate.send("inventory-checkingResponse-topic", inventoryEvent);
         return ApiResponse.<Boolean>builder()
-                .result(false)
+                .result(flag)
                 .build();
     }
 

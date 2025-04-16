@@ -27,7 +27,7 @@ public class RedisConfig {
                 .disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext
                         .SerializationPair
-                        .fromSerializer(new Jackson2JsonRedisSerializer<>(Product.class)));
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(cacheConfiguration)
@@ -35,13 +35,12 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
-
-        RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Product.class));
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
         return redisTemplate;
     }

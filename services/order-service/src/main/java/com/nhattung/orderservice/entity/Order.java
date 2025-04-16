@@ -32,6 +32,7 @@ public class Order {
     private CancelReason cancelReason;
     private String userId;
     private Long promotionId;
+    private Long transId;
 
     @CreationTimestamp
     private Timestamp createdAt;

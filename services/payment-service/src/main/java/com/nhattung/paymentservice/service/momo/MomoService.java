@@ -18,6 +18,7 @@ import com.nhattung.paymentservice.utils.MoMoSignatureUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,7 @@ public class MomoService {
     private final MoMoSignatureUtil moMoSignatureUtil;
     private final IPaymentService paymentService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     public MoMoPaymentResponse createPayment(PaymentRequest request) {
 
         String orderId = request.getOrderId();
@@ -92,9 +94,12 @@ public class MomoService {
         String requestId = UUID.randomUUID().toString();
         BigDecimal amount = request.getTotalAmount();
         String lang = "vi";
-
-        String rawSignature = String.format("accessKey=%s&amount=%s&orderId=%s&partnerCode=%s&requestId=%s",
-                ACCESS_KEY, amount.longValue(), orderId, PARTNER_CODE, requestId);
+        String description = "Refund for order " + orderId;
+        Long transId = request.getTransId();
+        String rawSignature = String.format(
+                "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&transId=%s",
+                ACCESS_KEY, amount.longValue(), description, orderId, PARTNER_CODE, requestId, transId
+        );
 
         log.info("Raw signature: " + rawSignature);
 
@@ -109,11 +114,12 @@ public class MomoService {
         }
         MoMoRefundRequest refundRequest = MoMoRefundRequest.builder()
                 .partnerCode(PARTNER_CODE)
-                .accessKey(ACCESS_KEY)
                 .requestId(requestId)
                 .orderId(orderId)
                 .amount(amount.longValue())
                 .signature(signature)
+                .transId(transId)
+                .description(description)
                 .lang(lang)
                 .build();
 
@@ -149,25 +155,30 @@ public class MomoService {
                 throw new AppException(ErrorCode.ERROR_HASH);
             }
 
-            OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
-            paymentSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
-
+            OrderSagaEvent paymentSagaEvent = (OrderSagaEvent) redisTemplate.opsForValue().get(request.getOrderId());
+            if (paymentSagaEvent == null) {
+                log.error("Payment saga event not found in Redis for orderId: {}", request.getOrderId());
+                throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
             Payment payment = paymentService.getPaymentByOrderId(request.getOrderId());
             if (request.getResultCode() == 0 && request.getSignature().equals(signature)) {
                 log.info("Payment successful: {}", request);
                 payment.setPaymentStatus(OrderStatus.PAYMENT_COMPLETED);
+                paymentSagaEvent.getOrder().setTransId(request.getTransId());
                 paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_COMPLETED);
                 paymentSagaEvent.setMessage("Payment completed successfully");
                 paymentService.savePayment(payment);
             } else {
                 log.info("Payment failed: {}", request);
                 payment.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
+                paymentSagaEvent.getOrder().setTransId(request.getTransId());
                 paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_FAILED);
                 paymentSagaEvent.setMessage("Payment failed");
                 paymentService.savePayment(payment);
             }
 
             // Send payment saga event to Kafka
+            redisTemplate.delete(request.getOrderId());
             kafkaTemplate.send("payment-response-topic", paymentSagaEvent);
 
 

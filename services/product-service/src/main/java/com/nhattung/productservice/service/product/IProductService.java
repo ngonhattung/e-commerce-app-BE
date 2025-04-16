@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface IProductService {
-    Product getProductById(Long id);
+    ProductDto getProductById(Long id);
     Product saveProduct(CreateProductRequest request);
     Product updateProduct(Long id, UpdateProductRequest request);
     void deleteProduct(Long id);

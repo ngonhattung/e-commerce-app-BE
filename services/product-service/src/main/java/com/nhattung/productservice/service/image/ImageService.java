@@ -1,6 +1,7 @@
 package com.nhattung.productservice.service.image;
 
 
+import com.nhattung.productservice.dto.ProductDto;
 import com.nhattung.productservice.entity.Image;
 import com.nhattung.productservice.entity.Product;
 import com.nhattung.productservice.exception.AppException;

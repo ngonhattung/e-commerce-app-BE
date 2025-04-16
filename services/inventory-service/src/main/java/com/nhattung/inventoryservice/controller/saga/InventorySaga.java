@@ -7,10 +7,12 @@ import com.nhattung.inventoryservice.service.IInventoryService;
 import com.nhattung.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,8 +23,9 @@ public class InventorySaga {
 
     private final IInventoryService inventoryService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final Map<String, List<InventoryService.InventoryCompensation>> compensationMap = new ConcurrentHashMap<>();
-    @KafkaListener(topics = "order-created-topic")
+    @KafkaListener(topics = "order-created-topic") // khi tạo đơn hàng thành công
     public void handleInventoryChecking(OrderSagaEvent orderSagaEvent) {
 
         log.info("Nhận phản hồi từ Order Service: {}", orderSagaEvent);
@@ -54,9 +57,10 @@ public class InventorySaga {
             orderSagaEvent.setOrderStatus(OrderStatus.INVENTORY_FAILED);
             orderSagaEvent.setMessage("Checking inventory completed, some products are not available");
         }
+        redisTemplate.opsForValue().set(orderSagaEvent.getOrder().getOrderId(), orderSagaEvent, Duration.ofMinutes(5));
     }
 
-    @KafkaListener(topics = "inventory-processing-topic")
+    @KafkaListener(topics = "inventory-processing-topic")  // khi thanh toán thành công
     public void handleInventoryProcessing(OrderSagaEvent orderSagaEvent) {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
         if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_PROCESSING) {
@@ -99,7 +103,7 @@ public class InventorySaga {
         }
     }
 
-    @KafkaListener(topics = "inventory-revert-topic")
+    @KafkaListener(topics = "inventory-revert-topic") //khi giao hàng thất bại
     public void handleInventoryRevert(OrderSagaEvent orderSagaEvent) {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
         if (orderSagaEvent.getOrderStatus() == OrderStatus.ORDER_CANCELLED) {

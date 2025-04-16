@@ -52,10 +52,23 @@ public class OrderService implements IOrderService{
         order.setOrderStatus(OrderStatus.ORDER_CREATED);
         PromotionDto promotion = promotionClient.getActivePromotionByCode(request.getCouponCode()).getResult();
         order.setPromotionId(promotion.getId());
-        BigDecimal totalAmount = calculateTotalAmount(createOrderItems(order, cartItems));
+
+        List<OrderItemDto> orderItems = createOrderItems(order, cartItems);
+        BigDecimal totalAmount = calculateTotalAmount(orderItems);
         BigDecimal finalAmount = getFinalAmount(promotion, totalAmount);
-        List<OrderItem> orderItems = createOrderItems(order, cartItems);
-        order.setOrderItems(new HashSet<>(orderItems));
+
+        //Map orderItems to OrderItem
+        var orderItemsOrigin = orderItems
+                .stream()
+                .map(orderItem -> OrderItem.builder()
+                        .productId(orderItem.getProduct().getId())
+                        .quantity(orderItem.getQuantity())
+                        .price(orderItem.getPrice())
+                        .order(order)
+                        .build())
+                .toList();
+
+        order.setOrderItems(new HashSet<>(orderItemsOrigin));
         order.setTotalAmount(finalAmount);
 
         OrderSagaDto orderSagaDto = OrderSagaDto.builder()
@@ -67,7 +80,8 @@ public class OrderService implements IOrderService{
                         .stream()
                         .map(item -> OrderItemSagaDto.builder()
                                 .orderItemId(item.getId())
-                                .productId(item.getProductId())
+                                .productId(item.getProduct().getId())
+                                .productName(item.getProduct().getName())
                                 .quantity(item.getQuantity())
                                 .price(item.getPrice())
                                 .build())
@@ -104,18 +118,17 @@ public class OrderService implements IOrderService{
                 .build();
     }
 
-    private List<OrderItem> createOrderItems(Order order, List<CartItemDto> selectedItems) {
+    private List<OrderItemDto> createOrderItems(Order order, List<CartItemDto> selectedItems) {
         return selectedItems
                 .stream()
-                .map(item -> OrderItem.builder()
-                        .order(order)
-                        .productId(item.getProduct().getId())
+                .map(item -> OrderItemDto.builder()
+                        .product(item.getProduct())
                         .quantity(item.getQuantity())
                         .price(item.getUnitPrice())
                         .build())
                 .toList();
     }
-    private BigDecimal calculateTotalAmount(List<OrderItem> orderItemList) {
+    private BigDecimal calculateTotalAmount(List<OrderItemDto> orderItemList) {
         return orderItemList
                 .stream()
                 .map(orderItem -> orderItem.getPrice()

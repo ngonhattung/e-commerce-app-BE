@@ -14,5 +14,6 @@ import java.math.BigDecimal;
 public class PaymentRequest {
     private String orderId;
     private String userId;
+    private Long transId;
     private BigDecimal totalAmount;
 }

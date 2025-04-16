@@ -49,14 +49,9 @@ public class ProductController {
 
     @GetMapping("/product/{id}")
     public ApiResponse<ProductDto> getProductById(@PathVariable Long id) {
-        Product product = productService.getProductById(id);
-        ProductDto productDto = productService.convertToDto(product);
-//        String key = "products::" + id;
-//        Object value = redisTemplate.opsForValue().get(key);
-//        Product product1 = (Product) value;
         return ApiResponse.<ProductDto>builder()
                 .message("Product retrieved successfully")
-                .result(productDto)
+                .result(productService.getProductById(id))
                 .build();
     }
 

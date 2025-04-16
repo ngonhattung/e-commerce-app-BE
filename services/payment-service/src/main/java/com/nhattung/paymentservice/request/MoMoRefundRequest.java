@@ -16,8 +16,8 @@ public class MoMoRefundRequest {
     private String orderId;
     private String requestId;
     private Long amount;
-    private String accessKey;
     private String lang;
     private String description;
+    private Long transId;
     private String signature;
 }

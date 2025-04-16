@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class InventoryService implements IInventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final InventoryCancelRepository inventoryCancelRepository;
     @Override
     public void updateInventory(InventoryRequest request) {
@@ -55,7 +55,8 @@ public class InventoryService implements IInventoryService {
 
     @Override
     public boolean checkInventory(GetQuantityRequest request) {
-        Inventory inventory = inventoryRepository.findByProductId(request.getProductId()).orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+        Inventory inventory = inventoryRepository.findByProductId(request.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
         return inventory.getQuantity() >= request.getQuantity();
     }
 
@@ -105,7 +106,7 @@ public class InventoryService implements IInventoryService {
             int reserved = 0;
             if (keys != null) {
                 for (String key : keys) {
-                    Integer value = redisTemplate.opsForValue().get(key);
+                    Integer value = (Integer) redisTemplate.opsForValue().get(key);
                     reserved += (value != null) ? value : 0;
                 }
             }
