@@ -15,7 +15,11 @@ import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.InventoryRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import com.nhattung.productservice.response.PageResponse;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -29,9 +33,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService implements IProductService {
 
     private final ProductRepository productRepository;
@@ -39,7 +45,7 @@ public class ProductService implements IProductService {
     private final ModelMapper modelMapper;
     private final ImageRepository imageRepository;
     private final InventoryClient inventoryClient;
-
+    private final RateLimiter inventoryServiceRateLimiter;
     @Cacheable(value = "products", key = "#id")
     @Override
     public ProductDto getProductById(Long id) {
@@ -304,9 +310,26 @@ public class ProductService implements IProductService {
                 .map(image -> modelMapper.map(image, ImageDto.class))
                 .toList();
         productDto.setImages(imageDtos);
-        int quantity = inventoryClient.getInventory(product.getId());
+        int quantity = getInventory(product.getId());
         productDto.setQuantity(quantity);
         return productDto;
     }
+
+    public int getInventory(Long productId) {
+        // Gói lời gọi InventoryService trong RateLimiter
+        Supplier<Integer> inventorySupplier = RateLimiter.decorateSupplier(
+                inventoryServiceRateLimiter,
+                () -> inventoryClient.getInventory(productId)
+        );
+
+        try {
+            // Thực thi lời gọi, nếu vượt giới hạn sẽ ném ra lỗi
+            return inventorySupplier.get();
+        } catch (RequestNotPermitted e) {
+            throw new AppException(ErrorCode.RATE_LIMIT_EXCEEDED);
+        }
+    }
+
+
 
 }

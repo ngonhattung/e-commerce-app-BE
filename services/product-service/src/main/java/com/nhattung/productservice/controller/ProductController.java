@@ -49,6 +49,7 @@ public class ProductController {
 
     @GetMapping("/product/{id}")
     public ApiResponse<ProductDto> getProductById(@PathVariable Long id) {
+
         return ApiResponse.<ProductDto>builder()
                 .message("Product retrieved successfully")
                 .result(productService.getProductById(id))

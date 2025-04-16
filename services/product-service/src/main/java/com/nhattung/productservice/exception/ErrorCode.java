@@ -49,6 +49,7 @@ public enum ErrorCode {
     EMPTY_SELLING_PRICE(1040, "Selling price cannot be empty", HttpStatus.BAD_REQUEST),
     INVALID_SELLING_PRICE(1041, "Selling price must be greater than 0", HttpStatus.BAD_REQUEST),
     INVALID_PAGE_SIZE(1042, "Page size must be greater than 0", HttpStatus.BAD_REQUEST),
+    RATE_LIMIT_EXCEEDED(1043, "Exceeded the access limit in 1 minute, please try again later", HttpStatus.TOO_MANY_REQUESTS),
             ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

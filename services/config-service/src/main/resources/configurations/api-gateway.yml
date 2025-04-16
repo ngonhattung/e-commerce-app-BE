@@ -43,7 +43,7 @@ spring:
             - name: Retry
               args:
                 retries: 3 # Retry tối đa 3 lần
-                statuses: BAD_GATEWAY, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR # Retry với các status code này
+                statuses: BAD_GATEWAY, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR,SERVICE_UNAVAILABLE # Retry với các status code này
                 methods: GET # Retry cho các phương thức GET
                 backoff:
                   firstBackoff: 3s  # Thời gian retry đầu tiên
