@@ -9,10 +9,7 @@ import com.nhattung.authservice.response.RefreshTokenResponse;
 import com.nhattung.authservice.service.IAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,7 +61,7 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/token")
+    @GetMapping("/token")
     public ApiResponse<AuthResponse> getTokenFromCode(@RequestBody String code) {
         return ApiResponse.<AuthResponse>builder()
                 .result(authService.getTokenFromCode(code))
