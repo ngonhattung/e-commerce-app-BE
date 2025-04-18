@@ -22,5 +22,6 @@ public interface ICartItemService {
     Set<CartItemDto> getConvertedCartItems(List<CartItem> cartItems);
     CartItemDto convertToDto(CartItem cartItem);
     CartDto convertToDto(Cart cart);
+    void deleteItemOrderFromCart(List<Long> itemIds);
 
 }

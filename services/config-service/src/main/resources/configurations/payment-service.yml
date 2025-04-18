@@ -38,10 +38,10 @@ server:
 
 momo:
   partner-code: MOMO
-  redirect-url: https://05c3-113-161-58-60.ngrok-free.app/payment/notify
+  redirect-url: https://bc38-113-161-58-60.ngrok-free.app/payment/notify
   end-point: https://test-payment.momo.vn/v2/gateway/api
-  ipn-url: https://05c3-113-161-58-60.ngrok-free.app/payment/ipn-handler
+  ipn-url: https://bc38-113-161-58-60.ngrok-free.app/payment/ipn-handler
   access-key: F8BBA842ECF85
   secret-key: K951B6PE1waDMi640xX08PD3vg6EkVlz
-  request-type: payWithATM
+  request-type: captureWallet #payWithATM
 

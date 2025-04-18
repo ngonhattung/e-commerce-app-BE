@@ -12,6 +12,7 @@ import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.repository.httpclient.CartClient;
+import com.nhattung.orderservice.repository.httpclient.ProductClient;
 import com.nhattung.orderservice.repository.httpclient.PromotionClient;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
@@ -38,6 +39,7 @@ public class OrderService implements IOrderService{
     private final PromotionClient promotionClient;
     private final ModelMapper modelMapper;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    private final ProductClient productClient;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart().getResult();
@@ -53,14 +55,18 @@ public class OrderService implements IOrderService{
         PromotionDto promotion = promotionClient.getActivePromotionByCode(request.getCouponCode()).getResult();
         order.setPromotionId(promotion.getId());
 
-        List<OrderItemDto> orderItems = createOrderItems(order, cartItems);
+        List<OrderItemDto> orderItems = createOrderItems(cartItems);
         BigDecimal totalAmount = calculateTotalAmount(orderItems);
         BigDecimal finalAmount = getFinalAmount(promotion, totalAmount);
+
+
+        cartClient.deleteItemsOrder(request.getSelectedCartItemIds());
 
         //Map orderItems to OrderItem
         var orderItemsOrigin = orderItems
                 .stream()
                 .map(orderItem -> OrderItem.builder()
+                        .id(orderItem.getId())
                         .productId(orderItem.getProduct().getId())
                         .quantity(orderItem.getQuantity())
                         .price(orderItem.getPrice())
@@ -75,6 +81,7 @@ public class OrderService implements IOrderService{
                 .orderId(order.getId())
                 .userId(authenticatedUser.getUserId())
                 .totalPrice(finalAmount)
+                .email(authenticatedUser.getEmail())
                 .shippingAddress(request.getShippingAddress())
                 .orderItems(orderItems
                         .stream()
@@ -118,7 +125,7 @@ public class OrderService implements IOrderService{
                 .build();
     }
 
-    private List<OrderItemDto> createOrderItems(Order order, List<CartItemDto> selectedItems) {
+    private List<OrderItemDto> createOrderItems(List<CartItemDto> selectedItems) {
         return selectedItems
                 .stream()
                 .map(item -> OrderItemDto.builder()
@@ -156,23 +163,29 @@ public class OrderService implements IOrderService{
         return orderDto;
     }
 
-    private OrderItemDto convertToOrderItemDto(OrderItem orderItem) {
-        OrderItemDto orderItemDto = modelMapper.map(orderItem, OrderItemDto.class);
-        ProductDto productDto = cartClient.getCart()
-                .getResult()
-                .getItems()
-                .stream()
-                .map(CartItemDto::getProduct)
-                .filter(product -> product.getId().equals(orderItem.getProductId()))
-                .findFirst()
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        orderItemDto.setProduct(productDto);
-        return orderItemDto;
-    }
+
     private List<OrderItemDto> convertToOrderItemDtoList(Order order) {
+        List<ProductDto> productDtos = productClient.getProductsByIds(
+                order.getOrderItems()
+                        .stream()
+                        .map(OrderItem::getProductId)
+                        .toList()).getResult();
+
         return order.getOrderItems()
                 .stream()
-                .map(this::convertToOrderItemDto)
+                .map(orderItem -> {
+                    ProductDto productDto = productDtos
+                            .stream()
+                            .filter(product -> product.getId().equals(orderItem.getProductId()))
+                            .findFirst()
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                    return OrderItemDto.builder()
+                            .id(orderItem.getId())
+                            .product(productDto)
+                            .quantity(orderItem.getQuantity())
+                            .price(orderItem.getPrice())
+                            .build();
+                })
                 .toList();
     }
 }

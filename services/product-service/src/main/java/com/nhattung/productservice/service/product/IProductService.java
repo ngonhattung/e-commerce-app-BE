@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface IProductService {
     ProductDto getProductById(Long id);
+    List<ProductDto> getProductsByIds(List<Long> ids);
     Product saveProduct(CreateProductRequest request);
     Product updateProduct(Long id, UpdateProductRequest request);
     void deleteProduct(Long id);
@@ -37,4 +38,5 @@ public interface IProductService {
     Long countProductsByBrandAndName(String brand, String name);
     List<ProductDto> getConvertedProducts(List<Product> products);
     ProductDto convertToDto(Product product);
+    List<ProductDto> convertToDtoList(List<Product> products);
 }

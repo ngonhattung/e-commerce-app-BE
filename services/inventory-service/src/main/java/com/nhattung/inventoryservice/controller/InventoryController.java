@@ -12,6 +12,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/inventory")
@@ -44,9 +48,9 @@ public class InventoryController {
                 .build();
     }
 
-    @GetMapping("/get/{productId}")
-    public int getInventory(@PathVariable("productId") Long productId) {
-        return inventoryService.getInventory(productId);
+    @GetMapping("/gets")
+    public Map<Long, Integer> getInventory(@RequestParam("productIds")Set<Long> productIds) {
+        return inventoryService.getInventory(productIds);
     }
 
     @PostMapping("/checkToCart")

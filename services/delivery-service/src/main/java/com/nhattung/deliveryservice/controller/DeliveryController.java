@@ -1,6 +1,8 @@
 package com.nhattung.deliveryservice.controller;
 
 import com.nhattung.deliveryservice.entity.Delivery;
+import com.nhattung.deliveryservice.exception.AppException;
+import com.nhattung.deliveryservice.exception.ErrorCode;
 import com.nhattung.deliveryservice.request.UpdateStatusRequest;
 import com.nhattung.deliveryservice.response.ApiResponse;
 import com.nhattung.deliveryservice.service.IDeliveryService;
@@ -8,6 +10,7 @@ import com.nhattung.dto.OrderSagaDto;
 import com.nhattung.enums.OrderStatus;
 import com.nhattung.event.dto.OrderSagaEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ public class DeliveryController {
 
     private final IDeliveryService deliveryService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     @GetMapping("/get-by-id/{deliveryId}")
     public ApiResponse<Delivery> getDeliveryById(@PathVariable Long deliveryId) {
         Delivery delivery = deliveryService.getDeliveryById(deliveryId);
@@ -64,8 +68,10 @@ public class DeliveryController {
     }
 
     private OrderSagaEvent getOrderSagaEvent(UpdateStatusRequest request) {
-        OrderSagaEvent orderSagaEvent = new OrderSagaEvent();
-        orderSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
+        OrderSagaEvent orderSagaEvent = (OrderSagaEvent) redisTemplate.opsForValue().get(request.getOrderId());
+        if (orderSagaEvent == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        }
         if (OrderStatus.DELIVERY_COMPLETED.name().equals(request.getStatus())) {
             orderSagaEvent.setOrderStatus(OrderStatus.DELIVERY_COMPLETED);
             orderSagaEvent.setMessage("Delivery completed");

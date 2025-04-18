@@ -17,6 +17,7 @@ public class OrderSagaDto {
     private String userId;
     private BigDecimal totalPrice;
     private String shippingAddress;
+    private String email;
     private Long transId;
     private Set<OrderItemSagaDto> orderItems;
 

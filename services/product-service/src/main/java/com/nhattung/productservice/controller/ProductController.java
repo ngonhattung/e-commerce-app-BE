@@ -56,6 +56,14 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/productsByIds")
+    public ApiResponse<List<ProductDto>> getProductsByIds(@RequestParam List<Long> ids) {
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productService.getProductsByIds(ids))
+                .build();
+    }
+
     @GetMapping("/all")
     public ApiResponse<PageResponse<ProductDto>> getAllProducts(
             @RequestParam (value = "page", defaultValue = "1") int page,

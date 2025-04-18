@@ -49,8 +49,9 @@ public class InventoryService implements IInventoryService {
     }
 
     @Override
-    public int getInventory(Long productId) {
-        return inventoryRepository.findByProductId(productId).map(Inventory::getQuantity).orElse(0);
+    public Map<Long, Integer> getInventory(Set<Long> productIds) {
+        return inventoryRepository.findAllByProductIdIn(productIds).stream()
+                .collect(Collectors.toMap(Inventory::getProductId, Inventory::getQuantity));
     }
 
     @Override

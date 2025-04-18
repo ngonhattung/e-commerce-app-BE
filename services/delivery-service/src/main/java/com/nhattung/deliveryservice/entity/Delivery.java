@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -29,7 +30,7 @@ public class Delivery {
     @Enumerated(EnumType.STRING)
     private OrderStatus shippingStatus;
 
-    private Instant shippingDate;
+    private LocalDate shippingDate;
     private String orderId;
 
     @CreationTimestamp

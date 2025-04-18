@@ -69,16 +69,6 @@ spring:
             - Path=${app.apiPrefix}/cart/**, ${app.apiPrefix}/cartItems/**
           filters:
             - StripPrefix=2
-            - name: Retry
-              args:
-                retries: 3 # Retry tối đa 3 lần
-                statuses: BAD_GATEWAY, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR # Retry với các status code này
-                methods: GET # Retry cho các phương thức GET
-                backoff:
-                  firstBackoff: 3s  # Thời gian retry đầu tiên
-                  maxBackoff: 5s    # Thời gian tối đa giữa các lần retry
-                  factor: 2       # Tăng thời gian retry theo factor
-                  basedOnPreviousValue: true # Dựa trên thời gian của lần retry trước
         - id: order-service
           uri: lb://order-service
           predicates:

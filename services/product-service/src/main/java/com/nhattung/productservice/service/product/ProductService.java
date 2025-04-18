@@ -31,9 +31,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,12 +46,21 @@ public class ProductService implements IProductService {
     private final ImageRepository imageRepository;
     private final InventoryClient inventoryClient;
     private final RateLimiter inventoryServiceRateLimiter;
+
     @Cacheable(value = "products", key = "#id")
     @Override
     public ProductDto getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return convertToDto(product);
+    }
+
+    @Override
+    public List<ProductDto> getProductsByIds(List<Long> ids) {
+        List<Product> products = productRepository.findAllById(ids);
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return convertToDtoList(products);
     }
 
 
@@ -62,21 +71,14 @@ public class ProductService implements IProductService {
         if (isProductExisted(request.getName(), request.getBrand())) {
             throw new AppException(ErrorCode.PRODUCT_EXISTED);
         }
-        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategoryName()))
-                .orElseGet(() -> {
-                    return categoryRepository.save(Category
-                            .builder()
-                            .name(request.getCategoryName())
-                            .build());
-                });
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategoryName())).orElseGet(() -> {
+            return categoryRepository.save(Category.builder().name(request.getCategoryName()).build());
+        });
 
 
         Product product = productRepository.save(createProduct(request, category));
 
-        InventoryRequest inventoryRequest = InventoryRequest.builder()
-                .productId(product.getId())
-                .quantity(request.getQuantity())
-                .build();
+        InventoryRequest inventoryRequest = InventoryRequest.builder().productId(product.getId()).quantity(request.getQuantity()).build();
         inventoryClient.addInventory(inventoryRequest);
 
         return product;
@@ -85,28 +87,19 @@ public class ProductService implements IProductService {
     private boolean isProductExisted(String name, String brand) {
         return productRepository.existsByNameAndBrand(name, brand);
     }
+
     private Product createProduct(CreateProductRequest request, Category category) {
-        return Product.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .brand(request.getBrand())
-                .costPrice(request.getCostPrice())
-                .sellingPrice(request.getSellingPrice())
-                .category(category)
-                .build();
+        return Product.builder().name(request.getName()).description(request.getDescription()).brand(request.getBrand()).costPrice(request.getCostPrice()).sellingPrice(request.getSellingPrice()).category(category).build();
     }
 
 
     @CachePut(value = "products", key = "#id")
     @Override
     public Product updateProduct(Long id, UpdateProductRequest request) {
-        return productRepository.findById(id)
-                .map((existingProduct -> updateExistingProduct(existingProduct, request)))
-                .map(productRepository::save)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        return productRepository.findById(id).map((existingProduct -> updateExistingProduct(existingProduct, request))).map(productRepository::save).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request){
+    private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request) {
         existingProduct.setName(request.getName());
         existingProduct.setDescription(request.getDescription());
         existingProduct.setBrand(request.getBrand());
@@ -118,28 +111,20 @@ public class ProductService implements IProductService {
         }
         existingProduct.setCategory(category);
 
-        InventoryRequest inventoryRequest = InventoryRequest.builder()
-                .productId(existingProduct.getId())
-                .quantity(request.getQuantity())
-                .build();
+        InventoryRequest inventoryRequest = InventoryRequest.builder().productId(existingProduct.getId()).quantity(request.getQuantity()).build();
         inventoryClient.updateInventory(inventoryRequest);
 
         return existingProduct;
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "products", key = "#id"),
-            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)
-    })
+    @Caching(evict = {@CacheEvict(value = "products", key = "#id"), @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)})
     @Override
     public void deleteProduct(Long id) {
-        productRepository.findById(id)
-                .ifPresentOrElse(productRepository::delete,() -> {
-                    throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                });
+        productRepository.findById(id).ifPresentOrElse(productRepository::delete, () -> {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        });
         inventoryClient.deleteInventory(id);
     }
-
 
 
     @Override
@@ -155,17 +140,11 @@ public class ProductService implements IProductService {
         }
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Product> productPage = productRepository.findAll(pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
 
     @Override
@@ -180,17 +159,11 @@ public class ProductService implements IProductService {
         }
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Product> productPage = productRepository.findByCategoryName(category, pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
 
     @Override
@@ -205,17 +178,11 @@ public class ProductService implements IProductService {
         }
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Product> productPage = productRepository.findByBrand(brand, pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
 
     @Override
@@ -224,23 +191,16 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public PageResponse<ProductDto> getPagedProductsByCategoryAndBrand(
-            String category, String brand, int page, int size) {
+    public PageResponse<ProductDto> getPagedProductsByCategoryAndBrand(String category, String brand, int page, int size) {
 
         if (page < 0 || size <= 0) {
             throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Product> productPage = productRepository.findByCategoryNameAndBrand(category, brand, pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
 
     }
 
@@ -255,16 +215,10 @@ public class ProductService implements IProductService {
             throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Product> productPage = productRepository.findByName(name, pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
 
     @Override
@@ -278,16 +232,10 @@ public class ProductService implements IProductService {
             throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
         }
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page-1,size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Product> productPage = productRepository.findByBrandAndName(brand, name, pageable);
-        List<ProductDto> productDtos = getConvertedProducts(productPage.getContent());
-        return PageResponse.<ProductDto>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .totalElements(productPage.getTotalElements())
-                .pageSize(productPage.getSize())
-                .data(productDtos)
-                .build();
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
 
     @Override
@@ -297,39 +245,62 @@ public class ProductService implements IProductService {
 
     @Override
     public List<ProductDto> getConvertedProducts(List<Product> products) {
-        return products.stream()
-                .map(this::convertToDto)
-                .toList();
+        return products.stream().map(this::convertToDto).toList();
     }
+
 
     @Override
     public ProductDto convertToDto(Product product) {
-        ProductDto productDto = modelMapper.map(product, ProductDto.class);
-        List<Image> images = imageRepository.findByProductId(product.getId());
-        List<ImageDto> imageDtos = images.stream()
-                .map(image -> modelMapper.map(image, ImageDto.class))
-                .toList();
-        productDto.setImages(imageDtos);
+        ProductDto productDto = mapperProduct(product);
         int quantity = getInventory(product.getId());
         productDto.setQuantity(quantity);
         return productDto;
     }
 
+    @Override
+    public List<ProductDto> convertToDtoList(List<Product> products) {
+        // Lấy tất cả productIds và chuyển thành Set để loại bỏ trùng lặp
+        Set<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toSet());
+
+        // Lấy thông tin tồn kho cho tất cả sản phẩm trong một lần gọi
+        Map<Long, Integer> inventoryMap = inventoryClient.getInventory(productIds);
+
+        // Chuyển đổi các sản phẩm thành DTO, sử dụng dữ liệu tồn kho đã lấy
+        return products.stream().map(product -> {
+            ProductDto productDto = mapperProduct(product);
+
+            // Lấy quantity từ map đã có thay vì gọi API riêng lẻ
+            Integer quantity = inventoryMap.getOrDefault(product.getId(), 0);
+            productDto.setQuantity(quantity);
+
+            return productDto;
+        }).collect(Collectors.toList());
+    }
+
+    private ProductDto mapperProduct(Product product) {
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDto> imageDtos = images.stream().map(image -> modelMapper.map(image, ImageDto.class)).toList();
+        productDto.setImages(imageDtos);
+        return productDto;
+    }
+
     public int getInventory(Long productId) {
+        Set<Long> idSet = Collections.singleton(productId);
+        Map<Long, Integer> inventoryMap = inventoryClient.getInventory(idSet);
         // Gói lời gọi InventoryService trong RateLimiter
         Supplier<Integer> inventorySupplier = RateLimiter.decorateSupplier(
                 inventoryServiceRateLimiter,
-                () -> inventoryClient.getInventory(productId)
-        );
-
+                () -> inventoryMap.getOrDefault(productId, 0));
         try {
             // Thực thi lời gọi, nếu vượt giới hạn sẽ ném ra lỗi
             return inventorySupplier.get();
+
         } catch (RequestNotPermitted e) {
             throw new AppException(ErrorCode.RATE_LIMIT_EXCEEDED);
         }
-    }
 
+    }
 
 
 }

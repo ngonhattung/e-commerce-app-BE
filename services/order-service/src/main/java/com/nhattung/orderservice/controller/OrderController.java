@@ -5,6 +5,7 @@ import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.response.ApiResponse;
 import com.nhattung.orderservice.service.IOrderService;
+import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class OrderController {
 
     private final IOrderService orderService;
-
+    private final AuthenticatedUser authenticatedUser;
     @PostMapping("/place-order")
     public ApiResponse<Order> placeOrder(@RequestBody SelectedCartItemRequest request) {
         Order order = orderService.placeOrder(request);

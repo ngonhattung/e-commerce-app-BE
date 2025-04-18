@@ -11,6 +11,7 @@ import com.nhattung.cartservice.service.cartItem.CartItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -58,5 +59,13 @@ public class CartItemController {
                 .build();
     }
 
+
+    @PostMapping("/deleteItemsOrder")
+    public ApiResponse<Void> deleteItemsOrder(@RequestBody List<Long> itemIds) {
+        cartItemService.deleteItemOrderFromCart(itemIds);
+        return ApiResponse.<Void>builder()
+                .message("Items deleted from cart successfully")
+                .build();
+    }
 
 }

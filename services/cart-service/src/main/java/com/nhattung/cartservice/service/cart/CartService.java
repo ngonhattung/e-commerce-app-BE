@@ -5,6 +5,7 @@ import com.nhattung.cartservice.dto.CartDto;
 import com.nhattung.cartservice.dto.CartItemDto;
 import com.nhattung.cartservice.dto.ProductDto;
 import com.nhattung.cartservice.entity.Cart;
+import com.nhattung.cartservice.entity.CartItem;
 import com.nhattung.cartservice.exception.AppException;
 import com.nhattung.cartservice.exception.ErrorCode;
 import com.nhattung.cartservice.repository.CartItemRepository;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,8 +32,6 @@ public class CartService implements ICartService{
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final AuthenticatedUser authenticatedUser;
-    private final ModelMapper modelMapper;
-    private final ProductClient productClient;
     @Override
     public Cart getCart() {
         Cart cart = cartRepository.findByUserId(authenticatedUser.getUserId())
@@ -72,6 +73,7 @@ public class CartService implements ICartService{
                     return cartRepository.save(cart);
                 });
     }
+
 
 //    @Override
 //    public CartDto convertToDto(Cart cart) {

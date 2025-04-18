@@ -19,7 +19,7 @@ public class RateLimiterConfig {
                     ? exchange.getRequest().getRemoteAddress().getAddress().getHostAddress()
                     : "anonymous";
             log.info("Resolved IP: {}", ip);
-            return Mono.just("rate_limit:" + ip); // dễ debug hơn
+            return Mono.just("rate_limit:" + ip);
         };
     }
 

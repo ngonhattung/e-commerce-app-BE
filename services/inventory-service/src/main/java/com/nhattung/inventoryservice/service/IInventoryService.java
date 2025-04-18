@@ -3,8 +3,10 @@ package com.nhattung.inventoryservice.service;
 import com.nhattung.inventoryservice.request.GetQuantityRequest;
 import com.nhattung.inventoryservice.request.InventoryRequest;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IInventoryService {
 
@@ -14,7 +16,7 @@ public interface IInventoryService {
 
      void deleteInventory(Long productId);
 
-     int getInventory(Long productId);
+     Map<Long, Integer> getInventory(Set<Long> productIds);
 
      boolean checkInventory(GetQuantityRequest request);
 

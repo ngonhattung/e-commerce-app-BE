@@ -1,14 +1,18 @@
 package com.nhattung.orderservice.controller.saga;
 
+import com.nhattung.dto.OrderItemSagaDto;
 import com.nhattung.enums.OrderStatus;
 import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.event.dto.OrderSagaEvent;
 import com.nhattung.orderservice.dto.OrderDto;
+import com.nhattung.orderservice.dto.OrderItemDto;
 import com.nhattung.orderservice.entity.Order;
+import com.nhattung.orderservice.entity.OrderItem;
 import com.nhattung.orderservice.enums.CancelReason;
 import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
+import com.nhattung.orderservice.repository.httpclient.CartClient;
 import com.nhattung.orderservice.service.IOrderService;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -28,21 +34,17 @@ public class OrderSaga {
 
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final KafkaTemplate<String, Long> kafkaTemplateLong;
     private final AuthenticatedUser authenticatedUser;
-
     @KafkaListener(topics = "inventory-checkingResponse-topic")
     @Transactional
     public void handleInventoryChecked(OrderSagaEvent orderSagaEvent) {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
-
         Order order = orderRepository.findById(orderSagaEvent.getOrder().getOrderId())
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (orderSagaEvent.getOrderStatus() == OrderStatus.INVENTORY_CHECKED) {
             order.setOrderStatus(OrderStatus.PAYMENT_PROCESSING);
             orderRepository.save(order);
-
             orderSagaEvent.setOrderStatus(OrderStatus.PAYMENT_PROCESSING);
             orderSagaEvent.setMessage("Inventory checked, processing payment");
             kafkaTemplate.send("payment-processing-topic", orderSagaEvent);
@@ -179,7 +181,7 @@ public class OrderSaga {
     public void sendMailOrder(String subject, String reason, int formCode, OrderSagaEvent orderSagaEvent) {
         NotificationEvent notificationEvent = NotificationEvent.builder()
                 .channel("email")
-                .receiver(authenticatedUser.getEmail())
+                .receiver(orderSagaEvent.getOrder().getEmail())
                 .templateCode("ORDER_EMAIL")
                 .params(Map.of(
                         "subject", subject,
@@ -193,59 +195,73 @@ public class OrderSaga {
         StringBuilder html = new StringBuilder();
 
         html.append("""
-                    <!DOCTYPE html>
-                    <html lang="vi">
-                    <head>
-                        <meta charset="UTF-8">
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                background-color: #f9f9f9;
-                                margin: 0;
-                                padding: 20px;
-                                color: #333;
-                            }
-                            .container {
-                                background-color: #ffffff;
-                                border-radius: 8px;
-                                padding: 20px;
-                                max-width: 600px;
-                                margin: auto;
-                                box-shadow: 0 0 10px rgba(0,0,0,0.05);
-                            }
-                            h2 {
-                                color: #d9534f;
-                            }
-                            .status-message {
-                                background-color: #fff3cd;
-                                border: 1px solid #ffeeba;
-                                padding: 15px;
-                                border-radius: 5px;
-                                margin-bottom: 20px;
-                            }
-                            table {
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-top: 15px;
-                            }
-                            th, td {
-                                text-align: left;
-                                padding: 10px;
-                                border-bottom: 1px solid #ddd;
-                            }
-                            th {
-                                background-color: #f2f2f2;
-                            }
-                            .total {
-                                text-align: right;
-                                font-weight: bold;
-                                padding-top: 15px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                """);
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f2f4f6;
+                    margin: 0;
+                    padding: 20px;
+                    color: #333;
+                }
+                .container {
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    padding: 20px;
+                    max-width: 700px;
+                    margin: auto;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    width: 150px;
+                }
+                h2 {
+                    color: #007BFF;
+                    text-align: center;
+                }
+                .status-message {
+                    background-color: #fff3cd;
+                    border: 1px solid #ffeeba;
+                    padding: 15px;
+                    border-radius: 5px;
+                    margin-bottom: 20px;
+                    font-size: 16px;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: center;
+                }
+                th {
+                    background-color: #007BFF;
+                    color: white;
+                }
+                .total {
+                    text-align: right;
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="logo">
+                    <img src="https://res.cloudinary.com/dclf0ngcu/image/upload/v1743265120/dreamy-mart/logo-blue_cnfw0g.png" alt="Dreamy Mart Logo">
+                </div>
+    """);
 
         html.append("<h2>").append(reason).append("</h2>");
 
@@ -255,8 +271,7 @@ public class OrderSaga {
             case 103 -> html.append("Đơn hàng của bạn đã được <strong>hoàn tiền</strong>.");
             case 104 -> html.append("Kho hiện tại <strong>không đủ số lượng</strong> để đáp ứng đơn hàng của bạn.");
             case 105 -> html.append("<strong>Giao hàng thất bại</strong>. Chúng tôi rất tiếc vì sự bất tiện này.");
-            case 999 ->
-                    html.append("Đơn hàng của bạn đã được <strong>giao thành công</strong>. Cảm ơn bạn đã mua sắm cùng chúng tôi!");
+            case 999 -> html.append("Đơn hàng của bạn đã được <strong>giao thành công</strong>. Cảm ơn bạn đã mua sắm cùng chúng tôi!");
             default -> html.append("Trạng thái đơn hàng không xác định.");
         }
         html.append("</div>");
@@ -264,14 +279,17 @@ public class OrderSaga {
         html.append("<p><strong>Mã đơn hàng:</strong> ").append(orderSagaEvent.getOrder().getOrderId()).append("</p>");
 
         html.append("""
-                    <table>
-                        <tr>
-                            <th>Tên sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                """);
+        <table>
+            <thead>
+                <tr>
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+    """);
 
         for (var item : orderSagaEvent.getOrder().getOrderItems()) {
             BigDecimal total = item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -283,18 +301,19 @@ public class OrderSaga {
             html.append("</tr>");
         }
 
-        html.append("</table>");
+        html.append("</tbody></table>");
 
         html.append("<p class='total'>Tổng cộng: ").append(formatCurrency(orderSagaEvent.getOrder().getTotalPrice())).append("</p>");
 
         html.append("""
-                        </div>
-                    </body>
-                    </html>
-                """);
+            </div>
+        </body>
+        </html>
+    """);
 
         return html.toString();
     }
+
 
     private String formatCurrency(BigDecimal amount) {
         return String.format("%,.0f VND", amount);

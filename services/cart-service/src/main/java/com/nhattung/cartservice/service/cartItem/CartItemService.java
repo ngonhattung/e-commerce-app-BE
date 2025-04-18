@@ -169,4 +169,26 @@ public class CartItemService implements ICartItemService{
         cartDto.setItems(getConvertedCartItems(new ArrayList<>(cart.getItems())));
         return cartDto;
     }
+
+    @Override
+    public void deleteItemOrderFromCart(List<Long> itemIds) {
+        Cart cart = cartService.getCart();
+        Set<CartItem> itemsToRemove = cart.getItems()
+                .stream()
+                .filter(item -> itemIds.contains(item.getId()))
+                .collect(Collectors.toSet());
+
+        for (CartItem item : itemsToRemove) {
+            cart.getItems().remove(item); // Xóa khỏi danh sách cart
+            item.setCart(null);           // Bỏ liên kết ngược
+            cartItemRepository.delete(item); // Xóa khỏi database
+        }
+        BigDecimal totalAmount = cart.getItems()
+                .stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        cart.setTotalAmount(totalAmount);
+
+        cartRepository.save(cart);
+    }
 }

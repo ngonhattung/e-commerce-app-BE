@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDto {
-    private Long id;
+    private String id;
     private String userId;
     private LocalDate orderDate;
     private BigDecimal totalAmount;;
