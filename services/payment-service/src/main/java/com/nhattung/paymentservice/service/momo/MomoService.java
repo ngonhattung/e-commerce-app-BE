@@ -90,7 +90,7 @@ public class MomoService {
     }
 
     public MoMoPaymentResponse refundPayment(PaymentRequest request) {
-        String orderId = request.getOrderId();
+        String orderId = UUID.randomUUID().toString();
         String requestId = UUID.randomUUID().toString();
         BigDecimal amount = request.getTotalAmount();
         String lang = "vi";
@@ -112,6 +112,11 @@ public class MomoService {
         if (signature.isEmpty()) {
             throw new AppException(ErrorCode.ERROR_HASH);
         }
+
+        Payment payment = paymentService.getPaymentByOrderId(request.getOrderId());
+        payment.setPaymentStatus(OrderStatus.PAYMENT_REFUND_COMPLETED);
+        paymentService.savePayment(payment);
+
         MoMoRefundRequest refundRequest = MoMoRefundRequest.builder()
                 .partnerCode(PARTNER_CODE)
                 .requestId(requestId)

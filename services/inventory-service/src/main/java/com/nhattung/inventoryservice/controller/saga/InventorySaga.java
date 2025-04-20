@@ -106,7 +106,7 @@ public class InventorySaga {
     @KafkaListener(topics = "inventory-revert-topic") //khi giao hàng thất bại
     public void handleInventoryRevert(OrderSagaEvent orderSagaEvent) {
         log.info("Nhận phản hồi từ Inventory Service: {}", orderSagaEvent);
-        if (orderSagaEvent.getOrderStatus() == OrderStatus.ORDER_CANCELLED) {
+        if (orderSagaEvent.getOrderStatus() == OrderStatus.DELIVERY_FAILED) {
             // Xử lý revert quantity
             String orderId = orderSagaEvent.getOrder().getOrderId();
             List<InventoryService.InventoryCompensation> comps = compensationMap.get(orderId);

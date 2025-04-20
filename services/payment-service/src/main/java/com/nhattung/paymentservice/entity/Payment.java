@@ -27,6 +27,7 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
     private OrderStatus paymentStatus;
 
     private String orderId;

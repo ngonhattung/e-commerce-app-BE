@@ -32,21 +32,21 @@ public class PaymentController {
     @PostMapping("/refund")
     public ApiResponse<MoMoPaymentResponse> refundPayment(@RequestBody PaymentRequest request) {
 
-//        OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
-//        paymentSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
+        OrderSagaEvent paymentSagaEvent = new OrderSagaEvent();
+        paymentSagaEvent.setOrder(new OrderSagaDto(request.getOrderId()));
 
         MoMoPaymentResponse response = momoService.refundPayment(request);
         log.info("Response successfully: {}", response);
-//        if(response.getResultCode() == 0)
-//        {
-//            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_REFUND_COMPLETED);
-//            paymentSagaEvent.setMessage("Refund request sent successfully");
-//            kafkaTemplate.send("payment-refundResponse-topic", paymentSagaEvent);
-//        } else {
-//            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_REFUND_FAILED);
-//            paymentSagaEvent.setMessage("Refund request failed");
-//            kafkaTemplate.send("payment-refundResponse-topic", paymentSagaEvent);
-//        }
+        if(response.getResultCode() == 0)
+        {
+            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_REFUND_COMPLETED);
+            paymentSagaEvent.setMessage("Refund request sent successfully");
+            kafkaTemplate.send("payment-refundResponse-topic", paymentSagaEvent);
+        } else {
+            paymentSagaEvent.setOrderStatus(OrderStatus.PAYMENT_REFUND_FAILED);
+            paymentSagaEvent.setMessage("Refund request failed");
+            kafkaTemplate.send("payment-refundResponse-topic", paymentSagaEvent);
+        }
 
         return ApiResponse.<MoMoPaymentResponse>builder()
                 .message("Refund request sent successfully")
