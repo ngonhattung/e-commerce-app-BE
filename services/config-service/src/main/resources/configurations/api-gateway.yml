@@ -114,6 +114,13 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: chatbot-service
+          uri: lb://chatbot-service
+          predicates:
+            - Path=${app.apiPrefix}/chat/**
+          filters:
+            - StripPrefix=2
+
   security:
     oauth2:
       resourceserver:
