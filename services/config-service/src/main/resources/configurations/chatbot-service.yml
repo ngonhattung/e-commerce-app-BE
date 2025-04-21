@@ -10,5 +10,10 @@ server:
   port: 8100
 
 
+gemini:
+  url: https://generativelanguage.googleapis.com/v1beta
+  api-key: AIzaSyDKvm0-8FOy_bPNvRnXbUyM8w9yFHJVolM
+
+
 
 
