@@ -38,6 +38,7 @@ public class SecurityConfig {
                 apiPrefix + "/cart/initialize/**",
                 apiPrefix + "/user-profile/user/forgot-password",
                 apiPrefix + "/user-profile/user/verify-email/**",
+                apiPrefix + "/chat/**",
         };
 
 
