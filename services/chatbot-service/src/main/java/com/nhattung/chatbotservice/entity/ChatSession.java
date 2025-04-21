@@ -2,6 +2,7 @@ package com.nhattung.chatbotservice.entity;
 
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,4 +27,18 @@ public class ChatSession {
         this.lastUpdatedAt = System.currentTimeMillis();
     }
 
+
+    @Data
+    @NoArgsConstructor
+    public static class ChatMessage {
+        private String role; // "user" hoặc "model"
+        private String content;
+        private long timestamp;
+
+        public ChatMessage(String role, String content) {
+            this.role = role;
+            this.content = content;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
 }
