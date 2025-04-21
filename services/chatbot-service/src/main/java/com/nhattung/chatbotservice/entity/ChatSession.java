@@ -28,17 +28,5 @@ public class ChatSession {
     }
 
 
-    @Data
-    @NoArgsConstructor
-    public static class ChatMessage {
-        private String role; // "user" hoặc "model"
-        private String content;
-        private long timestamp;
 
-        public ChatMessage(String role, String content) {
-            this.role = role;
-            this.content = content;
-            this.timestamp = System.currentTimeMillis();
-        }
-    }
 }
