@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,5 +26,9 @@ public class AuthResponse {
 
     @JsonProperty("refresh_expires_in")
     private String refreshExpiresIn;
+
+    @JsonProperty("roles")
+    private List<String> roles;
+
 
 }

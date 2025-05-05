@@ -1,6 +1,8 @@
 package com.nhattung.authservice.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhattung.authservice.exception.AppException;
 import com.nhattung.authservice.exception.ErrorCode;
 import com.nhattung.authservice.repository.KeyCloakClient;
@@ -13,6 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +49,8 @@ public class AuthService implements IAuthService{
     @Override
     public AuthResponse exchangeToken(LoginRequest request) {
         try {
-            return keyCloakClient.exchangeToken(TokenExchangeParam.builder()
+            // Get the token response from Keycloak
+            AuthResponse response = keyCloakClient.exchangeToken(TokenExchangeParam.builder()
                     .client_id(CLIENT_ID)
                     .client_secret(CLIENT_SECRET)
                     .username(request.getUsername().trim())
@@ -50,6 +58,12 @@ public class AuthService implements IAuthService{
                     .grant_type(GRANT_TYPE)
                     .scope(SCOPE)
                     .build());
+
+            // Extract roles from the access token
+            List<String> roles = extractRolesFromToken(response.getAccessToken());
+            response.setRoles(roles);
+
+            return response;
         } catch (FeignException.Unauthorized e) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         } catch (FeignException e) {
@@ -58,6 +72,41 @@ public class AuthService implements IAuthService{
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
 
+    }
+
+    private List<String> extractRolesFromToken(String accessToken) {
+        try {
+            // Split the token
+            String[] chunks = accessToken.split("\\.");
+
+            // Get the payload part (second chunk)
+            Base64.Decoder decoder = Base64.getUrlDecoder();
+            String payload = new String(decoder.decode(chunks[1]));
+
+            // Parse the payload as JSON
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode payloadJson = mapper.readTree(payload);
+
+            // Extract roles from the token
+            // The path to roles might vary depending on your Keycloak configuration
+            // Common paths include: realm_access.roles, resource_access.[client-id].roles
+            List<String> roles = new ArrayList<>();
+
+            // Check for realm roles
+            if (payloadJson.has("realm_access") && payloadJson.get("realm_access").has("roles")) {
+                JsonNode rolesNode = payloadJson.get("realm_access").get("roles");
+                if (rolesNode.isArray()) {
+                    for (JsonNode role : rolesNode) {
+                        roles.add(role.asText());
+                    }
+                }
+            }
+
+            return roles;
+        } catch (Exception e) {
+            // Handle exceptions or return empty list
+            return new ArrayList<>();
+        }
     }
 
     @Override

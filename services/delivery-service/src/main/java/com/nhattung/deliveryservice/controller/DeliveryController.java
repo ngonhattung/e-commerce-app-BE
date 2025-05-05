@@ -12,6 +12,7 @@ import com.nhattung.event.dto.OrderSagaEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public class DeliveryController {
     private final IDeliveryService deliveryService;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get-by-id/{deliveryId}")
     public ApiResponse<Delivery> getDeliveryById(@PathVariable Long deliveryId) {
         Delivery delivery = deliveryService.getDeliveryById(deliveryId);
@@ -32,6 +36,8 @@ public class DeliveryController {
                 .result(delivery)
                 .build();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get-by-status/{status}")
     public ApiResponse<Delivery> getDeliveryByStatus(@PathVariable String status) {
         Delivery delivery = deliveryService.getDeliveryByStatus(status);
@@ -41,6 +47,8 @@ public class DeliveryController {
                 .build();
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get-all")
     public ApiResponse<List<Delivery>> getAllDeliveries() {
         List<Delivery> deliveries = deliveryService.getAllDeliveries();
@@ -50,6 +58,8 @@ public class DeliveryController {
                 .build();
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/update-status")
     public ApiResponse<Delivery> updateDeliveryStatus(@RequestBody UpdateStatusRequest request) {
         if(request.getStatus() == null || request.getStatus().isEmpty()) {
