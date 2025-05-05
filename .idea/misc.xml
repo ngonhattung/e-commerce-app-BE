@@ -11,7 +11,6 @@
         <option value="$PROJECT_DIR$/services/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/services/notification-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/common-dto/pom.xml" />
-        <option value="$PROJECT_DIR$/services/product-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/inventory_service/pom.xml" />
         <option value="$PROJECT_DIR$/services/inventory-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/cart-service/pom.xml" />
@@ -20,6 +19,8 @@
         <option value="$PROJECT_DIR$/services/promotion-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/delivery-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/chatbot-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/product-service/pom.xml" />
+        <option value="$PROJECT_DIR$/../TH/TH_Pattern/BaiTapTHKTPM/services/product-service/pom.xml" />
       </list>
     </option>
   </component>

@@ -27,6 +27,9 @@ public class Product {
     private BigDecimal costPrice;
     private BigDecimal sellingPrice;
 
+    @Builder.Default
+    private boolean destroyed = false;
+
     @CreationTimestamp
     private Timestamp createdAt;
     @UpdateTimestamp

@@ -12,6 +12,8 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByNameAndBrand(String name, String brand);
 
+    Page<Product> findByDestroyedFalse(Pageable pageable);
+
     List<Product> findByCategoryName(String category);
     Page<Product> findByCategoryName(String category, Pageable pageable);
 

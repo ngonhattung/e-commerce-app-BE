@@ -117,13 +117,14 @@ public class ProductService implements IProductService {
         return existingProduct;
     }
 
-    @Caching(evict = {@CacheEvict(value = "products", key = "#id"), @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)})
+    @Caching(evict = {@CacheEvict(value = "products", key = "#id"),
+            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)})
     @Override
     public void deleteProduct(Long id) {
-        productRepository.findById(id).ifPresentOrElse(productRepository::delete, () -> {
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-        });
-        inventoryClient.deleteInventory(id);
+        productRepository.findById(id).map(product -> {
+            product.setDestroyed(true);
+            return productRepository.save(product);
+        }).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
 
@@ -142,7 +143,7 @@ public class ProductService implements IProductService {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Product> productPage = productRepository.findAll(pageable);
+        Page<Product> productPage = productRepository.findByDestroyedFalse(pageable);
         List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
         return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
     }
