@@ -55,9 +55,4 @@ public class ChatSessionService {
         saveSession(session);
     }
 
-//    private void cleanupExpiredSessions() {
-//        long currentTime = System.currentTimeMillis();
-//        activeSessions.entrySet().removeIf(entry ->
-//                currentTime - entry.getValue().getLastUpdatedAt() > SESSION_TIMEOUT);
-//    }
 }

@@ -30,6 +30,7 @@ public class Order {
     private OrderStatus orderStatus;
     @Enumerated(EnumType.STRING)
     private CancelReason cancelReason;
+    private String shippingAddress;
     private String userId;
     private Long promotionId;
     private Long transId;

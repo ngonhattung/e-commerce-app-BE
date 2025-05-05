@@ -52,6 +52,7 @@ public class OrderService implements IOrderService{
         }
         Order order = createOrder();
         order.setOrderStatus(OrderStatus.ORDER_CREATED);
+        order.setShippingAddress(request.getShippingAddress());
         PromotionDto promotion = promotionClient.getActivePromotionByCode(request.getCouponCode()).getResult();
         order.setPromotionId(promotion.getId());
 
