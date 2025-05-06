@@ -1,6 +1,5 @@
 package com.nhattung.promotionservice.request;
 
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -33,4 +32,6 @@ public class CreatePromotionRequest {
     private Instant endDate;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private Boolean isGlobal = true;
 }

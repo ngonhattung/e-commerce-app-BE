@@ -145,7 +145,13 @@ public class ProductService implements IProductService {
 
         Page<Product> productPage = productRepository.findByDestroyedFalse(pageable);
         List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
-        return PageResponse.<ProductDto>builder().currentPage(page).totalPages(productPage.getTotalPages()).totalElements(productPage.getTotalElements()).pageSize(productPage.getSize()).data(productDtos).build();
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
     }
 
     @Override

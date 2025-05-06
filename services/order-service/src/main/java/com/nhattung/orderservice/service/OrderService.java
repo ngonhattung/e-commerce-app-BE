@@ -14,10 +14,15 @@ import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.repository.httpclient.CartClient;
 import com.nhattung.orderservice.repository.httpclient.ProductClient;
 import com.nhattung.orderservice.repository.httpclient.PromotionClient;
+import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -85,6 +90,8 @@ public class OrderService implements IOrderService{
                 .totalPrice(finalAmount)
                 .email(authenticatedUser.getEmail())
                 .shippingAddress(request.getShippingAddress())
+                .promotionId(promotion.getId())
+                .isGlobalPromotion(promotion.getIsGlobal())
                 .orderItems(orderItems
                         .stream()
                         .map(item -> OrderItemSagaDto.builder()
@@ -163,6 +170,29 @@ public class OrderService implements IOrderService{
         OrderDto orderDto =  modelMapper.map(order, OrderDto.class);
         orderDto.setItems(convertToOrderItemDtoList(order));
         return orderDto;
+    }
+
+    @Override
+    public PageResponse<OrderDto> getAllOrders(int page, int size) {
+        if(page < 0 || size < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "orderDate");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Order> orderPage = orderRepository.findAll(pageable);
+        List<OrderDto> orderDtos = orderPage.getContent()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+        return PageResponse.<OrderDto>builder()
+                .currentPage(page)
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .pageSize(size)
+                .data(orderDtos)
+                .build();
     }
 
 

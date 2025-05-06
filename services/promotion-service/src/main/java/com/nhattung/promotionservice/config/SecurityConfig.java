@@ -19,6 +19,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
+            "/promotions/create-user-promotion",
+            "/promotions/update-user-promotion",
     };
 
     @Bean

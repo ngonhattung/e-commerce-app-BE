@@ -23,4 +23,5 @@ public class PromotionDto {
     private Instant startDate;
     private Instant endDate;
     private Boolean isActive;
+    private Boolean isGlobal;
 }

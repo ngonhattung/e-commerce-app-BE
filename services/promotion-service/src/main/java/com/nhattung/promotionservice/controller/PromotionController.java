@@ -3,6 +3,7 @@ package com.nhattung.promotionservice.controller;
 import com.nhattung.promotionservice.dto.PromotionDto;
 import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
+import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
 import com.nhattung.promotionservice.response.ApiResponse;
 import com.nhattung.promotionservice.service.IPromotionService;
@@ -86,6 +87,22 @@ public class PromotionController {
         promotionService.deletePromotion(promotionId);
         return ApiResponse.<String>builder()
                 .message("Delete promotion successfully")
+                .build();
+    }
+
+    @PostMapping("/create-user-promotion")
+    public ApiResponse<Void> createUserPromotion(@RequestBody HandleUserPromotionRequest request) {
+        promotionService.createUserPromotion(request);
+        return ApiResponse.<Void>builder()
+                .message("Create user promotion successfully")
+                .build();
+    }
+
+    @PutMapping("/update-user-promotion")
+    public ApiResponse<Void> updateUserPromotion(@RequestBody HandleUserPromotionRequest request) {
+        promotionService.updateUserPromotion(request);
+        return ApiResponse.<Void>builder()
+                .message("Update user promotion successfully")
                 .build();
     }
 }

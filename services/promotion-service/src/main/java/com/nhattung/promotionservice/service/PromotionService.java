@@ -2,11 +2,15 @@ package com.nhattung.promotionservice.service;
 
 import com.nhattung.promotionservice.dto.PromotionDto;
 import com.nhattung.promotionservice.entity.Promotion;
+import com.nhattung.promotionservice.entity.UserPromotion;
 import com.nhattung.promotionservice.exception.AppException;
 import com.nhattung.promotionservice.exception.ErrorCode;
 import com.nhattung.promotionservice.repository.PromotionRepository;
+import com.nhattung.promotionservice.repository.UserPromotionRepository;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
+import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
+import com.nhattung.promotionservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import java.util.List;
 public class PromotionService implements IPromotionService{
 
     private final PromotionRepository promotionRepository;
+    private final UserPromotionRepository userPromotionRepository;
+    private final AuthenticatedUser authenticatedUser;
     private final ModelMapper modelMapper;
 
     @Override
@@ -63,14 +69,22 @@ public class PromotionService implements IPromotionService{
     public Promotion getPromotionActiveByCouponCode(String couponCode) {
         Promotion promotion = promotionRepository.findByCouponCode(couponCode)
                 .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
-        if (!promotion.getIsActive()) {
+        // Kiểm tra trạng thái kích hoạt & thời gian
+        if (!promotion.getIsActive()
+                || (promotion.getStartDate() != null && promotion.getStartDate().isAfter(Instant.now()))
+                || (promotion.getEndDate() != null && promotion.getEndDate().isBefore(Instant.now()))) {
             throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
         }
-        if(promotion.getStartDate() != null && promotion.getStartDate().isAfter(Instant.now())) {
-            throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
-        }
-        if(promotion.getEndDate() != null && promotion.getEndDate().isBefore(Instant.now())) {
-            throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
+
+        // Kiểm tra xem khuyến mãi không phải là cá nhân
+        if (!promotion.getIsGlobal()) {
+            UserPromotion userPromotion = userPromotionRepository
+                    .findByUserIdAndPromotionId(authenticatedUser.getUserId(), promotion.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_AVAILABLE_FOR_USER));
+
+            if (userPromotion.getIsUsed()) {
+                throw new AppException(ErrorCode.PROMOTION_ALREADY_USED);
+            }
         }
         return promotion;
     }
@@ -125,5 +139,24 @@ public class PromotionService implements IPromotionService{
         return promotions.stream()
                 .map(this::convertToDto)
                 .toList();
+    }
+
+    @Override
+    public void createUserPromotion(HandleUserPromotionRequest request) {
+        UserPromotion userPromotion = UserPromotion.builder()
+                .userId(request.getUserId())
+                .promotionId(request.getPromotionId())
+                .isUsed(false)
+                .build();
+        userPromotionRepository.save(userPromotion);
+    }
+
+    @Override
+    public void updateUserPromotion(HandleUserPromotionRequest request) {
+        UserPromotion userPromotion = userPromotionRepository
+                .findByUserIdAndPromotionId(request.getUserId(), request.getPromotionId())
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+        userPromotion.setIsUsed(true);
+        userPromotionRepository.save(userPromotion);
     }
 }

@@ -9,10 +9,8 @@ import com.nhattung.userservice.exception.ErrorCode;
 import com.nhattung.userservice.exception.ErrorNomalizer;
 import com.nhattung.userservice.repository.UserProfileRepository;
 import com.nhattung.userservice.repository.httpclient.CartClient;
-import com.nhattung.userservice.request.ChangePasswordRequest;
-import com.nhattung.userservice.request.CreateUserProfileRequest;
-import com.nhattung.userservice.request.ForgotPasswordRequest;
-import com.nhattung.userservice.request.UpdateUserProfileRequest;
+import com.nhattung.userservice.repository.httpclient.PromotionClient;
+import com.nhattung.userservice.request.*;
 import com.nhattung.userservice.response.PageResponse;
 import com.nhattung.userservice.utils.AuthenticatedUser;
 import com.nhattung.userservice.utils.RandomUtil;
@@ -45,6 +43,7 @@ import java.util.*;
 public class UserProfileService implements IUserProfileService {
 
     private final UserProfileRepository userProfileRepository;
+    private final PromotionClient promotionClient;
     private final ModelMapper modelMapper;
     @Value("${idp.client.realm}")
     private String REALM;
@@ -123,8 +122,18 @@ public class UserProfileService implements IUserProfileService {
                 .build();
 
 
+        //Create user promotion
+        promotionClient.createUserPromotion(
+                HandleUserPromotionRequest.builder()
+                        .userId(user.getId())
+                        .promotionId(2L)
+                        .build()
+        );
+
         //Publish message to Kafka
         kafkaTemplate.send("notification-delivery", notificationEvent);
+
+
 
         return userProfileRepository.save(userProfile);
 
@@ -318,6 +327,16 @@ public class UserProfileService implements IUserProfileService {
                 "            text-align: center;\n" +
                 "            color: #333;\n" +
                 "        }\n" +
+                "        .promo-code {\n" +
+                "            background-color: #e0f7fa;\n" +
+                "            border: 1px dashed #00acc1;\n" +
+                "            padding: 10px;\n" +
+                "            margin: 20px auto;\n" +
+                "            display: inline-block;\n" +
+                "            font-weight: bold;\n" +
+                "            color: #007c91;\n" +
+                "            border-radius: 5px;\n" +
+                "        }\n" +
                 "        .button {\n" +
                 "            display: inline-block;\n" +
                 "            background: #ff6600;\n" +
@@ -344,6 +363,8 @@ public class UserProfileService implements IUserProfileService {
                 "            <h2>Welcome to Dream E-Commerce Store!</h2>\n" +
                 "            <p>Thank you for registering with us. We are excited to have you on board.</p>\n" +
                 "            <p>Start exploring our wide range of products and enjoy exclusive discounts.</p>\n" +
+                "            <p>Use the promo code below to get <strong>10% off</strong> your first order:</p>\n" +
+                "            <div class=\"promo-code\">WELCOMEDREAMYMART</div>\n" +
                 "            <a href=\"https://your-ecommerce-website.com\" class=\"button\">Shop Now</a>\n" +
                 "        </div>\n" +
                 "        <div class=\"footer\">\n" +
@@ -353,4 +374,5 @@ public class UserProfileService implements IUserProfileService {
                 "</body>\n" +
                 "</html>";
     }
+
 }

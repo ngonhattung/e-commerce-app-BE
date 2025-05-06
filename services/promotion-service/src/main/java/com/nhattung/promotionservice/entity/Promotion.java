@@ -32,6 +32,7 @@ public class Promotion {
     private Instant startDate;
     private Instant endDate;
     private Boolean isActive;
+    private Boolean isGlobal;
 
     @CreationTimestamp
     private Timestamp createdAt;

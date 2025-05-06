@@ -2,11 +2,13 @@ package com.nhattung.orderservice.controller;
 
 import com.nhattung.orderservice.dto.OrderDto;
 import com.nhattung.orderservice.entity.Order;
+import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.response.ApiResponse;
 import com.nhattung.orderservice.service.IOrderService;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +44,17 @@ public class OrderController {
         return ApiResponse.<List<OrderDto>>builder()
                 .message("User orders retrieved successfully")
                 .result(orders)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/getAll")
+    public ApiResponse<PageResponse<OrderDto>> getAllOrders(
+            @RequestParam (value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<OrderDto>>builder()
+                .message("All orders retrieved successfully")
+                .result(orderService.getAllOrders(page, size))
                 .build();
     }
 }

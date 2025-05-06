@@ -3,6 +3,7 @@ package com.nhattung.promotionservice.service;
 import com.nhattung.promotionservice.dto.PromotionDto;
 import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
+import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface IPromotionService {
     void deletePromotion(Long promotionId);
     PromotionDto convertToDto(Promotion promotion);
     List<PromotionDto> convertToDto(List<Promotion> promotions);
+    void createUserPromotion(HandleUserPromotionRequest request);
+    void updateUserPromotion(HandleUserPromotionRequest request);
 }

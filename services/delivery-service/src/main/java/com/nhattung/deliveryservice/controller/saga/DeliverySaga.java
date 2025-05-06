@@ -27,7 +27,7 @@ public class DeliverySaga {
     @KafkaListener(topics = "delivery-processing-topic")
     public void processDelivery(OrderSagaEvent orderSagaEvent) {
         log.info("Nhận phản hồi từ Order Service: {}", orderSagaEvent);
-        redisTemplate.opsForValue().set(orderSagaEvent.getOrder().getOrderId(), orderSagaEvent, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(orderSagaEvent.getOrder().getOrderId(), orderSagaEvent, Duration.ofMinutes(30));
 
         if(OrderStatus.DELIVERY_PROCESSING == orderSagaEvent.getOrderStatus()){
             Delivery delivery = Delivery.builder()

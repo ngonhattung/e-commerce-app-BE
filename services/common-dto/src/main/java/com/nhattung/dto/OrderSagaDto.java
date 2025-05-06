@@ -18,6 +18,8 @@ public class OrderSagaDto {
     private BigDecimal totalPrice;
     private String shippingAddress;
     private String email;
+    private Long promotionId;
+    private boolean isGlobalPromotion;
     private Long transId;
     private Set<OrderItemSagaDto> orderItems;
 

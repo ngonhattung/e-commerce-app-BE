@@ -1,20 +1,15 @@
 package com.nhattung.orderservice.controller.saga;
 
-import com.nhattung.dto.OrderItemSagaDto;
 import com.nhattung.enums.OrderStatus;
 import com.nhattung.event.dto.NotificationEvent;
 import com.nhattung.event.dto.OrderSagaEvent;
-import com.nhattung.orderservice.dto.OrderDto;
-import com.nhattung.orderservice.dto.OrderItemDto;
 import com.nhattung.orderservice.entity.Order;
-import com.nhattung.orderservice.entity.OrderItem;
 import com.nhattung.orderservice.enums.CancelReason;
 import com.nhattung.orderservice.exception.AppException;
 import com.nhattung.orderservice.exception.ErrorCode;
 import com.nhattung.orderservice.repository.OrderRepository;
-import com.nhattung.orderservice.repository.httpclient.CartClient;
-import com.nhattung.orderservice.service.IOrderService;
-import com.nhattung.orderservice.utils.AuthenticatedUser;
+import com.nhattung.orderservice.repository.httpclient.PromotionPublicClient;
+import com.nhattung.orderservice.request.HandleUserPromotionRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -24,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +27,7 @@ public class OrderSaga {
 
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final AuthenticatedUser authenticatedUser;
+    private final PromotionPublicClient promotionClient;
     @KafkaListener(topics = "inventory-checkingResponse-topic")
     @Transactional
     public void handleInventoryChecked(OrderSagaEvent orderSagaEvent) {
@@ -160,6 +153,15 @@ public class OrderSaga {
             order.setOrderStatus(OrderStatus.ORDER_COMPLETED);
             order.setCancelReason(null);
             orderRepository.save(order);
+
+            if(!orderSagaEvent.getOrder().isGlobalPromotion())
+            {
+                promotionClient.updateUserPromotion(HandleUserPromotionRequest.builder()
+                        .userId(order.getUserId())
+                        .promotionId(order.getPromotionId())
+                        .build());
+            }
+
 
             orderSagaEvent.setMessage("Delivery completed");
             sendMailOrder("Order completed", "Delivery completed", 999, orderSagaEvent);

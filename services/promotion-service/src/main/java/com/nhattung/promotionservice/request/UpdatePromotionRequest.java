@@ -32,4 +32,6 @@ public class UpdatePromotionRequest {
     private Instant endDate;
     @Builder.Default
     private Boolean isActive = true;
+    @Builder.Default
+    private Boolean isGlobal = true;
 }
