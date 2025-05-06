@@ -121,6 +121,13 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=${app.apiPrefix}/admin/**
+          filters:
+            - StripPrefix=2
+
   security:
     oauth2:
       resourceserver:
