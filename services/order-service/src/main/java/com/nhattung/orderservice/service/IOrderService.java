@@ -6,6 +6,7 @@ import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IOrderService {
@@ -15,4 +16,6 @@ public interface IOrderService {
     List<OrderDto> getOrdersByUserId();
     OrderDto convertToDto(Order order);
     PageResponse<OrderDto> getAllOrders(int page, int size);
+    long countOrders();
+    BigDecimal getTotalRevenue();
 }

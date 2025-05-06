@@ -25,4 +25,5 @@ public interface IUserProfileService {
     void forgotPassword(ForgotPasswordRequest request);
     boolean existsByEmail(String email);
     void changePassword(ChangePasswordRequest request);
+    long getTotalUserCount();
 }

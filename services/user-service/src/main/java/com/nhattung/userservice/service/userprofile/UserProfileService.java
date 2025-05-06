@@ -288,6 +288,11 @@ public class UserProfileService implements IUserProfileService {
         usersResource.get(userId).resetPassword(newCredentialRepresentation);
     }
 
+    @Override
+    public long getTotalUserCount() {
+        return userProfileRepository.count();
+    }
+
     private UsersResource getUsersResource() {
 
         return keycloak.realm(REALM).users();

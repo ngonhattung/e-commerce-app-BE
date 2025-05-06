@@ -122,4 +122,14 @@ public class UserProfileController {
                 .result(userProfileService.existsByEmail(email))
                 .build();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/count")
+    public ApiResponse<Long> getTotalUserCount() {
+        long totalUserCount = userProfileService.getTotalUserCount();
+        return ApiResponse.<Long>builder()
+                .message("Total user count fetched successfully")
+                .result(totalUserCount)
+                .build();
+    }
 }

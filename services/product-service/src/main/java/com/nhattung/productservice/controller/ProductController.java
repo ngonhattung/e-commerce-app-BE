@@ -174,4 +174,14 @@ public class ProductController {
     }
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/count")
+    public ApiResponse<Long> getTotalProductCount() {
+        long count = productService.getTotalProductCount();
+        return ApiResponse.<Long>builder()
+                .message("Total product count retrieved successfully")
+                .result(count)
+                .build();
+    }
+
 }

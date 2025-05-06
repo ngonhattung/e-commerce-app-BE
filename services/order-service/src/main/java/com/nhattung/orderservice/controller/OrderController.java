@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -55,6 +56,26 @@ public class OrderController {
         return ApiResponse.<PageResponse<OrderDto>>builder()
                 .message("All orders retrieved successfully")
                 .result(orderService.getAllOrders(page, size))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/count")
+    public ApiResponse<Long> countOrders() {
+        long count = orderService.countOrders();
+        return ApiResponse.<Long>builder()
+                .message("Total orders count retrieved successfully")
+                .result(count)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/revenue")
+    public ApiResponse<BigDecimal> getTotalRevenue() {
+        BigDecimal totalRevenue = orderService.getTotalRevenue();
+        return ApiResponse.<BigDecimal>builder()
+                .message("Total revenue retrieved successfully")
+                .result(totalRevenue)
                 .build();
     }
 }

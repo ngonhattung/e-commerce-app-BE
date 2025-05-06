@@ -292,6 +292,11 @@ public class ProductService implements IProductService {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public long getTotalProductCount() {
+        return productRepository.count();
+    }
+
     private ProductDto mapperProduct(Product product) {
         ProductDto productDto = modelMapper.map(product, ProductDto.class);
         List<Image> images = imageRepository.findByProductId(product.getId());

@@ -198,6 +198,21 @@ public class OrderService implements IOrderService{
                 .build();
     }
 
+    @Override
+    public long countOrders() {
+        return orderRepository.count();
+    }
+
+    @Override
+    public BigDecimal getTotalRevenue() {
+
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    }
+
 
     private List<OrderItemDto> convertToOrderItemDtoList(Order order) {
         List<ProductDto> productDtos = productClient.getProductsByIds(
