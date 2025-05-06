@@ -57,6 +57,7 @@ public class PromotionService implements IPromotionService{
                 .endDate(request.getEndDate())
                 .isActive(request.getIsActive())
                 .isGlobal(request.getIsGlobal())
+                .destroyed(false)
                 .build();
     }
     @Override
