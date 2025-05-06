@@ -1,5 +1,6 @@
 package com.nhattung.userservice.controller;
 
+import com.nhattung.userservice.dto.MonthlyRegistrationDto;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.AppException;
@@ -130,6 +131,15 @@ public class UserProfileController {
         return ApiResponse.<Long>builder()
                 .message("Total user count fetched successfully")
                 .result(totalUserCount)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/monthly-registrations")
+    public ApiResponse<List<MonthlyRegistrationDto>> getMonthlyRegistrationData() {
+        return ApiResponse.<List<MonthlyRegistrationDto>>builder()
+                .message("Monthly registration data fetched successfully")
+                .result(userProfileService.getMonthlyRegistrationData())
                 .build();
     }
 }

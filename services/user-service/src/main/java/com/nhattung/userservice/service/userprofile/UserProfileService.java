@@ -2,6 +2,7 @@ package com.nhattung.userservice.service.userprofile;
 
 
 import com.nhattung.event.dto.NotificationEvent;
+import com.nhattung.userservice.dto.MonthlyRegistrationDto;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.AppException;
@@ -291,6 +292,19 @@ public class UserProfileService implements IUserProfileService {
     @Override
     public long getTotalUserCount() {
         return userProfileRepository.count();
+    }
+
+    @Override
+    public List<MonthlyRegistrationDto> getMonthlyRegistrationData() {
+        List<MonthlyRegistrationDto> monthlyRegistrations = userProfileRepository.getMonthlyRegistrations();
+
+        return monthlyRegistrations.stream()
+                .map(monthlyRegistration -> MonthlyRegistrationDto.builder()
+                        .year(monthlyRegistration.getYear())
+                        .month(monthlyRegistration.getMonth())
+                        .count(monthlyRegistration.getCount())
+                        .build())
+                .toList();
     }
 
     private UsersResource getUsersResource() {

@@ -31,9 +31,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -206,11 +204,155 @@ public class OrderService implements IOrderService{
     @Override
     public BigDecimal getTotalRevenue() {
 
-        List<Order> orders = orderRepository.findAll();
-        return orders.stream()
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return orderRepository.getTotalRevenue()
+                .setScale(2, RoundingMode.HALF_UP);
 
+    }
+
+    @Override
+    public List<RevenueDto> getRevenueByTimeRange(String timeRange) {
+        List<Map<String, Object>> results = switch (timeRange.toLowerCase()) {
+            case "weekly" -> orderRepository.getWeeklyRevenue();
+            case "monthly" -> orderRepository.getMonthlyRevenue();
+            default -> orderRepository.getDailyRevenue();
+        };
+
+        return mapToRevenueDto(results);
+    }
+
+    @Override
+    public List<CategoryRevenueDto> getRevenueByCategory() {
+
+        // 1. Lấy doanh thu theo product_id
+        List<ProductRevenueDto> productRevenues = mapToCategoryRevenueDto(orderRepository.getRevenueByProduct());
+
+
+        // 2. Chuyển đổi danh sách product_id thành danh sách duy nhất để giảm số lần gọi API
+        List<Long> productIds = productRevenues.stream()
+                .map(ProductRevenueDto::getProductId)
+                .collect(Collectors.toList());
+
+        // 3. Gọi product service để lấy thông tin category cho mỗi product
+        Map<Long, ProductDto> productInfoMap = productClient.getProductsByIds(productIds)
+                .getResult()
+                .stream()
+                .collect(Collectors.toMap(ProductDto::getId, productDto -> productDto));
+
+        // 4. Nhóm doanh thu theo category
+        Map<String, BigDecimal> categoryRevenueMap = new HashMap<>();
+
+        for (ProductRevenueDto productRevenue : productRevenues) {
+            ProductDto productInfo = productInfoMap.get(productRevenue.getProductId());
+            if (productInfo != null) {
+                String categoryName = productInfo.getCategory().getName();
+                BigDecimal revenue = productRevenue.getRevenue();
+
+                categoryRevenueMap.merge(categoryName, revenue, BigDecimal::add);
+            }
+        }
+
+        // 5. Chuyển đổi map thành danh sách kết quả và sắp xếp
+        return categoryRevenueMap.entrySet().stream()
+                .map(entry -> new CategoryRevenueDto(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(CategoryRevenueDto::getCategoryName))
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
+    public List<TopProductDto> getTopSellingProducts() {
+        List<ProductSalesDto> topProducts = orderRepository.getTopSellingProducts()
+                .stream()
+                .map(result -> {
+                    Object productIdObj = result.get("productId");
+                    Object soldObj = result.get("sold");
+
+                    // Safe conversion for productId
+                    Long productId = (productIdObj instanceof BigDecimal)
+                            ? ((BigDecimal) productIdObj).longValue()
+                            : (Long) productIdObj;
+
+                    // Safe conversion for sold
+                    Long sold = (soldObj instanceof BigDecimal)
+                            ? ((BigDecimal) soldObj).longValue()
+                            : (Long) soldObj;
+
+                    return new ProductSalesDto(
+                            productId,
+                            (BigDecimal) result.get("revenue"),
+                            (BigDecimal) result.get("price"),
+                            sold
+                    );
+                }).toList();
+
+        // Lấy product IDs
+        List<Long> productIds = topProducts.stream()
+                .map(ProductSalesDto::getProductId)
+                .collect(Collectors.toList());
+
+        Map<Long, ProductDto> productInfoMap = productClient.getProductsByIds(productIds)
+                .getResult()
+                .stream()
+                .collect(Collectors.toMap(ProductDto::getId, productDto -> productDto));
+
+
+        return topProducts.stream()
+                .map(productSalesDto -> {
+                    ProductDto productInfo = productInfoMap.get(productSalesDto.getProductId());
+                    if (productInfo != null) {
+                        String imageUri = productInfo.getImages() != null && !productInfo.getImages().isEmpty()
+                                ? productInfo.getImages().getFirst().getFileUri()
+                                : null;
+                        return TopProductDto.builder()
+                                .productId(productSalesDto.getProductId())
+                                .productName(productInfo.getName())
+                                .productImage(imageUri)
+                                .quantity(productInfo.getQuantity())
+                                .price(productSalesDto.getPrice())
+                                .sold(productSalesDto.getSold())
+                                .revenue(productSalesDto.getRevenue())
+                                .categoryName(productInfo.getCategory().getName())
+                                .build();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(TopProductDto::getSold).reversed())
+                .collect(Collectors.toList());
+
+
+    }
+
+    private List<ProductRevenueDto> mapToCategoryRevenueDto(List<Map<String, Object>> results) {
+        return results.stream()
+                .map(result -> new ProductRevenueDto(
+                        (Long) result.get("productId"),
+                        ((BigDecimal) result.get("revenue"))
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private List<RevenueDto> mapToRevenueDto(List<Map<String, Object>> results) {
+        return results.stream()
+                .map(result -> {
+                    Object dateObj = result.get("date");
+                    String dateStr;
+
+                    // Handle different date types
+                    if (dateObj instanceof java.sql.Date) {
+                        dateStr = ((java.sql.Date) dateObj).toString();  // Converts to YYYY-MM-DD format
+                    } else if (dateObj instanceof java.sql.Timestamp) {
+                        dateStr = ((java.sql.Timestamp) dateObj).toString();
+                    } else {
+                        dateStr = (String) dateObj;
+                    }
+
+                    return new RevenueDto(
+                            dateStr,
+                            ((BigDecimal) result.get("revenue"))
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
 

@@ -1,5 +1,6 @@
 package com.nhattung.userservice.service.userprofile;
 
+import com.nhattung.userservice.dto.MonthlyRegistrationDto;
 import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.request.ChangePasswordRequest;
@@ -7,6 +8,7 @@ import com.nhattung.userservice.request.CreateUserProfileRequest;
 import com.nhattung.userservice.request.ForgotPasswordRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.PageResponse;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -26,4 +28,5 @@ public interface IUserProfileService {
     boolean existsByEmail(String email);
     void changePassword(ChangePasswordRequest request);
     long getTotalUserCount();
+    List<MonthlyRegistrationDto> getMonthlyRegistrationData();
 }

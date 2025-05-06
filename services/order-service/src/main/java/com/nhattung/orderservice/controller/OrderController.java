@@ -1,6 +1,9 @@
 package com.nhattung.orderservice.controller;
 
+import com.nhattung.orderservice.dto.CategoryRevenueDto;
 import com.nhattung.orderservice.dto.OrderDto;
+import com.nhattung.orderservice.dto.RevenueDto;
+import com.nhattung.orderservice.dto.TopProductDto;
 import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
@@ -78,4 +81,33 @@ public class OrderController {
                 .result(totalRevenue)
                 .build();
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/revenue-by-time-range")
+    public ApiResponse<List<RevenueDto>> getRevenueByTimeRange(@RequestParam("timeRange") String timeRange) {
+        List<RevenueDto> revenue = orderService.getRevenueByTimeRange(timeRange);
+        return ApiResponse.<List<RevenueDto>>builder()
+                .message("Revenue by time range retrieved successfully")
+                .result(revenue)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/revenue-by-category")
+    public ApiResponse<List<CategoryRevenueDto>> getRevenueByCategory() {
+        return ApiResponse.<List<CategoryRevenueDto>>builder()
+                .message("Revenue by category retrieved successfully")
+                .result(orderService.getRevenueByCategory())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/top-selling-products")
+    public ApiResponse<List<TopProductDto>> getTopSellingProducts() {
+        return ApiResponse.<List<TopProductDto>>builder()
+                .message("Top selling products retrieved successfully")
+                .result(orderService.getTopSellingProducts())
+                .build();
+    }
+
 }

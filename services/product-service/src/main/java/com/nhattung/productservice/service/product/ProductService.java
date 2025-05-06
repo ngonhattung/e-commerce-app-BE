@@ -63,6 +63,17 @@ public class ProductService implements IProductService {
         return convertToDtoList(products);
     }
 
+    @Override
+    public Map<Long, ProductDto> getProductsByIdsMap(List<Long> ids) {
+        List<Product> products = productRepository.findAllById(ids);
+        if (products.isEmpty()) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return products
+                .stream()
+                .collect(Collectors.toMap(Product::getId, this::convertToDto));
+    }
+
 
     @CachePut(value = "products", key = "#request.name")
     @CacheEvict(value = "products", allEntries = true)
@@ -103,8 +114,12 @@ public class ProductService implements IProductService {
 
     @CachePut(value = "products", key = "#id")
     @Override
-    public Product updateProduct(Long id, UpdateProductRequest request) {
-        return productRepository.findById(id).map((existingProduct -> updateExistingProduct(existingProduct, request))).map(productRepository::save).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+    public ProductDto updateProduct(Long id, UpdateProductRequest request) {
+        return productRepository.findById(id)
+                .map(existingProduct -> updateExistingProduct(existingProduct, request))
+                .map(productRepository::save)
+                .map(this::convertToDto)  // Chuyển đổi thành DTO trước khi cache
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request) {

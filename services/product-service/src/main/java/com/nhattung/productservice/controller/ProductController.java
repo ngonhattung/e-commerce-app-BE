@@ -94,14 +94,12 @@ public class ProductController {
                                                  @RequestParam(value = "imageIds", required = false) List<Long> imageIds,
                                                  @RequestParam(value = "files", required = false) List<MultipartFile> files
                                                  ) {
-        Product product = productService.updateProduct(id, request);
         if(files != null && !files.isEmpty() && imageIds != null){
             imageService.updateImages(imageIds, files);
         }
-        ProductDto productDto = productService.convertToDto(product);
         return ApiResponse.<ProductDto>builder()
                 .message("Product updated successfully")
-                .result(productDto)
+                .result(productService.updateProduct(id, request))
                 .build();
     }
 
@@ -181,6 +179,14 @@ public class ProductController {
         return ApiResponse.<Long>builder()
                 .message("Total product count retrieved successfully")
                 .result(count)
+                .build();
+    }
+
+    @GetMapping("/getByIds")
+    public ApiResponse<List<ProductDto>> getProductsByIdsMap(@RequestParam List<Long> ids) {
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productService.getProductsByIdsMap(ids).values().stream().toList())
                 .build();
     }
 

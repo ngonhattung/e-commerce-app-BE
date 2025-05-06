@@ -9,12 +9,14 @@ import org.hibernate.sql.Update;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IProductService {
     ProductDto getProductById(Long id);
     List<ProductDto> getProductsByIds(List<Long> ids);
+    Map<Long, ProductDto> getProductsByIdsMap(List<Long> ids);
     Product saveProduct(CreateProductRequest request);
-    Product updateProduct(Long id, UpdateProductRequest request);
+    ProductDto updateProduct(Long id, UpdateProductRequest request);
     void deleteProduct(Long id);
 
     List<Product> getAllProducts();
