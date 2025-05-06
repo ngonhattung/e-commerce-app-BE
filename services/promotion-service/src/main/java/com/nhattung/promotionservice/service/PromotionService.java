@@ -56,6 +56,7 @@ public class PromotionService implements IPromotionService{
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .isActive(request.getIsActive())
+                .isGlobal(request.getIsGlobal())
                 .build();
     }
     @Override
@@ -112,6 +113,7 @@ public class PromotionService implements IPromotionService{
         existingPromotion.setStartDate(request.getStartDate());
         existingPromotion.setEndDate(request.getEndDate());
         existingPromotion.setIsActive(request.getIsActive());
+        existingPromotion.setIsGlobal(request.getIsGlobal());
         return existingPromotion;
     }
 
