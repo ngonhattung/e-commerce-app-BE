@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class MonthlyRegistrationDto {
-    private int month;
     private int year;
+    private int month;
     private Long count;
 }
