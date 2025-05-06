@@ -34,6 +34,7 @@ public class Promotion {
     private Boolean isActive;
     private Boolean isGlobal;
 
+    private Boolean destroyed = false;
     @CreationTimestamp
     private Timestamp createdAt;
     @UpdateTimestamp

@@ -6,6 +6,7 @@ import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
 import com.nhattung.promotionservice.response.ApiResponse;
+import com.nhattung.promotionservice.response.PageResponse;
 import com.nhattung.promotionservice.service.IPromotionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -73,12 +74,13 @@ public class PromotionController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<List<PromotionDto> > getAllPromotions() {
-        List<Promotion> listPromotion = promotionService.getAllPromotions();
-        List<PromotionDto> listPromotionDto = promotionService.convertToDto(listPromotion);
-        return ApiResponse.<List<PromotionDto> >builder()
+    public ApiResponse<PageResponse<PromotionDto>> getAllPromotions(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ApiResponse.<PageResponse<PromotionDto> >builder()
                 .message("Get all promotions successfully")
-                .result(listPromotionDto)
+                .result(promotionService.getAllPromotions(page, size))
                 .build();
     }
 

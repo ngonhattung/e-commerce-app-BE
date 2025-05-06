@@ -65,7 +65,7 @@ public class ProductService implements IProductService {
 
 
     @CachePut(value = "products", key = "#request.name")
-    @CacheEvict(value = "products", key = "'allProducts'")
+    @CacheEvict(value = "products", allEntries = true)
     @Override
     public Product saveProduct(CreateProductRequest request) {
         if (isProductExisted(request.getName(), request.getBrand())) {
@@ -118,7 +118,7 @@ public class ProductService implements IProductService {
     }
 
     @Caching(evict = {@CacheEvict(value = "products", key = "#id"),
-            @CacheEvict(value = "products", key = "'allProducts'", beforeInvocation = true)})
+            @CacheEvict(value = "products", allEntries = true, beforeInvocation = true)})
     @Override
     public void deleteProduct(Long id) {
         productRepository.findById(id).map(product -> {
@@ -133,7 +133,7 @@ public class ProductService implements IProductService {
         return productRepository.findAll();
     }
 
-    @Cacheable(value = "products", key = "'allProducts'")
+    @Cacheable(value = "products",key = "'products_page_' + #page + '_size_' + #size")
     @Override
     public PageResponse<ProductDto> getPagedProducts(int page, int size) {
         if (page < 0 || size <= 0) {

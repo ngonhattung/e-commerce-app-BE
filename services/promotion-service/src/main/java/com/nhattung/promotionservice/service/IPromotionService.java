@@ -5,6 +5,7 @@ import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
+import com.nhattung.promotionservice.response.PageResponse;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface IPromotionService {
     Promotion getPromotionByCouponCode(String couponCode);
     Promotion getPromotionActiveByCouponCode(String couponCode);
     Promotion updatePromotion(Long promotionId, UpdatePromotionRequest request);
-    List<Promotion> getAllPromotions();
+    PageResponse<PromotionDto> getAllPromotions(int page, int size);
     List<Promotion> getAllActivePromotions();
     void deletePromotion(Long promotionId);
     PromotionDto convertToDto(Promotion promotion);

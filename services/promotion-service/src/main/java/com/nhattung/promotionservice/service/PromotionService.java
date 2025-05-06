@@ -10,9 +10,14 @@ import com.nhattung.promotionservice.repository.UserPromotionRepository;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
+import com.nhattung.promotionservice.response.PageResponse;
 import com.nhattung.promotionservice.utils.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -111,8 +116,30 @@ public class PromotionService implements IPromotionService{
     }
 
     @Override
-    public List<Promotion> getAllPromotions() {
-        return promotionRepository.findAll();
+    public PageResponse<PromotionDto> getAllPromotions(int page, int size) {
+
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Promotion> promotionPage = promotionRepository.findByDestroyedFalse(pageable);
+
+        List<PromotionDto> promotionDtos = promotionPage.getContent()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+
+        return PageResponse.<PromotionDto>builder()
+                .currentPage(page)
+                .totalPages(promotionPage.getTotalPages())
+                .totalElements(promotionPage.getTotalElements())
+                .pageSize(size)
+                .data(promotionDtos)
+                .build();
+
     }
 
     @Override
@@ -122,11 +149,13 @@ public class PromotionService implements IPromotionService{
 
     @Override
     public void deletePromotion(Long promotionId) {
-        promotionRepository.findById(promotionId)
-                .ifPresentOrElse(promotionRepository::delete, () -> {
-                            throw new AppException(ErrorCode.PROMOTION_NOT_FOUND);
-                        }
-                );
+       promotionRepository.findById(promotionId)
+                .map(promotion -> {
+                    promotion.setDestroyed(true);
+                    return promotionRepository.save(promotion);
+                })
+                .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+
     }
 
     @Override
