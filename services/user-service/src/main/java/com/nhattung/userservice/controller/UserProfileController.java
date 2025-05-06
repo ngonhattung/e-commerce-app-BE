@@ -41,6 +41,18 @@ public class UserProfileController {
                 .build();
     }
 
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/profile/{userId}")
+    public ApiResponse<UserProfileDto> getUserProfileById(@PathVariable("userId") String userId) {
+        UserProfile userProfile = userProfileService.getUserProfileById(userId);
+        UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
+        return ApiResponse.<UserProfileDto>builder()
+                .message("User profile fetched successfully")
+                .result(userProfileDto)
+                .build();
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profiles")
     public ApiResponse<PageResponse<UserProfileDto>> getAllUserProfiles(

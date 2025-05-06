@@ -146,6 +146,12 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
+    public UserProfile getUserProfileById(String userId) {
+        return userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    @Override
     public List<UserProfile> getAllUserProfiles() {
         return userProfileRepository.findAll();
     }

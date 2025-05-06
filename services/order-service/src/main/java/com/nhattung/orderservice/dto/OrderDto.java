@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderDto {
     private String id;
-    private String userId;
+    private UserProfileDto user;
     private LocalDateTime orderDate;
     private BigDecimal totalAmount;;
     private String status;

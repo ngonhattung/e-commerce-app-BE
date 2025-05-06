@@ -14,6 +14,7 @@ import java.util.List;
 public interface IUserProfileService {
     UserProfile createUserProfile(CreateUserProfileRequest request, MultipartFile avatar);
     UserProfile getUserProfile();
+    UserProfile getUserProfileById(String userId);
     List<UserProfile> getAllUserProfiles();
     PageResponse<UserProfileDto> getPagedUserProfiles(int page, int size);
     UserProfile updateUserProfile(UpdateUserProfileRequest request,MultipartFile avatar);

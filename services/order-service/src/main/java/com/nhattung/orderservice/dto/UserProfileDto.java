@@ -1,4 +1,4 @@
-package com.nhattung.userservice.dto;
+package com.nhattung.orderservice.dto;
 
 
 import lombok.Data;
@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 @Data
 public class UserProfileDto {
-
     private String userId;
     private String fullName;
     private String phone;

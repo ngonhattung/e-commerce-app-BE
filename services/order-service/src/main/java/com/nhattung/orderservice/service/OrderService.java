@@ -14,6 +14,7 @@ import com.nhattung.orderservice.repository.OrderRepository;
 import com.nhattung.orderservice.repository.httpclient.CartClient;
 import com.nhattung.orderservice.repository.httpclient.ProductClient;
 import com.nhattung.orderservice.repository.httpclient.PromotionClient;
+import com.nhattung.orderservice.repository.httpclient.UserClient;
 import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
@@ -46,6 +47,7 @@ public class OrderService implements IOrderService{
     private final ModelMapper modelMapper;
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     private final ProductClient productClient;
+    private final UserClient userClient;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart().getResult();
@@ -168,6 +170,7 @@ public class OrderService implements IOrderService{
     @Override
     public OrderDto convertToDto(Order order) {
         OrderDto orderDto =  modelMapper.map(order, OrderDto.class);
+        orderDto.setUser(userClient.getUserProfileById(order.getUserId()).getResult());
         orderDto.setItems(convertToOrderItemDtoList(order));
         return orderDto;
     }
