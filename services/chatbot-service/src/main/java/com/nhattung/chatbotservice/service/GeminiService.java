@@ -37,6 +37,16 @@ public class GeminiService {
         List<GeminiRequest.Content> contents = createContentsFromHistory(session);
         log.info("Generated Contents for Gemini: {}", contents);
 
+        // CHÈN SYSTEM PROMPT định hướng vào đầu contents
+        GeminiRequest.Part systemPart = new GeminiRequest.Part(
+                "Bạn là một trợ lý ảo chuyên tư vấn sản phẩm cho website thương mại điện tử. "
+                        + "Hãy trả lời ngắn gọn, đúng trọng tâm và tránh lan man."
+        );
+        GeminiRequest.Content systemContent = new GeminiRequest.Content(
+                Collections.singletonList(systemPart), "model"
+        );
+        contents.addFirst(systemContent);
+
         // Tạo request
         GeminiRequest.GenerationConfig config = new GeminiRequest.GenerationConfig(0.7, 2048, 0.95, 40.0);
         GeminiRequest request = new GeminiRequest(contents, config);
