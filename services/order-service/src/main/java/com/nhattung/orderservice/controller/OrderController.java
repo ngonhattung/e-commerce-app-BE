@@ -1,9 +1,6 @@
 package com.nhattung.orderservice.controller;
 
-import com.nhattung.orderservice.dto.CategoryRevenueDto;
-import com.nhattung.orderservice.dto.OrderDto;
-import com.nhattung.orderservice.dto.RevenueDto;
-import com.nhattung.orderservice.dto.TopProductDto;
+import com.nhattung.orderservice.dto.*;
 import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
@@ -107,6 +104,24 @@ public class OrderController {
         return ApiResponse.<List<TopProductDto>>builder()
                 .message("Top selling products retrieved successfully")
                 .result(orderService.getTopSellingProducts())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/order-status-stats")
+    public ApiResponse<List<OrderStatusStatsDto>> getOrderStatusStats() {
+        return ApiResponse.<List<OrderStatusStatsDto>>builder()
+                .message("Order status statistics retrieved successfully")
+                .result(orderService.getOrderStatusStats())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/monthly-order-stats")
+    public ApiResponse<List<MonthlyOrderStatsDto>> getMonthlyOrderStats() {
+        return ApiResponse.<List<MonthlyOrderStatsDto>>builder()
+                .message("Monthly order statistics retrieved successfully")
+                .result(orderService.getMonthlyOrderStats())
                 .build();
     }
 

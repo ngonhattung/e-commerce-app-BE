@@ -1,5 +1,7 @@
 package com.nhattung.orderservice.repository;
 
+import com.nhattung.orderservice.dto.MonthlyOrderStatsDto;
+import com.nhattung.orderservice.dto.OrderStatusStatsDto;
 import com.nhattung.orderservice.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -65,4 +67,23 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             "            ORDER BY revenue DESC\n" +
             "            LIMIT 5", nativeQuery = true)
     List<Map<String, Object>> getTopSellingProducts();
+
+
+    @Query(value = "SELECT YEAR(order_date) as year, MONTH(order_date) as month,\n" +
+            "               COUNT(*) as count\n" +
+            "               FROM ms_order_db.orders\n" +
+            "               WHERE order_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)\n" +
+            "               GROUP BY YEAR(order_date), MONTH(order_date)\n" +
+            "               ORDER BY year ASC, month ASC",
+            nativeQuery = true)
+    List<MonthlyOrderStatsDto> getMonthlyOrderStats();
+
+
+    @Query(value = "SELECT order_status, COUNT(*) as count\n" +
+            "               FROM  ms_order_db.orders\n" +
+            "               WHERE order_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH)\n" +
+            "               GROUP BY order_status\n" +
+            "               ORDER BY count DESC",
+            nativeQuery = true)
+    List<Map<String,Object>> getOrderStatusStats();
 }

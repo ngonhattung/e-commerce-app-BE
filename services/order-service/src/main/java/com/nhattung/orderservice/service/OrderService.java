@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService implements IOrderService{
+public class OrderService implements IOrderService {
 
     private final OrderRepository orderRepository;
     private final AuthenticatedUser authenticatedUser;
@@ -46,6 +46,7 @@ public class OrderService implements IOrderService{
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     private final ProductClient productClient;
     private final UserClient userClient;
+
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart().getResult();
@@ -53,7 +54,7 @@ public class OrderService implements IOrderService{
                 .stream()
                 .filter(cartItem -> request.getSelectedCartItemIds().contains(cartItem.getId()))
                 .toList();
-        if(cartItems.isEmpty()){
+        if (cartItems.isEmpty()) {
             throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
         Order order = createOrder();
@@ -114,12 +115,12 @@ public class OrderService implements IOrderService{
     }
 
     private BigDecimal getFinalAmount(PromotionDto promotion, BigDecimal totalAmount) {
-        if(promotion.getMinimumOrderValue().compareTo(totalAmount) > 0) {
+        if (promotion.getMinimumOrderValue().compareTo(totalAmount) > 0) {
             throw new AppException(ErrorCode.PROMOTION_MINIMUM_ORDER_VALUE_NOT_MET);
         }
         BigDecimal percentDiscount = totalAmount
-                    .multiply(promotion.getDiscountPercent())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                .multiply(promotion.getDiscountPercent())
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         BigDecimal totalAmountWithPromotion = promotion.getDiscountAmount().max(percentDiscount);
 
         return totalAmount.subtract(totalAmountWithPromotion);
@@ -144,6 +145,7 @@ public class OrderService implements IOrderService{
                         .build())
                 .toList();
     }
+
     private BigDecimal calculateTotalAmount(List<OrderItemDto> orderItemList) {
         return orderItemList
                 .stream()
@@ -151,6 +153,7 @@ public class OrderService implements IOrderService{
                         .multiply(BigDecimal.valueOf(orderItem.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
     @Override
     public OrderDto getOrder(String orderId) {
         return orderRepository.findById(orderId)
@@ -165,9 +168,10 @@ public class OrderService implements IOrderService{
                 .map(this::convertToDto)
                 .toList();
     }
+
     @Override
     public OrderDto convertToDto(Order order) {
-        OrderDto orderDto =  modelMapper.map(order, OrderDto.class);
+        OrderDto orderDto = modelMapper.map(order, OrderDto.class);
         orderDto.setUser(userClient.getUserProfileById(order.getUserId()).getResult());
         orderDto.setItems(convertToOrderItemDtoList(order));
         return orderDto;
@@ -175,7 +179,7 @@ public class OrderService implements IOrderService{
 
     @Override
     public PageResponse<OrderDto> getAllOrders(int page, int size) {
-        if(page < 0 || size < 1) {
+        if (page < 0 || size < 1) {
             throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
         }
 
@@ -320,6 +324,48 @@ public class OrderService implements IOrderService{
                 .sorted(Comparator.comparing(TopProductDto::getSold).reversed())
                 .collect(Collectors.toList());
 
+
+    }
+
+    @Override
+    public List<OrderStatusStatsDto> getOrderStatusStats() {
+        List<OrderStatusStatsDto> results = orderRepository.getOrderStatusStats()
+                .stream()
+                .map(result -> {
+                    Object statusObj = result.get("order_status");
+                    String statusStr;
+
+                    // Handle different status types
+                    if (statusObj instanceof String) {
+                        statusStr = (String) statusObj;
+                    } else if (statusObj instanceof OrderStatus) {
+                        statusStr = ((OrderStatus) statusObj).name();
+                    } else {
+                        statusStr = String.valueOf(statusObj);
+                    }
+
+                    Object countObj = result.get("count");
+
+                    Long count = (countObj instanceof BigDecimal)
+                            ? ((BigDecimal) countObj).longValue()
+                            : (Long) countObj;
+
+                    return new OrderStatusStatsDto(
+                            statusStr,
+                            count
+                    );
+
+
+                }).toList();
+
+        return results.stream()
+                .sorted(Comparator.comparing(OrderStatusStatsDto::getCount).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MonthlyOrderStatsDto> getMonthlyOrderStats() {
+        return orderRepository.getMonthlyOrderStats();
 
     }
 

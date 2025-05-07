@@ -61,4 +61,20 @@ public class AdminController {
                 .build();
     }
 
+    @GetMapping("/order-status-stats")
+    public ApiResponse<List<OrderStatusStatsDto>> getOrderStatusStats() {
+        return ApiResponse.<List<OrderStatusStatsDto>>builder()
+                .message("Get order status statistics successfully")
+                .result(adminService.getOrderStatusStats())
+                .build();
+    }
+
+    @GetMapping("/monthly-order-stats")
+    public ApiResponse<List<MonthlyOrderStatsDto>> getMonthlyOrderStats() {
+        return ApiResponse.<List<MonthlyOrderStatsDto>>builder()
+                .message("Get monthly order statistics successfully")
+                .result(adminService.getMonthlyOrderStats())
+                .build();
+    }
+
 }

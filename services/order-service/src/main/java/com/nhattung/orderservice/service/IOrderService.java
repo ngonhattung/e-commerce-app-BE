@@ -1,9 +1,6 @@
 package com.nhattung.orderservice.service;
 
-import com.nhattung.orderservice.dto.CategoryRevenueDto;
-import com.nhattung.orderservice.dto.OrderDto;
-import com.nhattung.orderservice.dto.RevenueDto;
-import com.nhattung.orderservice.dto.TopProductDto;
+import com.nhattung.orderservice.dto.*;
 import com.nhattung.orderservice.entity.Order;
 import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
@@ -24,4 +21,6 @@ public interface IOrderService {
     List<RevenueDto> getRevenueByTimeRange(String timeRange);
     List<CategoryRevenueDto> getRevenueByCategory();
     List<TopProductDto> getTopSellingProducts();
+    List<OrderStatusStatsDto> getOrderStatusStats();
+    List<MonthlyOrderStatsDto> getMonthlyOrderStats();
 }

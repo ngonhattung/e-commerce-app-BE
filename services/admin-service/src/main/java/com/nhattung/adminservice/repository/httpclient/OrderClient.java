@@ -1,9 +1,7 @@
 package com.nhattung.adminservice.repository.httpclient;
 
 import com.nhattung.adminservice.config.AuthRequestInterceptor;
-import com.nhattung.adminservice.dto.CategoryRevenueDto;
-import com.nhattung.adminservice.dto.RevenueDto;
-import com.nhattung.adminservice.dto.TopProductDto;
+import com.nhattung.adminservice.dto.*;
 import com.nhattung.adminservice.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -31,4 +29,11 @@ public interface OrderClient {
 
     @GetMapping(value = "/orders/revenue-by-time-range", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<List<RevenueDto>> getRevenueByTimeRange(@RequestParam("timeRange") String timeRange);
+
+    @GetMapping(value = "/orders/order-status-stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<List<OrderStatusStatsDto>> getOrderStatusStats();
+
+    @GetMapping(value = "/orders/monthly-order-stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<List<MonthlyOrderStatsDto>> getMonthlyOrderStats();
+
 }

@@ -47,4 +47,12 @@ public class AdminService {
     public List<RevenueDto> getRevenueByTimeRange(String timeRange) {
         return orderClient.getRevenueByTimeRange(timeRange).getResult();
     }
+
+    public List<OrderStatusStatsDto> getOrderStatusStats() {
+        return orderClient.getOrderStatusStats().getResult();
+    }
+
+    public List<MonthlyOrderStatsDto> getMonthlyOrderStats() {
+        return orderClient.getMonthlyOrderStats().getResult();
+    }
 }
