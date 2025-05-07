@@ -39,6 +39,8 @@ public class SecurityConfig {
                 apiPrefix + "/user-profile/user/forgot-password",
                 apiPrefix + "/user-profile/user/verify-email/**",
                 apiPrefix + "/chatbot/**",
+                apiPrefix + "/products/search/**",
+                apiPrefix + "/products/filter/**",
         };
 
 

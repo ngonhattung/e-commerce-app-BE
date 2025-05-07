@@ -1,8 +1,10 @@
 package com.nhattung.productservice.repository;
 
+import com.nhattung.productservice.dto.ProductDto;
 import com.nhattung.productservice.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -29,4 +31,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByBrandAndName(String brand, String name);
     Page<Product> findByBrandAndName(String brand, String name, Pageable pageable);
     Long countByBrandAndName(String brand, String name);
+
+    Page<Product> findAll(Specification<ProductDto> specification, Pageable pageable);
 }

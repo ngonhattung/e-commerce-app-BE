@@ -28,6 +28,8 @@ public class SecurityConfig {
             "/categories/category/**",
             "/categories/name/**",
             "/categories/all",
+            "/products/search/**",
+            "/products/filter/**",
     };
 
     @Bean

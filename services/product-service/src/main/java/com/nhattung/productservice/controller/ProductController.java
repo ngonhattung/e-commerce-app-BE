@@ -1,6 +1,7 @@
 package com.nhattung.productservice.controller;
 
 import com.nhattung.productservice.dto.ProductDto;
+import com.nhattung.productservice.dto.ProductSearchCriteria;
 import com.nhattung.productservice.entity.Product;
 import com.nhattung.productservice.repository.httpclient.InventoryClient;
 import com.nhattung.productservice.request.CreateProductRequest;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -187,6 +189,69 @@ public class ProductController {
         return ApiResponse.<List<ProductDto>>builder()
                 .message("Products retrieved successfully")
                 .result(productService.getProductsByIdsMap(ids).values().stream().toList())
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<ProductDto>> searchProducts(
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ProductSearchCriteria criteria = ProductSearchCriteria.builder()
+                .searchTerm(searchTerm)
+                .build();
+
+        PageResponse<ProductDto> productPage = productService.getPagedProductsByCriteria(criteria, page, size);
+        return ApiResponse.<PageResponse<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productPage)
+                .build();
+    }
+
+    @GetMapping("/filter")
+    public ApiResponse<PageResponse<ProductDto>> filterProducts(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ProductSearchCriteria criteria = ProductSearchCriteria.builder()
+                .name(name)
+                .brand(brand)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .build();
+
+        PageResponse<ProductDto> productPage = productService.getPagedProductsByCriteriaAndFilter(criteria, page, size);
+        return ApiResponse.<PageResponse<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productPage)
+                .build();
+    }
+
+    @GetMapping("/filter/home")
+    public ApiResponse<PageResponse<ProductDto>> filterProductsHome(
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ProductSearchCriteria criteria = ProductSearchCriteria.builder()
+                .searchTerm(searchTerm)
+                .categoryName(categoryName)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .build();
+
+        PageResponse<ProductDto> productPage = productService.getPagedProductsByCriteriaAndFilterHome(criteria, page, size);
+        return ApiResponse.<PageResponse<ProductDto>>builder()
+                .message("Products retrieved successfully")
+                .result(productPage)
                 .build();
     }
 

@@ -2,6 +2,7 @@ package com.nhattung.productservice.service.product;
 
 import com.nhattung.productservice.dto.ImageDto;
 import com.nhattung.productservice.dto.ProductDto;
+import com.nhattung.productservice.dto.ProductSearchCriteria;
 import com.nhattung.productservice.entity.Category;
 import com.nhattung.productservice.entity.Image;
 import com.nhattung.productservice.entity.Product;
@@ -15,6 +16,7 @@ import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.InventoryRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
 import com.nhattung.productservice.response.PageResponse;
+import com.nhattung.productservice.utils.ProductSpecification;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -29,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -168,6 +171,41 @@ public class ProductService implements IProductService {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Product> productPage = productRepository.findByDestroyedFalse(pageable);
+        List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
+        return PageResponse.<ProductDto>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .pageSize(productPage.getSize())
+                .data(productDtos)
+                .build();
+    }
+
+    @Override
+    public PageResponse<ProductDto> getPagedProductsByCriteria(ProductSearchCriteria criteria, int page, int size) {
+        Specification<ProductDto> specification = ProductSpecification.withSearchCriteria(criteria);
+        return getProductDtoPageResponse(page, size, specification);
+    }
+
+    @Override
+    public PageResponse<ProductDto> getPagedProductsByCriteriaAndFilter(ProductSearchCriteria criteria, int page, int size) {
+        Specification<ProductDto> specification = ProductSpecification.withFilterCriteria(criteria);
+        return getProductDtoPageResponse(page, size, specification);
+    }
+
+    @Override
+    public PageResponse<ProductDto> getPagedProductsByCriteriaAndFilterHome(ProductSearchCriteria criteria, int page, int size) {
+        Specification<ProductDto> specification = ProductSpecification.withFilterCriteriaHome(criteria);
+        return getProductDtoPageResponse(page, size, specification);
+    }
+
+    private PageResponse<ProductDto> getProductDtoPageResponse(int page, int size, Specification<ProductDto> specification) {
+        if (page < 0 || size <= 0) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Page<Product> productPage = productRepository.findAll(specification,pageable);
         List<ProductDto> productDtos = convertToDtoList(productPage.getContent());
         return PageResponse.<ProductDto>builder()
                 .currentPage(page)

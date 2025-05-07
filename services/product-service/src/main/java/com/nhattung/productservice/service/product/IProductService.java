@@ -1,6 +1,7 @@
 package com.nhattung.productservice.service.product;
 
 import com.nhattung.productservice.dto.ProductDto;
+import com.nhattung.productservice.dto.ProductSearchCriteria;
 import com.nhattung.productservice.entity.Product;
 import com.nhattung.productservice.request.CreateProductRequest;
 import com.nhattung.productservice.request.UpdateProductRequest;
@@ -21,6 +22,9 @@ public interface IProductService {
 
     List<Product> getAllProducts();
     PageResponse<ProductDto> getPagedProducts(int page, int size);
+    PageResponse<ProductDto> getPagedProductsByCriteria(ProductSearchCriteria criteria, int page, int size);
+    PageResponse<ProductDto> getPagedProductsByCriteriaAndFilter(ProductSearchCriteria criteria, int page, int size);
+    PageResponse<ProductDto> getPagedProductsByCriteriaAndFilterHome(ProductSearchCriteria criteria, int page, int size);
 
     List<Product> getProductsByCategory(String category);
     PageResponse<ProductDto> getPagedProductsByCategory(String category, int page, int size);
