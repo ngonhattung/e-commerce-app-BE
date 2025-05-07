@@ -113,6 +113,7 @@ public class ProductService implements IProductService {
 
 
     @CachePut(value = "products", key = "#id")
+    @CacheEvict(value = "products", allEntries = true)
     @Override
     public ProductDto updateProduct(Long id, UpdateProductRequest request) {
         return productRepository.findById(id)
