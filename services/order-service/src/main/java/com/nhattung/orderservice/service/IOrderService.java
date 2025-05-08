@@ -23,4 +23,6 @@ public interface IOrderService {
     List<TopProductDto> getTopSellingProducts();
     List<OrderStatusStatsDto> getOrderStatusStats();
     List<MonthlyOrderStatsDto> getMonthlyOrderStats();
+    PageResponse<OrderDto> searchOrders(OrderSearchCriteria criteria, int page, int size);
+    PageResponse<OrderDto> filterOrders(OrderSearchCriteria criteria, int page, int size);
 }

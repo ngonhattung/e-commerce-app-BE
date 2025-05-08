@@ -5,6 +5,7 @@ import com.nhattung.userservice.dto.UserProfileDto;
 import com.nhattung.userservice.entity.UserProfile;
 import com.nhattung.userservice.exception.AppException;
 import com.nhattung.userservice.request.ChangePasswordRequest;
+import com.nhattung.userservice.request.CreateUserProfileGGFBRequest;
 import com.nhattung.userservice.request.ForgotPasswordRequest;
 import com.nhattung.userservice.request.UpdateUserProfileRequest;
 import com.nhattung.userservice.response.ApiResponse;
@@ -140,6 +141,56 @@ public class UserProfileController {
         return ApiResponse.<List<MonthlyRegistrationDto>>builder()
                 .message("Monthly registration data fetched successfully")
                 .result(userProfileService.getMonthlyRegistrationData())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/search")
+    public ApiResponse<List<String>> findUserIdsBySearchTerm(@RequestParam("searchTerm") String searchTerm) {
+        List<String> userIds = userProfileService.findUserIdsBySearchTerm(searchTerm);
+        return ApiResponse.<List<String>>builder()
+                .message("User IDs fetched successfully")
+                .result(userIds)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/search-fullName")
+    public ApiResponse<List<String>> findUserIdsByFullName(@RequestParam("fullName") String fullName) {
+        List<String> userIds = userProfileService.findUserIdsByFullName(fullName);
+        return ApiResponse.<List<String>>builder()
+                .message("User IDs fetched successfully")
+                .result(userIds)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/search-email")
+    public ApiResponse<List<String>> findUserIdsByEmail(@RequestParam("email") String email) {
+        List<String> userIds = userProfileService.findUserIdsByEmail(email);
+        return ApiResponse.<List<String>>builder()
+                .message("User IDs fetched successfully")
+                .result(userIds)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/user/search-phone")
+    public ApiResponse<List<String>> findUserIdsByPhone(@RequestParam("phone") String phone) {
+        List<String> userIds = userProfileService.findUserIdsByPhone(phone);
+        return ApiResponse.<List<String>>builder()
+                .message("User IDs fetched successfully")
+                .result(userIds)
+                .build();
+    }
+
+    @PostMapping("/create")
+    public ApiResponse<UserProfileDto> createUserProfile(@RequestBody CreateUserProfileGGFBRequest request){
+        UserProfile userProfile = userProfileService.createUserProfileByGoogleAndFacebook(request);
+        UserProfileDto userProfileDto = userProfileService.convertToDto(userProfile);
+        return ApiResponse.<UserProfileDto>builder()
+                .message("User profile created successfully")
+                .result(userProfileDto)
                 .build();
     }
 }

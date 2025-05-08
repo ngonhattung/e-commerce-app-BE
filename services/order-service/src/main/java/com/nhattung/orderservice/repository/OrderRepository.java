@@ -1,8 +1,12 @@
 package com.nhattung.orderservice.repository;
 
 import com.nhattung.orderservice.dto.MonthlyOrderStatsDto;
+import com.nhattung.orderservice.dto.OrderDto;
 import com.nhattung.orderservice.dto.OrderStatusStatsDto;
 import com.nhattung.orderservice.entity.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -86,4 +90,6 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             "               ORDER BY count DESC",
             nativeQuery = true)
     List<Map<String,Object>> getOrderStatusStats();
+
+    Page<Order> findAll(Specification<OrderDto> orderDtoSpecification, Pageable pageable);
 }

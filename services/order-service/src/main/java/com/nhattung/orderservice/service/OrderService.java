@@ -18,12 +18,14 @@ import com.nhattung.orderservice.repository.httpclient.UserClient;
 import com.nhattung.orderservice.request.PageResponse;
 import com.nhattung.orderservice.request.SelectedCartItemRequest;
 import com.nhattung.orderservice.utils.AuthenticatedUser;
+import com.nhattung.orderservice.utils.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +48,7 @@ public class OrderService implements IOrderService {
     private final KafkaTemplate<String, OrderSagaEvent> kafkaTemplate;
     private final ProductClient productClient;
     private final UserClient userClient;
-
+    private final OrderSpecification orderSpecification;
     @Override
     public Order placeOrder(SelectedCartItemRequest request) {
         CartDto cart = cartClient.getCart().getResult();
@@ -368,6 +370,41 @@ public class OrderService implements IOrderService {
         return orderRepository.getMonthlyOrderStats();
 
     }
+
+    @Override
+    public PageResponse<OrderDto> searchOrders(OrderSearchCriteria criteria, int page, int size) {
+        Specification<OrderDto> specification = orderSpecification.withSearchCriteria(criteria);
+        return getOrderDtoPageResponse(page, size, specification);
+    }
+
+    @Override
+    public PageResponse<OrderDto> filterOrders(OrderSearchCriteria criteria, int page, int size) {
+        Specification<OrderDto> specification = orderSpecification.withFilterCriteria(criteria);
+        return getOrderDtoPageResponse(page, size, specification);
+    }
+
+    private PageResponse<OrderDto> getOrderDtoPageResponse(int page, int size, Specification<OrderDto> specification) {
+        if (page < 0 || size < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "orderDate");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Order> orderPage = orderRepository.findAll(specification, pageable);
+        List<OrderDto> orderDtos = orderPage.getContent()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+        return PageResponse.<OrderDto>builder()
+                .currentPage(page)
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .pageSize(size)
+                .data(orderDtos)
+                .build();
+    }
+
 
     private List<ProductRevenueDto> mapToCategoryRevenueDto(List<Map<String, Object>> results) {
         return results.stream()

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -20,8 +21,8 @@ public class PromotionDto {
     private BigDecimal discountPercent;
     private BigDecimal discountAmount;
     private BigDecimal minimumOrderValue;
-    private Instant startDate;
-    private Instant endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private Boolean isActive;
     private Boolean isGlobal;
 }

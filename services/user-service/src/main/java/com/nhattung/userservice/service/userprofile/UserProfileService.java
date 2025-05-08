@@ -141,6 +141,25 @@ public class UserProfileService implements IUserProfileService {
     }
 
     @Override
+    public UserProfile createUserProfileByGoogleAndFacebook(CreateUserProfileGGFBRequest request) {
+
+        UserProfile userProfile = UserProfile.builder()
+                .email(request.getEmail())
+                .fullName(request.getFullName())
+                .avatar(request.getAvatar())
+                .userId(request.getUserId())
+                .build();
+
+        return userProfileRepository.findByEmail(request.getEmail())
+                .orElseGet(() -> {
+                    UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+                    // Initialize cart for user
+                    cartClient.initializeCart(savedUserProfile.getUserId());
+                    return savedUserProfile;
+                });
+    }
+
+    @Override
     public UserProfile getUserProfile() {
         return userProfileRepository.findByUserId(authenticatedUser.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -304,6 +323,42 @@ public class UserProfileService implements IUserProfileService {
                         .month(monthlyRegistration.getMonth())
                         .count(monthlyRegistration.getCount())
                         .build())
+                .toList();
+    }
+
+    @Override
+    public List<String> findUserIdsBySearchTerm(String searchTerm) {
+        log.info("Searching for user IDs with search term: {}", searchTerm);
+        List<UserProfile> userProfiles = userProfileRepository.findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContaining(searchTerm,searchTerm,searchTerm);
+        return userProfiles.stream()
+                .map(UserProfile::getUserId)
+                .toList();
+    }
+
+    @Override
+    public List<String> findUserIdsByFullName(String fullName) {
+        log.info("Searching for user IDs with full name: {}", fullName);
+        List<UserProfile> userProfiles = userProfileRepository.findByFullNameContainingIgnoreCase(fullName);
+        return userProfiles.stream()
+                .map(UserProfile::getUserId)
+                .toList();
+    }
+
+    @Override
+    public List<String> findUserIdsByEmail(String email) {
+        log.info("Searching for user IDs with email: {}", email);
+        List<UserProfile> userProfiles = userProfileRepository.findByEmailContainingIgnoreCase(email);
+        return userProfiles.stream()
+                .map(UserProfile::getUserId)
+                .toList();
+    }
+
+    @Override
+    public List<String> findUserIdsByPhone(String phone) {
+        log.info("Searching for user IDs with phone: {}", phone);
+        List<UserProfile> userProfiles = userProfileRepository.findByPhoneContainingIgnoreCase(phone);
+        return userProfiles.stream()
+                .map(UserProfile::getUserId)
                 .toList();
     }
 

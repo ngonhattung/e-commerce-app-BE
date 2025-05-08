@@ -1,6 +1,7 @@
 package com.nhattung.promotionservice.service;
 
 import com.nhattung.promotionservice.dto.PromotionDto;
+import com.nhattung.promotionservice.dto.PromotionSearchCriteria;
 import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.entity.UserPromotion;
 import com.nhattung.promotionservice.exception.AppException;
@@ -12,15 +13,18 @@ import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
 import com.nhattung.promotionservice.request.UpdatePromotionRequest;
 import com.nhattung.promotionservice.response.PageResponse;
 import com.nhattung.promotionservice.utils.AuthenticatedUser;
+import com.nhattung.promotionservice.utils.PromotionSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -78,8 +82,8 @@ public class PromotionService implements IPromotionService{
                 .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
         // Kiểm tra trạng thái kích hoạt & thời gian
         if (!promotion.getIsActive()
-                || (promotion.getStartDate() != null && promotion.getStartDate().isAfter(Instant.now()))
-                || (promotion.getEndDate() != null && promotion.getEndDate().isBefore(Instant.now()))) {
+                || (promotion.getStartDate() != null && promotion.getStartDate().isAfter(LocalDateTime.now()))
+                || (promotion.getEndDate() != null && promotion.getEndDate().isBefore(LocalDateTime.now()))) {
             throw new AppException(ErrorCode.PROMOTION_NOT_ACTIVE);
         }
 
@@ -190,5 +194,40 @@ public class PromotionService implements IPromotionService{
                 .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
         userPromotion.setIsUsed(true);
         userPromotionRepository.save(userPromotion);
+    }
+
+    @Override
+    public PageResponse<PromotionDto> searchPromotions(PromotionSearchCriteria criteria, int page, int size) {
+        Specification<PromotionDto> specification = PromotionSpecification.withSearchCriteria(criteria);
+        return getPromotionDtoPageResponse(page, size, specification);
+    }
+
+    @Override
+    public PageResponse<PromotionDto> filterPromotions(PromotionSearchCriteria criteria, int page, int size) {
+        Specification<PromotionDto> specification = PromotionSpecification.withFilterCriteria(criteria);
+        return getPromotionDtoPageResponse(page, size, specification);
+
+    }
+
+    private PageResponse<PromotionDto> getPromotionDtoPageResponse(int page, int size, Specification<PromotionDto> specification) {
+        if (page < 0 || size < 1) {
+            throw new AppException(ErrorCode.INVALID_PAGE_SIZE);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Promotion> orderPage = promotionRepository.findAll(specification, pageable);
+        List<PromotionDto> orderDtos = orderPage.getContent()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+        return PageResponse.<PromotionDto>builder()
+                .currentPage(page)
+                .totalPages(orderPage.getTotalPages())
+                .totalElements(orderPage.getTotalElements())
+                .pageSize(size)
+                .data(orderDtos)
+                .build();
     }
 }

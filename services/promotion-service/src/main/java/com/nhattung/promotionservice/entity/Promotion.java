@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -29,8 +30,8 @@ public class Promotion {
     private BigDecimal discountPercent;
     private BigDecimal discountAmount;
     private BigDecimal minimumOrderValue;
-    private Instant startDate;
-    private Instant endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private Boolean isActive;
     private Boolean isGlobal;
 

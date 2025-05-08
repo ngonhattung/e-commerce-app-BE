@@ -1,6 +1,7 @@
 package com.nhattung.promotionservice.controller;
 
 import com.nhattung.promotionservice.dto.PromotionDto;
+import com.nhattung.promotionservice.dto.PromotionSearchCriteria;
 import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
@@ -10,8 +11,10 @@ import com.nhattung.promotionservice.response.PageResponse;
 import com.nhattung.promotionservice.service.IPromotionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -105,6 +108,56 @@ public class PromotionController {
         promotionService.updateUserPromotion(request);
         return ApiResponse.<Void>builder()
                 .message("Update user promotion successfully")
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<PromotionDto>> searchPromotions(
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        PromotionSearchCriteria criteria = PromotionSearchCriteria.builder()
+                .searchTerm(searchTerm)
+                .build();
+        PageResponse<PromotionDto> promotions = promotionService.searchPromotions(criteria, page, size);
+        return ApiResponse.<PageResponse<PromotionDto>>builder()
+                .message("Search promotions successfully")
+                .result(promotions)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/filter")
+    public ApiResponse<PageResponse<PromotionDto>> filterPromotions(
+            @RequestParam(value = "promotionName", required = false) String promotionName,
+            @RequestParam(value = "promotionCode", required = false) String promotionCode,
+            @RequestParam(value = "status", required = false, defaultValue = "true") boolean status,
+            @RequestParam(value = "startDatePromotionStartDate", required = false) String startDatePromotionStartDate,
+            @RequestParam(value = "endDatePromotionStartDate", required = false) String endDatePromotionStartDate,
+            @RequestParam(value = "startDatePromotionEndDate", required = false) String startDatePromotionEndDate,
+            @RequestParam(value = "endDatePromotionEndDate", required = false) String endDatePromotionEndDate,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        PromotionSearchCriteria criteria = PromotionSearchCriteria.builder()
+                .promotionName(promotionName)
+                .promotionCode(promotionCode)
+                .status(status)
+                .startDatePromotionStartDate(
+                        startDatePromotionStartDate != null ? LocalDate.parse(startDatePromotionStartDate) : null)
+                .endDatePromotionStartDate(
+                        endDatePromotionStartDate != null ? LocalDate.parse(endDatePromotionStartDate) : null)
+                .startDatePromotionEndDate(
+                        startDatePromotionEndDate != null ? LocalDate.parse(startDatePromotionEndDate) : null)
+                .endDatePromotionEndDate(
+                        endDatePromotionEndDate != null ? LocalDate.parse(endDatePromotionEndDate) : null)
+                .build();
+        PageResponse<PromotionDto> promotions = promotionService.filterPromotions(criteria, page, size);
+        return ApiResponse.<PageResponse<PromotionDto>>builder()
+                .message("Filter promotions successfully")
+                .result(promotions)
                 .build();
     }
 }

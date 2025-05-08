@@ -62,7 +62,7 @@ public class AuthController {
     }
 
     @GetMapping("/token")
-    public ApiResponse<AuthResponse> getTokenFromCode(@RequestBody String code) {
+    public ApiResponse<AuthResponse> getTokenFromCode(@RequestParam String code) {
         return ApiResponse.<AuthResponse>builder()
                 .result(authService.getTokenFromCode(code))
                 .build();

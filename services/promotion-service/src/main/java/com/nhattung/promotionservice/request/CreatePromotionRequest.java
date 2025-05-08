@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -27,9 +28,9 @@ public class CreatePromotionRequest {
     @NotNull(message = "EMPTY_MINIMUM_ORDER_VALUE")
     private BigDecimal minimumOrderValue;
     @NotNull(message = "EMPTY_START_DATE")
-    private Instant startDate;
+    private LocalDateTime startDate;
     @NotNull(message = "EMPTY_END_DATE")
-    private Instant endDate;
+    private LocalDateTime endDate;
     @Builder.Default
     private Boolean isActive = true;
     @Builder.Default

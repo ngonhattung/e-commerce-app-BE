@@ -1,6 +1,7 @@
 package com.nhattung.promotionservice.service;
 
 import com.nhattung.promotionservice.dto.PromotionDto;
+import com.nhattung.promotionservice.dto.PromotionSearchCriteria;
 import com.nhattung.promotionservice.entity.Promotion;
 import com.nhattung.promotionservice.request.CreatePromotionRequest;
 import com.nhattung.promotionservice.request.HandleUserPromotionRequest;
@@ -23,4 +24,6 @@ public interface IPromotionService {
     List<PromotionDto> convertToDto(List<Promotion> promotions);
     void createUserPromotion(HandleUserPromotionRequest request);
     void updateUserPromotion(HandleUserPromotionRequest request);
+    PageResponse<PromotionDto> searchPromotions(PromotionSearchCriteria criteria, int page, int size);
+    PageResponse<PromotionDto> filterPromotions(PromotionSearchCriteria criteria, int page, int size);
 }

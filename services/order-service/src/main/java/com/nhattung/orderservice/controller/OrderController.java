@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -122,6 +123,50 @@ public class OrderController {
         return ApiResponse.<List<MonthlyOrderStatsDto>>builder()
                 .message("Monthly order statistics retrieved successfully")
                 .result(orderService.getMonthlyOrderStats())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<OrderDto>> searchOrders(
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        OrderSearchCriteria criteria = OrderSearchCriteria.builder()
+                .searchTerm(searchTerm)
+                .build();
+        return ApiResponse.<PageResponse<OrderDto>>builder()
+                .message("Orders searched successfully")
+                .result(orderService.searchOrders(criteria, page, size))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/filter")
+    public ApiResponse<PageResponse<OrderDto>> filterOrders(
+            @RequestParam(value = "customerName", required = false) String customerName,
+            @RequestParam(value = "customerPhone", required = false) String customerPhone,
+            @RequestParam(value = "customerEmail", required = false) String customerEmail,
+            @RequestParam(value = "orderStatus", required = false) String orderStatus,
+            @RequestParam(value = "minTotalPrice", required = false) BigDecimal minTotalPrice,
+            @RequestParam(value = "maxTotalPrice", required = false) BigDecimal maxTotalPrice,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        OrderSearchCriteria criteria = OrderSearchCriteria.builder()
+                .customerName(customerName)
+                .customerPhone(customerPhone)
+                .customerEmail(customerEmail)
+                .orderStatus(orderStatus)
+                .minTotalPrice(minTotalPrice)
+                .maxTotalPrice(maxTotalPrice)
+                .startDate(startDate != null  && !startDate.isEmpty() ? LocalDate.parse(startDate) : null)
+                .endDate(endDate != null && !endDate.isEmpty() ? LocalDate.parse(endDate) : null)
+                .build();
+        return ApiResponse.<PageResponse<OrderDto>>builder()
+                .message("Orders filtered successfully")
+                .result(orderService.filterOrders(criteria, page, size))
                 .build();
     }
 

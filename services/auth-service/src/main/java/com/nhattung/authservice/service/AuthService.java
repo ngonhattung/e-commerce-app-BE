@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhattung.authservice.exception.AppException;
 import com.nhattung.authservice.exception.ErrorCode;
 import com.nhattung.authservice.repository.KeyCloakClient;
+import com.nhattung.authservice.repository.UserClient;
 import com.nhattung.authservice.request.*;
 import com.nhattung.authservice.response.AuthResponse;
 import com.nhattung.authservice.response.LogoutResponse;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class AuthService implements IAuthService{
 
     private final KeyCloakClient keyCloakClient;
-
+    private final UserClient userClient;
     @Value("${idp.client.id}")
     private String CLIENT_ID;
 
@@ -179,13 +180,32 @@ public class AuthService implements IAuthService{
     @Override
     public AuthResponse getTokenFromCode(String code) {
         try {
-            return keyCloakClient.getTokenFromCode(TokenFromCodeParam.builder()
+            AuthResponse response =  keyCloakClient.getTokenFromCode(TokenFromCodeParam.builder()
                     .client_id(CLIENT_ID)
                     .client_secret(CLIENT_SECRET)
                     .grant_type("authorization_code")
                     .code(code)
                     .redirect_uri(FRONTEND_URL + "/callback")
                     .build());
+
+            // Extract roles from the access token
+            List<String> roles = extractRolesFromToken(response.getAccessToken());
+            response.setRoles(roles);
+
+            Map<String, Object> userInfo = keyCloakClient.getUserInfo("Bearer " + response.getAccessToken());
+            String userId = (String) userInfo.get("sub");
+            String email = (String) userInfo.get("email");
+            String fullName = (String) userInfo.get("name");
+            String avatar = "https://ui-avatars.com/api/?name=" + fullName.replace(" ", "+") + "&background=random&color=fff&bold=true&size=128";
+            CreateUserProfileGGFBRequest createUserProfileGGFBRequest = CreateUserProfileGGFBRequest.builder()
+                    .userId(userId)
+                    .email(email)
+                    .fullName(fullName)
+                    .avatar(avatar)
+                    .build();
+            userClient.createUserProfile(createUserProfileGGFBRequest);
+
+            return response;
         } catch (FeignException.BadRequest e) {
             throw new AppException(ErrorCode.ERROR_GET_TOKEN_FROM_CODE);
         } catch (FeignException e) {
@@ -194,4 +214,6 @@ public class AuthService implements IAuthService{
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
+
+
 }

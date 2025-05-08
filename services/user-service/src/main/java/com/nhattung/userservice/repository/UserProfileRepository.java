@@ -20,4 +20,14 @@ public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
             "               ORDER BY year ASC, month ASC",
             nativeQuery = true)
     List<MonthlyRegistrationDto> getMonthlyRegistrations();
+
+    List<UserProfile> findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContaining(String likePattern, String likePattern1, String likePattern2);
+
+    List<UserProfile> findByFullNameContainingIgnoreCase(String fullName);
+
+    List<UserProfile> findByEmailContainingIgnoreCase(String email);
+
+    List<UserProfile> findByPhoneContainingIgnoreCase(String phone);
+
+    Optional<UserProfile> findByEmail(String email);
 }
