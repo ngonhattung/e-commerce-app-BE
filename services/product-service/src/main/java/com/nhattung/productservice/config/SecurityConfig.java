@@ -30,6 +30,9 @@ public class SecurityConfig {
             "/categories/all",
             "/products/search/**",
             "/products/filter/**",
+            "/products/productsByIds",
+            "/products/recently/**",
+
     };
 
     @Bean

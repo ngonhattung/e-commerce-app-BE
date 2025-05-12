@@ -255,4 +255,21 @@ public class ProductController {
                 .build();
     }
 
+    @PostMapping("/recently/add/{id}")
+    public ApiResponse<Void> addProductRecently(@PathVariable(value = "id") Long id) {
+        productService.addProductRecently(id);
+        return ApiResponse.<Void>builder()
+                .message("Product added to recently viewed successfully")
+                .build();
+    }
+
+    @GetMapping("/recently/get")
+    public ApiResponse<List<ProductDto>> getProductRecently() {
+        List<ProductDto> productDtos = productService.getProductRecently();
+        return ApiResponse.<List<ProductDto>>builder()
+                .message("Recently viewed products retrieved successfully")
+                .result(productDtos)
+                .build();
+    }
+
 }

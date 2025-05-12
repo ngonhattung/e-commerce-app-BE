@@ -99,7 +99,6 @@ public class OrderController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/top-selling-products")
     public ApiResponse<List<TopProductDto>> getTopSellingProducts() {
         return ApiResponse.<List<TopProductDto>>builder()

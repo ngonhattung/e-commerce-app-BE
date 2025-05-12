@@ -65,7 +65,7 @@ public class OrderSpecification {
             if (orderStatus == null || orderStatus.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("status"), orderStatus);
+            return criteriaBuilder.equal(root.get("orderStatus"), orderStatus);
         };
     }
 

@@ -47,4 +47,8 @@ public interface IProductService {
     List<ProductDto> convertToDtoList(List<Product> products);
 
     long getTotalProductCount();
+
+
+    void addProductRecently(Long id);
+    List<ProductDto> getProductRecently();
 }

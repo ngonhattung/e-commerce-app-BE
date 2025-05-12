@@ -42,6 +42,10 @@ public class SecurityConfig {
                 apiPrefix + "/chatbot/**",
                 apiPrefix + "/products/search/**",
                 apiPrefix + "/products/filter/**",
+                apiPrefix + "/orders/top-selling-products",
+                apiPrefix + "/products/productsByIds",
+                apiPrefix + "/admin/top-selling-products",
+                apiPrefix + "/products/recently/**",
         };
 
 

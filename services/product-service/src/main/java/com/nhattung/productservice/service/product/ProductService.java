@@ -32,8 +32,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -49,7 +51,9 @@ public class ProductService implements IProductService {
     private final ImageRepository imageRepository;
     private final InventoryClient inventoryClient;
     private final RateLimiter inventoryServiceRateLimiter;
-
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final String RECENTLY_ADDED_PRODUCTS = "recently_added_products";
+    private static final int MAX_RECENT_PRODUCTS = 10;
     @Cacheable(value = "products", key = "#id")
     @Override
     public ProductDto getProductById(Long id) {
@@ -349,6 +353,32 @@ public class ProductService implements IProductService {
     @Override
     public long getTotalProductCount() {
         return productRepository.count();
+    }
+
+
+    @Override
+    public void addProductRecently(Long id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        ProductDto productDto = convertToDto(product);
+
+        // Đẩy sản phẩm mới lên đầu danh sách
+        redisTemplate.opsForList().leftPush(RECENTLY_ADDED_PRODUCTS, productDto);
+
+        // Cắt danh sách nếu vượt quá giới hạn
+        redisTemplate.opsForList().trim(RECENTLY_ADDED_PRODUCTS, 0, MAX_RECENT_PRODUCTS - 1);
+
+        redisTemplate.expire(RECENTLY_ADDED_PRODUCTS, Duration.ofHours(1));
+
+    }
+
+    @Override
+    public List<ProductDto> getProductRecently() {
+        List<Object> cachedList = redisTemplate.opsForList().range(RECENTLY_ADDED_PRODUCTS, 0, MAX_RECENT_PRODUCTS - 1);
+        assert cachedList != null;
+        return cachedList.stream()
+                .filter(item -> item instanceof ProductDto)
+                .map(item -> (ProductDto) item)
+                .collect(Collectors.toList());
     }
 
     private ProductDto mapperProduct(Product product) {
