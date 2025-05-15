@@ -133,10 +133,12 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/springboot-ms-realm
+#          issuer-uri: http://keycloak-ms:8080/realms/springboot-ms-realm
       client:
         provider:
           keycloak:
             issuer-uri: http://localhost:8081/realms/springboot-ms-realm
+#            issuer-uri: http://keycloak-ms:8080/realms/springboot-ms-realm
         registration:
           keycloak-client:
             client-id: ecommerce_ms_app
@@ -144,6 +146,7 @@ spring:
             authorization-grant-type: client_credentials
             scope: openid
   redis:
+#    host: redis
     host: localhost
     port: 6379
   cache:

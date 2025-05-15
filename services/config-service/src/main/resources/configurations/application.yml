@@ -12,3 +12,21 @@ management:
   tracing:
     sampling:
       probability: 1.0
+
+#eureka:
+#  instance:
+#    hostname: discovery-service # Tên container của Discovery Service
+#  client:
+#    serviceUrl:
+#      defaultZone: http://discovery-service:8761/eureka/ # Trỏ tới Eureka qua tên container
+#name:
+#  value: nhattung
+#
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0
+#    enabled: true
+#    zipkin:
+#      tracing:
+#        endpoint: http://zipkin:9411/api/v2/spans

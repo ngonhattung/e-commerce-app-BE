@@ -38,9 +38,9 @@ server:
 
 momo:
   partner-code: MOMO
-  redirect-url: https://3c57-2402-800-6295-48e-144f-b369-e45d-45ce.ngrok-free.app/payment/notify
+  redirect-url: https://1841-2402-800-6295-9d9d-a58c-64fe-73d1-b668.ngrok-free.app/payment/notify
   end-point: https://test-payment.momo.vn/v2/gateway/api
-  ipn-url: https://3c57-2402-800-6295-48e-144f-b369-e45d-45ce.ngrok-free.app/payment/ipn-handler
+  ipn-url: https://real-lines-follow.loca.lt/payment/ipn-handler
   access-key: F8BBA842ECF85
   secret-key: K951B6PE1waDMi640xX08PD3vg6EkVlz
   request-type: captureWallet #payWithATM

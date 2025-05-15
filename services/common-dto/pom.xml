@@ -27,4 +27,14 @@
       <version>1.18.36</version>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>http://localhost:8882/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>nexus-releases</id>
+      <url>http://localhost:8882/repository/maven-releases/</url>
+    </repository>
+  </distributionManagement>
 </project>

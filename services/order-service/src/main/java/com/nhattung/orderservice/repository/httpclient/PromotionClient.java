@@ -16,6 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
         configuration = AuthRequestInterceptor.class) // có token
 public interface PromotionClient {
 
-    @GetMapping(value = "promotions/active/{promotionCode}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/promotions/active/{promotionCode}",produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<PromotionDto> getActivePromotionByCode(@PathVariable("promotionCode") String promotionCode);
 }

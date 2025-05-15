@@ -4,11 +4,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/springboot-ms-realm
+#          issuer-uri: http://keycloak-ms:8080/realms/springboot-ms-realm
 server:
   port: 8090
 
 idp:
   url: http://localhost:8081/realms/springboot-ms-realm/protocol/openid-connect
+#  url: http://keycloak-ms:8080/realms/springboot-ms-realm/protocol/openid-connect
   client:
     id: ecommerce_ms_app
     realm: springboot-ms-realm

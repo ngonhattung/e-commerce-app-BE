@@ -66,8 +66,149 @@ services:
     networks:
       - e-commerce-network
 
+
+  config-service:
+    build:
+      context: ./services/config-service
+      dockerfile: Dockerfile
+    container_name: config-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=native # cấu hình cục bộ
+    ports:
+      - "8888:8888"
+    networks:
+      - e-commerce-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  discovery-service:
+    build:
+      context: ./services/discovery-service
+      dockerfile: Dockerfile
+    container_name: discovery-service
+    environment:
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-service
+    networks:
+      - e-commerce-network
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - KEYCLOAK_URL=http://keycloak-ms:8080
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICE_URL=http://discovery-service:8761/eureka/
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on:
+      - config-service
+      - discovery-service
+      - keycloak
+      - redis
+      - zipkin
+    networks:
+      - e-commerce-network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8090:8090"
+    environment:
+      - KEYCLOAK_URL=http://keycloak-ms:8080
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_INSTANCE_HOSTNAME=auth-service
+      - EUREKA_CLIENT_SERVICE_URL=http://discovery-service:8761/eureka/
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on:
+      - config-service
+      - discovery-service
+      - keycloak
+      - zipkin
+    networks:
+      - e-commerce-network
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8091:8091"
+    environment:
+      - MYSQL_HOST=mysql-e-commerce
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=ms_user_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - KEYCLOAK_URL=http://keycloak-ms:8080
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - EUREKA_INSTANCE_HOSTNAME=user-service
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_CLIENT_SERVICE_URL=http://discovery-service:8761/eureka/
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on:
+      - config-service
+      - discovery-service
+      - mysql
+      - keycloak
+      - redis
+      - kafka
+      - zipkin
+    networks:
+      - e-commerce-network
+
+  chatbot-service:
+    build:
+      context: ./services/chatbot-service
+      dockerfile: Dockerfile
+    container_name: chatbot-service
+    ports:
+      - "8092:8092"
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - KEYCLOAK_URL=http://keycloak-ms:8080
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - EUREKA_INSTANCE_HOSTNAME=chatbot-service
+      - EUREKA_CLIENT_SERVICE_URL=http://discovery-service:8761/eureka/
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411
+    depends_on:
+      - config-service
+      - discovery-service
+      - keycloak
+      - redis
+      - zipkin
+    networks:
+        - e-commerce-network
 volumes:
     e-commerce-mysql-data:
+    e-commerce-redis-data:
+    maven-repo:
 
 networks:
     e-commerce-network:

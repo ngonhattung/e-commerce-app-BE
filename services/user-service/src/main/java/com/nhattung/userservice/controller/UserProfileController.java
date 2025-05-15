@@ -44,7 +44,6 @@ public class UserProfileController {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/user/profile/{userId}")
     public ApiResponse<UserProfileDto> getUserProfileById(@PathVariable("userId") String userId) {
         UserProfile userProfile = userProfileService.getUserProfileById(userId);

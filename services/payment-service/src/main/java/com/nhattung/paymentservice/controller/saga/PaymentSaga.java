@@ -25,7 +25,7 @@ public class PaymentSaga {
     @KafkaListener(topics = "payment-processing-topic")
     public void processPayment(OrderSagaEvent orderSagaEvent) {
         log.info("Received order created event: {}", orderSagaEvent);
-        redisTemplate.opsForValue().set(orderSagaEvent.getOrder().getOrderId(), orderSagaEvent, Duration.ofMinutes(5));
+        redisTemplate.opsForValue().set(orderSagaEvent.getOrder().getOrderId(), orderSagaEvent, Duration.ofMinutes(30));
         Payment payment = Payment.builder()
                 .paymentDate(LocalDate.now())
                 .paymentMethod(PaymentMethod.MOMO)
