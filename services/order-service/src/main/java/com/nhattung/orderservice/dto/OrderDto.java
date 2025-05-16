@@ -1,5 +1,6 @@
 package com.nhattung.orderservice.dto;
 
+import com.nhattung.orderservice.enums.CancelReason;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,6 @@ public class OrderDto {
     private BigDecimal totalAmount;;
     private String status;
     private String shippingAddress;
+    private CancelReason cancelReason;
     private List<OrderItemDto> items;
 }

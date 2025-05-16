@@ -1,5 +1,7 @@
 package com.nhattung.productservice.service.product;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhattung.productservice.dto.ImageDto;
 import com.nhattung.productservice.dto.ProductDto;
 import com.nhattung.productservice.dto.ProductSearchCriteria;
@@ -358,19 +360,62 @@ public class ProductService implements IProductService {
 
     @Override
     public void addProductRecently(Long id) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         ProductDto productDto = convertToDto(product);
 
-        // Đẩy sản phẩm mới lên đầu danh sách
-        redisTemplate.opsForList().leftPush(RECENTLY_ADDED_PRODUCTS, productDto);
+        String key = RECENTLY_ADDED_PRODUCTS;
 
-        // Cắt danh sách nếu vượt quá giới hạn
-        redisTemplate.opsForList().trim(RECENTLY_ADDED_PRODUCTS, 0, MAX_RECENT_PRODUCTS - 1);
+        // Lấy toàn bộ danh sách hiện tại
+        List<Object> redisList = redisTemplate.opsForList().range(key, 0, -1);
 
-        redisTemplate.expire(RECENTLY_ADDED_PRODUCTS, Duration.ofHours(1));
+        // Tạo danh sách mới loại bỏ sản phẩm trùng id
+        List<ProductDto> newList = new ArrayList<>();
+        if (redisList != null) {
+            for (Object item : redisList) {
+                if (item instanceof ProductDto dto) {
+                    if (!dto.getId().equals(productDto.getId())) {
+                        newList.add(dto);
+                    }
+                } else {
+                    // deserialize nếu Redis lưu dưới dạng JSON string
+                    ProductDto dto = convertFromRedisObject(item);
+                    if (!dto.getId().equals(productDto.getId())) {
+                        newList.add(dto);
+                    }
+                }
+            }
+        }
 
+        // Thêm sản phẩm mới lên đầu
+        newList.add(0, productDto);
+
+        // Giới hạn số lượng sản phẩm gần đây
+        if (newList.size() > MAX_RECENT_PRODUCTS) {
+            newList = newList.subList(0, MAX_RECENT_PRODUCTS);
+        }
+
+        // Xoá danh sách cũ và ghi lại danh sách mới
+        redisTemplate.delete(key);
+        for (ProductDto dto : newList) {
+            redisTemplate.opsForList().rightPush(key, dto);
+        }
+
+        // Thiết lập thời gian sống
+        redisTemplate.expire(key, Duration.ofHours(1));
     }
 
+
+    private ProductDto convertFromRedisObject(Object obj) {
+        if (obj instanceof String str) {
+            try {
+                return new ObjectMapper().readValue(str, ProductDto.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to deserialize ProductDto from Redis", e);
+            }
+        }
+        return (ProductDto) obj;
+    }
     @Override
     public List<ProductDto> getProductRecently() {
         List<Object> cachedList = redisTemplate.opsForList().range(RECENTLY_ADDED_PRODUCTS, 0, MAX_RECENT_PRODUCTS - 1);
